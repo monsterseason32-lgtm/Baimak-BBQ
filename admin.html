@@ -1060,7 +1060,36 @@
     </div>
 
     <script>
-        // ================= MOCK DATABASE =================
+        const API_URL = "https://script.google.com/macros/s/AKfycbxYnt6AODwWQM2AupdcBiF1_05aZYgibMfRJ7ZvsLeyytN_rrvxbBl0DHKEUo9p7PnAcQ/exec";
+
+        // ================= DATABASE OPERATIONS =================
+        async function fetchOrders() {
+            try {
+                const response = await fetch(API_URL + "?action=getOrders", {
+                    method: 'POST',
+                    body: JSON.stringify({})
+                });
+                const res = await response.json();
+                const data = Array.isArray(res) ? res : (res && res.data ? res.data : []);
+                orders = Array.isArray(data) ? data : [];
+                renderBoard();
+            } catch (error) {
+                console.error("Fetch Orders Error:", error);
+                orders = [];
+                renderBoard();
+            }
+        }
+
+        async function fetchBanners() {
+            try {
+                const response = await fetch(API_URL + "?action=getPromotions");
+                const data = await response.json();
+                banners = data;
+                renderBanners();
+            } catch (error) {
+                console.error("Fetch Banners Error:", error);
+            }
+        }
         // จำลองข้อมูลที่ดึงมาจาก Google Sheets
         let orders = [
             {
@@ -1106,6 +1135,15 @@
         // ================= RENDER ENGINE =================
 
         function renderBoard() {
+            const container = document.getElementById('col-pending');
+            if (!container) return;
+
+            // ตรวจสอบว่า orders เป็น Array หรือไม่
+            if (!Array.isArray(orders)) {
+                console.warn("Orders is not an array, resetting to empty.");
+                orders = [];
+            }
+
             const cols = {
                 'pending': document.getElementById('col-pending'),
                 'cooking': document.getElementById('col-cooking'),
@@ -1225,20 +1263,18 @@
         // ================= ACTIONS =================
 
         async function updateStatus(orderId, newStatus) {
-            // ในระบบจริง ตรงนี้จะมีการทำ fetch (POST) ไปยัง Google Apps Script
-            /* await fetch(API_URL + "?action=updateStatus", {
-                   method: 'POST',
-                   body: JSON.stringify({ orderId: orderId, status: newStatus })
-               });
-            */
+            try {
+                // อัพเดท UI ทันทีแบบ Optimistic
+                const orderIndex = orders.findIndex(o => o.id === orderId);
+                if (orderIndex > -1) {
+                    orders[orderIndex].status = newStatus;
+                    renderBoard();
+                }
 
-            // อัพเดท UI (Mock)
-            const orderIndex = orders.findIndex(o => o.id === orderId);
-            if (orderIndex > -1) {
-                orders[orderIndex].status = newStatus;
-
-                // Re-render
-                renderBoard();
+                await fetch(API_URL + "?action=updateStatus", {
+                    method: 'POST',
+                    body: JSON.stringify({ orderId: orderId, status: newStatus })
+                });
 
                 // แจ้งเตือน
                 let msg = "";
@@ -1246,19 +1282,34 @@
                 if (newStatus === 'ready') msg = "อาหารพร้อมเสิร์ฟ แจ้งเตือนลูกค้าแล้ว 🔔";
                 if (newStatus === 'completed') msg = "ออเดอร์เสร็จสมบูรณ์ ✅";
                 if (newStatus === 'cancelled') msg = "ยกเลิกออเดอร์แล้ว ❌";
-
                 showToast(msg);
+
+                // Fetch อีกครั้งเพื่อให้แน่ใจว่าซิงค์กับ Sheets
+                fetchOrders();
+            } catch (error) {
+                console.error("Update Status Error:", error);
+                showToast("เกิดข้อผิดพลาดในการอัพเดทสถานะ");
             }
         }
 
-        function toggleBannerStatus(id, isActive) {
-            // ในระบบจริง จะส่งค่า isActive ไปอัพเดทใน Google Sheets
-            const index = banners.findIndex(b => b.id === id);
-            if (index > -1) {
-                banners[index].active = isActive;
-                renderBanners(); // รีเฟรช UI
-                if (isActive) showToast(`เปิดใช้งานแบนเนอร์แล้ว ระบบจะซิงค์ไปยังแอปลูกค้า`);
-                else showToast(`ปิดการแสดงผลแบนเนอร์แล้ว`);
+        async function toggleBannerStatus(id, isActive) {
+            try {
+                const index = banners.findIndex(b => b.id === id);
+                if (index > -1) {
+                    banners[index].active = isActive;
+                    renderBanners();
+
+                    await fetch(API_URL + "?action=toggleBanner", {
+                        method: 'POST',
+                        body: JSON.stringify({ id: id, active: isActive })
+                    });
+
+                    if (isActive) showToast(`เปิดใช้งานแบนเนอร์แล้ว ระบบจะซิงค์ไปยังแอปลูกค้า`);
+                    else showToast(`ปิดการแสดงผลแบนเนอร์แล้ว`);
+                }
+            } catch (error) {
+                console.error("Toggle Banner Error:", error);
+                showToast("ไม่สามารถอัพเดทสถานะแบนเนอร์ได้");
             }
         }
 
@@ -1298,7 +1349,7 @@
             document.getElementById('banner-modal').classList.remove('show');
         }
 
-        function saveBanner() {
+        async function saveBanner() {
             const id = document.getElementById('banner-id').value;
             const newBanner = {
                 id: id || 'p' + Date.now(), // Generate ID if new
@@ -1310,29 +1361,44 @@
                 active: true
             };
 
-            if (id) {
-                // Update existing
-                const index = banners.findIndex(b => b.id === id);
-                if (index > -1) banners[index] = { ...banners[index], ...newBanner, active: banners[index].active };
-                showToast('อัพเดทข้อมูลแบนเนอร์เรียบร้อย');
-            } else {
-                // Create new
-                banners.push(newBanner);
-                showToast('เพิ่มแบนเนอร์ใหม่เรียบร้อย');
+            // ส่งข้อมูลไปบันทึกใน Google Sheets
+            try {
+                await fetch(API_URL + "?action=saveBanner", {
+                    method: 'POST',
+                    body: JSON.stringify(newBanner)
+                });
+
+                if (id) {
+                    showToast('อัพเดทข้อมูลแบนเนอร์เรียบร้อย');
+                } else {
+                    showToast('เพิ่มแบนเนอร์ใหม่เรียบร้อย');
+                }
+
+                fetchBanners(); // รีโหลดข้อมูลจริง
+            } catch (error) {
+                console.error("Save Banner Error:", error);
+                showToast("เกิดข้อผิดพลาดในการบันทึกแบนเนอร์");
             }
 
             renderBanners();
             closeBannerModal();
-
-            // หมายเหตุ: ในระบบจริงตรงนี้ต้องมีการ fetch POST เพื่อเซฟลง Google Sheets
         }
 
-        function deleteBanner(id) {
+        async function deleteBanner(id) {
             if (confirm('คุณแน่ใจหรือไม่ที่จะลบแบนเนอร์นี้? (ไม่สามารถกู้คืนได้)')) {
-                banners = banners.filter(b => b.id !== id);
-                renderBanners();
-                showToast('ลบแบนเนอร์เรียบร้อยแล้ว');
-                // หมายเหตุ: ในระบบจริงตรงนี้ต้องมีการ fetch POST เพื่อสั่งลบใน Google Sheets
+                try {
+                    await fetch(API_URL + "?action=deleteBanner", {
+                        method: 'POST',
+                        body: JSON.stringify({ id: id })
+                    });
+
+                    banners = banners.filter(b => b.id !== id);
+                    renderBanners();
+                    showToast('ลบแบนเนอร์เรียบร้อยแล้ว');
+                } catch (error) {
+                    console.error("Delete Banner Error:", error);
+                    showToast("ไม่สามารถลบแบนเนอร์ได้");
+                }
             }
         }
 
@@ -1395,9 +1461,12 @@
         // Initialize
         window.onload = () => {
             lucide.createIcons();
-            renderBoard();
-            renderBanners(); // โหลดเตรียมไว้
-            simulateNewOrder();
+            fetchOrders();   // ดึงออเดอร์จริงจาก Sheets
+            fetchBanners();  // ดึงแบนเนอร์จริงจาก Sheets
+
+            // ตั้งเวลาดึงข้อมูลออเดอร์ใหม่ทุกๆ 30 วินาที (Polling)
+            setInterval(fetchOrders, 30000);
+
             setupScrollObserver();
         };
 
