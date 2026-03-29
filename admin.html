@@ -1,0 +1,1448 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - ใบหมาก BBQ หม่าล่า</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- ใช้ Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary: #E53935;
+            --primary-hover: #D32F2F;
+            --bg-dark: #0A0A0C;
+            --bg-panel: #141417;
+            --surface: rgba(255, 255, 255, 0.05);
+            --surface-border: rgba(255, 255, 255, 0.1);
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+            --success: #4CAF50;
+            --warning: #FFC107;
+            --info: #2196F3;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Prompt', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Glassmorphism Utilities */
+        .glass {
+            background: var(--surface);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--surface-border);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background-color: var(--bg-panel);
+            border-right: 1px solid var(--surface-border);
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            z-index: 10;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 40px;
+        }
+
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), #8E0000);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .brand-text h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .brand-text span {
+            font-size: 0.8rem;
+            color: var(--primary);
+        }
+
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+        }
+
+        .nav-link.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 15px rgba(229, 57, 53, 0.3);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .topbar {
+            height: 80px;
+            border-bottom: 1px solid var(--surface-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            background-color: var(--bg-panel);
+        }
+
+        .stats-container {
+            display: flex;
+            gap: 20px;
+        }
+
+        .stat-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            border-radius: 30px;
+            background: var(--surface);
+            border: 1px solid var(--surface-border);
+        }
+
+        .stat-badge strong {
+            color: var(--gold, #FFC107);
+        }
+
+        /* Board Area */
+        .board-container {
+            flex: 1;
+            padding: 32px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            display: flex;
+            gap: 24px;
+        }
+
+        .column {
+            flex: 0 0 320px;
+            display: flex;
+            flex-direction: column;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--surface-border);
+            max-height: 100%;
+        }
+
+        .column-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--surface-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+        }
+
+        .col-count {
+            background: var(--surface-border);
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+
+        .column-body {
+            padding: 16px;
+            overflow-y: auto;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Custom Scrollbar for columns */
+        .column-body::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .column-body::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+
+        /* Order Card */
+        .order-card {
+            background: var(--bg-panel);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            border: 1px solid var(--surface-border);
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+        }
+
+        .order-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px dashed var(--surface-border);
+        }
+
+        .queue-no {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--warning);
+        }
+
+        .order-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .customer-info {
+            margin-bottom: 12px;
+        }
+
+        .customer-name {
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .order-items {
+            font-size: 0.85rem;
+            color: #CCC;
+            margin-bottom: 16px;
+        }
+
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+
+        .order-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .total-price {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .action-btn {
+            border: none;
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-weight: 500;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s;
+        }
+
+        .btn-accept {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-accept:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-ready {
+            background: var(--info);
+            color: white;
+        }
+
+        .btn-ready:hover {
+            background: #1976D2;
+        }
+
+        .btn-complete {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-complete:hover {
+            background: #388E3C;
+        }
+
+        .btn-cancel {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--surface-border);
+        }
+
+        .btn-cancel:hover {
+            background: rgba(255, 0, 0, 0.1);
+            color: #F44336;
+            border-color: #F44336;
+        }
+
+        /* Column Specific Accents */
+        .col-pending .column-header {
+            border-top: 3px solid var(--warning);
+        }
+
+        .col-cooking .column-header {
+            border-top: 3px solid var(--primary);
+        }
+
+        .col-ready .column-header {
+            border-top: 3px solid var(--info);
+        }
+
+        .col-completed .column-header {
+            border-top: 3px solid var(--success);
+            opacity: 0.7;
+        }
+
+        .col-completed .order-card {
+            opacity: 0.6;
+        }
+
+        /* --- New System Features: View Controller --- */
+        .view-section {
+            display: none;
+            flex-direction: column;
+            flex: 1;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .view-section.active {
+            display: flex;
+        }
+
+        /* --- Banner Management Styles --- */
+        .banner-content-area {
+            flex: 1;
+            padding: 32px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .banner-header-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .btn-add {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(229, 57, 53, 0.3);
+            transition: all 0.2s;
+        }
+
+        .btn-add:active {
+            transform: scale(0.95);
+        }
+
+        .banner-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        .banner-card {
+            background: var(--bg-panel);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--surface-border);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .banner-card-img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            border-bottom: 1px solid var(--surface-border);
+        }
+
+        .banner-card-body {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .banner-card-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .banner-card-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+            flex: 1;
+        }
+
+        .banner-card-footer {
+            margin-top: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 12px;
+            border-top: 1px dashed var(--surface-border);
+        }
+
+        /* Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #333;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: var(--success);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(20px);
+        }
+
+        .btn-edit-banner {
+            background: transparent;
+            border: 1px solid var(--surface-border);
+            color: var(--text-main);
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-family: inherit;
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-edit-banner:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Auto Refresh Indicator */
+        .refresh-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--success);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--success);
+            animation: pulse-green 2s infinite;
+        }
+
+        @keyframes pulse-green {
+            0% {
+                box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+            }
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(30, 30, 35, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--surface-border);
+            color: white;
+            padding: 16px 24px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* --- Modal Styles (สำหรับฟอร์มจัดการแบนเนอร์) --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: var(--bg-panel);
+            border: 1px solid var(--surface-border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            width: 90%;
+            max-width: 500px;
+            transform: translateY(20px);
+            transition: transform 0.3s;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-overlay.show .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--surface-border);
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            font-family: inherit;
+            font-size: 0.95rem;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 10px rgba(229, 57, 53, 0.2);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text-main);
+            border: 1px solid var(--surface-border);
+            padding: 10px 20px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        /* Responsive Design for Mobile */
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-main);
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 5;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                left: -260px;
+                /* ซ่อนไปด้านซ้าย */
+                top: 0;
+                bottom: 0;
+                transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: 4px 0 24px rgba(0, 0, 0, 0.5);
+            }
+
+            .sidebar.open {
+                left: 0;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .topbar {
+                height: auto;
+                padding: 16px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+
+            .topbar-header {
+                display: flex;
+                width: 100%;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .topbar-header h1 {
+                font-size: 1.2rem !important;
+            }
+
+            .stats-container {
+                width: 100%;
+                overflow-x: auto;
+                padding-bottom: 8px;
+                scrollbar-width: none;
+                /* Firefox */
+            }
+
+            .stats-container::-webkit-scrollbar {
+                display: none;
+                /* Safari/Chrome */
+            }
+
+            .board-container {
+                padding: 16px;
+                padding-bottom: 90px;
+                /* เพิ่มพื้นที่ด้านล่างไม่ให้การ์ดโดน Quick Nav บัง */
+                scroll-snap-type: x mandatory;
+                /* ล็อคตำแหน่งเวลาปัด */
+                gap: 16px;
+            }
+
+            .column {
+                flex: 0 0 85vw;
+                /* ความกว้าง 85% ของจอ เพื่อให้เห็นคอลัมน์ถัดไปนิดนึง */
+                scroll-snap-align: center;
+            }
+        }
+
+        /* Quick Navigation Bar (Floating Mobile) */
+        .quick-nav {
+            display: none;
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(20, 20, 23, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--surface-border);
+            border-radius: 30px;
+            padding: 6px;
+            z-index: 90;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+        }
+
+        .quick-nav-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .quick-nav-btn i {
+            width: 16px;
+            height: 16px;
+        }
+
+        .quick-nav-btn.active {
+            background: var(--surface);
+            color: var(--text-main);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        @media (max-width: 1024px) {
+            .quick-nav {
+                display: flex;
+                gap: 4px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Overlay for mobile sidebar -->
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-icon">
+                <i data-lucide="flame" style="color: white; width: 24px;"></i>
+            </div>
+            <div class="brand-text">
+                <h2>Baimak BBQ</h2>
+                <span>Admin Panel</span>
+            </div>
+        </div>
+
+        <nav class="nav-menu">
+            <a class="nav-link active" onclick="switchView('orders')" id="nav-orders">
+                <i data-lucide="layout-dashboard" style="width: 20px;"></i>
+                จัดการออเดอร์
+            </a>
+            <a class="nav-link" onclick="switchView('banners')" id="nav-banners">
+                <i data-lucide="image" style="width: 20px;"></i>
+                จัดการแบนเนอร์ (โปรโมชั่น)
+            </a>
+            <a class="nav-link">
+                <i data-lucide="package" style="width: 20px;"></i>
+                จัดการเมนูอาหาร
+            </a>
+            <a class="nav-link">
+                <i data-lucide="bar-chart-2" style="width: 20px;"></i>
+                ยอดขาย / รายงาน
+            </a>
+            <a class="nav-link">
+                <i data-lucide="settings" style="width: 20px;"></i>
+                ตั้งค่าร้าน
+            </a>
+        </nav>
+
+        <div style="margin-top: auto;">
+            <div class="nav-link" style="color: var(--primary);">
+                <i data-lucide="log-out" style="width: 20px;"></i>
+                ออกจากระบบ
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- ================= VIEW: ORDERS (KANBAN BOARD) ================= -->
+        <div id="view-orders" class="view-section active">
+            <!-- Topbar -->
+            <header class="topbar">
+                <div class="topbar-header">
+                    <div>
+                        <h1 style="font-size: 1.4rem;">หน้าครัว (Kitchen Display)</h1>
+                        <p class="text-muted" style="font-size: 0.85rem;">ออเดอร์จะอัพเดทอัตโนมัติจาก Google Sheets</p>
+                    </div>
+                    <button class="menu-toggle" onclick="toggleSidebar()">
+                        <i data-lucide="menu" style="width: 28px; height: 28px;"></i>
+                    </button>
+                </div>
+                <div class="stats-container">
+                    <div class="refresh-indicator">
+                        <div class="pulse-dot"></div> เชื่อมต่อแบบ Real-time
+                    </div>
+                    <div class="stat-badge">
+                        <i data-lucide="bell" style="width: 16px; color: var(--warning);"></i>
+                        <span>รอรับ: <strong id="stat-pending">0</strong></span>
+                    </div>
+                    <div class="stat-badge">
+                        <i data-lucide="flame" style="width: 16px; color: var(--primary);"></i>
+                        <span>กำลังย่าง: <strong id="stat-cooking">0</strong></span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Kanban Board -->
+            <div class="board-container">
+                <!-- Column 1: รอรับออเดอร์ -->
+                <div class="column col-pending">
+                    <div class="column-header">
+                        <span style="display: flex; align-items: center; gap: 8px;">
+                            <i data-lucide="clock" style="width: 18px; color: var(--warning);"></i> ใหม่
+                        </span>
+                        <span class="col-count" id="count-pending">0</span>
+                    </div>
+                    <div class="column-body" id="col-pending">
+                        <!-- Cards render here -->
+                    </div>
+                </div>
+
+                <!-- Column 2: กำลังย่าง -->
+                <div class="column col-cooking">
+                    <div class="column-header">
+                        <span style="display: flex; align-items: center; gap: 8px;">
+                            <i data-lucide="flame" style="width: 18px; color: var(--primary);"></i> กำลังย่าง
+                        </span>
+                        <span class="col-count" id="count-cooking">0</span>
+                    </div>
+                    <div class="column-body" id="col-cooking">
+                        <!-- Cards render here -->
+                    </div>
+                </div>
+
+                <!-- Column 3: พร้อมเสิร์ฟ -->
+                <div class="column col-ready">
+                    <div class="column-header">
+                        <span style="display: flex; align-items: center; gap: 8px;">
+                            <i data-lucide="bell-ring" style="width: 18px; color: var(--info);"></i> พร้อมเสิร์ฟ
+                        </span>
+                        <span class="col-count" id="count-ready">0</span>
+                    </div>
+                    <div class="column-body" id="col-ready">
+                        <!-- Cards render here -->
+                    </div>
+                </div>
+
+                <!-- Column 4: เสร็จสิ้น -->
+                <div class="column col-completed">
+                    <div class="column-header">
+                        <span style="display: flex; align-items: center; gap: 8px;">
+                            <i data-lucide="check-circle-2" style="width: 18px; color: var(--success);"></i>
+                            เสร็จสิ้นแล้ว
+                        </span>
+                        <span class="col-count" id="count-completed">0</span>
+                    </div>
+                    <div class="column-body" id="col-completed">
+                        <!-- Cards render here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Floating Quick Nav (Mobile/Tablet) -->
+            <div class="quick-nav">
+                <button class="quick-nav-btn active" onclick="scrollToCol('col-pending')" data-target="col-pending">
+                    <i data-lucide="clock" style="color: var(--warning);"></i> <span>ใหม่</span>
+                </button>
+                <button class="quick-nav-btn" onclick="scrollToCol('col-cooking')" data-target="col-cooking">
+                    <i data-lucide="flame" style="color: var(--primary);"></i> <span>ย่าง</span>
+                </button>
+                <button class="quick-nav-btn" onclick="scrollToCol('col-ready')" data-target="col-ready">
+                    <i data-lucide="bell-ring" style="color: var(--info);"></i> <span>เสิร์ฟ</span>
+                </button>
+                <button class="quick-nav-btn" onclick="scrollToCol('col-completed')" data-target="col-completed">
+                    <i data-lucide="check-circle-2" style="color: var(--success);"></i> <span>เสร็จ</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= VIEW: BANNERS (PROMOTIONS) ================= -->
+        <div id="view-banners" class="view-section">
+            <header class="topbar">
+                <div class="topbar-header">
+                    <div>
+                        <h1 style="font-size: 1.4rem;">จัดการแบนเนอร์ / โปรโมชั่น</h1>
+                        <p class="text-muted" style="font-size: 0.85rem;">
+                            ภาพปกและโปรโมชั่นที่จะแสดงผลบนหน้าแอปพลิเคชันลูกค้า</p>
+                    </div>
+                    <button class="menu-toggle" onclick="toggleSidebar()">
+                        <i data-lucide="menu" style="width: 28px; height: 28px;"></i>
+                    </button>
+                </div>
+            </header>
+
+            <div class="banner-content-area">
+                <div class="banner-header-actions">
+                    <h3 style="font-weight: 500;">รายการแบนเนอร์ปัจจุบัน</h3>
+                    <button class="btn-add" onclick="openBannerModal()">
+                        <i data-lucide="plus" style="width: 18px;"></i> เพิ่มแบนเนอร์
+                    </button>
+                </div>
+
+                <div class="banner-list" id="banner-list-container">
+                    <!-- Banner items will be rendered here by JS -->
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Banner Management Modal -->
+    <div class="modal-overlay" id="banner-modal">
+        <div class="modal-content glass">
+            <div class="modal-header">
+                <h2 id="modal-title">เพิ่มแบนเนอร์ใหม่</h2>
+                <button class="btn-cancel" style="border: none;" onclick="closeBannerModal()"><i
+                        data-lucide="x"></i></button>
+            </div>
+            <input type="hidden" id="banner-id">
+
+            <div class="form-group">
+                <label>หัวข้อโปรโมชั่น (รองรับ HTML เช่น &lt;span class="text-primary"&gt;)</label>
+                <input type="text" id="banner-title" class="form-control" placeholder="เช่น เซ็ตหม่าล่า โคตรคุ้ม!">
+            </div>
+            <div class="form-group">
+                <label>รายละเอียด</label>
+                <textarea id="banner-desc" class="form-control" placeholder="พิมพ์รายละเอียดโปรโมชั่น..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>URL รูปภาพ (แนะนำขนาด 16:9)</label>
+                <input type="url" id="banner-img" class="form-control" placeholder="https://...">
+            </div>
+            <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div>
+                    <label>ข้อความปุ่มกด</label>
+                    <input type="text" id="banner-btn" class="form-control" placeholder="เช่น สั่งเลย">
+                </div>
+                <div>
+                    <label>การทำงานเมื่อกดปุ่ม</label>
+                    <select id="banner-action" class="form-control" style="background-color: var(--bg-panel);">
+                        <option value="search">เปิดช่องค้นหา</option>
+                        <option value="ทั้งหมด">ไปหมวดหมู่: ทั้งหมด</option>
+                        <option value="เนื้อสัตว์">ไปหมวดหมู่: เนื้อสัตว์</option>
+                        <option value="ลูกชิ้น">ไปหมวดหมู่: ลูกชิ้น</option>
+                        <option value="ผัก">ไปหมวดหมู่: ผัก</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-outline" onclick="closeBannerModal()">ยกเลิก</button>
+                <button class="btn-add" onclick="saveBanner()"><i data-lucide="save" style="width: 18px;"></i>
+                    บันทึก</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <i data-lucide="info" style="color: var(--info); width: 24px;"></i>
+        <div id="toast-msg">อัพเดทสถานะสำเร็จ</div>
+    </div>
+
+    <script>
+        // ================= MOCK DATABASE =================
+        // จำลองข้อมูลที่ดึงมาจาก Google Sheets
+        let orders = [
+            {
+                id: 'ORD-1001', queue: 'Q01', status: 'pending', customerName: 'คุณเอ สุทธิรักษ์',
+                time: '13:05', total: 120,
+                items: [
+                    { name: 'หมูสามชั้นสไลด์', qty: 2 },
+                    { name: 'เบคอนพันเห็ด', qty: 3 },
+                    { name: 'ไส้กรอกหนังกรอบ', qty: 1 }
+                ]
+            },
+            {
+                id: 'ORD-1002', queue: 'Q02', status: 'pending', customerName: 'Nong Bam',
+                time: '13:08', total: 45,
+                items: [
+                    { name: 'เห็ดออรินจิ', qty: 1 },
+                    { name: 'เต้าหู้ชีส', qty: 2 }
+                ]
+            },
+            {
+                id: 'ORD-1000', queue: 'Q00', status: 'cooking', customerName: 'คุณต้น',
+                time: '12:55', total: 80,
+                items: [
+                    { name: 'เนื้อโคขุน', qty: 4 }
+                ]
+            },
+            {
+                id: 'ORD-0999', queue: 'Q99', status: 'ready', customerName: 'Ploy',
+                time: '12:40', total: 150,
+                items: [
+                    { name: 'หมูสามชั้นสไลด์', qty: 5 },
+                    { name: 'เส้นมันหนึบ', qty: 2 }
+                ]
+            }
+        ];
+
+        let banners = [
+            { id: 'p1', title: '<span class="text-primary">เซ็ตหม่าล่า</span> โคตรคุ้ม!', desc: 'อิ่มจุกๆ ลดพิเศษ 20% เฉพาะสั่งผ่านแอพ', img: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80', btnText: 'สั่งเลยตอนนี้', action: 'search', active: true },
+            { id: 'p2', title: 'ใหม่! <span class="text-gold">ชีสเยิ้มมม</span>', desc: 'สายชีสห้ามพลาด เต้าหู้ชีสสุดฟิน', img: 'https://images.unsplash.com/photo-1582878826629-29b7ad1cb431?auto=format&fit=crop&w=600&q=80', btnText: 'ดูเมนูเลย', action: 'ลูกชิ้น', active: true },
+            { id: 'p3', title: 'สายผัก รักสุขภาพ', desc: 'ผักสด สะอาด คัดสรรมาเพื่อคุณ', img: 'https://images.unsplash.com/photo-1509358271058-acd22cc93898?auto=format&fit=crop&w=600&q=80', btnText: 'สายตี้ผัก', action: 'ผัก', active: true }
+        ];
+
+        // ================= RENDER ENGINE =================
+
+        function renderBoard() {
+            const cols = {
+                'pending': document.getElementById('col-pending'),
+                'cooking': document.getElementById('col-cooking'),
+                'ready': document.getElementById('col-ready'),
+                'completed': document.getElementById('col-completed')
+            };
+
+            // Clear existing
+            Object.values(cols).forEach(col => {
+                if (col) col.innerHTML = ''; // Added check to prevent null errors
+            });
+
+            const counts = { pending: 0, cooking: 0, ready: 0, completed: 0 };
+
+            orders.forEach(order => {
+                counts[order.status]++;
+                const cardHtml = createOrderCard(order);
+                if (cols[order.status]) {
+                    cols[order.status].insertAdjacentHTML('beforeend', cardHtml);
+                }
+            });
+
+            // Update counts
+            document.getElementById('count-pending').innerText = counts.pending;
+            document.getElementById('count-cooking').innerText = counts.cooking;
+            document.getElementById('count-ready').innerText = counts.ready;
+            document.getElementById('count-completed').innerText = counts.completed;
+
+            // Update top stats
+            document.getElementById('stat-pending').innerText = counts.pending;
+            document.getElementById('stat-cooking').innerText = counts.cooking;
+
+            // Re-init icons for newly added HTML
+            lucide.createIcons();
+        }
+
+        function renderBanners() {
+            const container = document.getElementById('banner-list-container');
+            container.innerHTML = banners.map(b => `
+            <div class="banner-card">
+                <img src="${b.img}" alt="Banner Image" class="banner-card-img" style="filter: ${b.active ? 'none' : 'grayscale(100%)'}; opacity: ${b.active ? '1' : '0.5'};">
+                <div class="banner-card-body">
+                    <div class="banner-card-title">${b.title}</div>
+                    <div class="banner-card-desc">${b.desc}</div>
+                    <div style="font-size: 0.8rem; color: var(--primary); margin-top: 8px;">ปุ่ม: [${b.btnText}] -> ${b.action}</div>
+                    <div class="banner-card-footer">
+                        <label class="switch" title="เปิด/ปิดการแสดงผล">
+                            <input type="checkbox" ${b.active ? 'checked' : ''} onchange="toggleBannerStatus('${b.id}', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="btn-edit-banner" style="color: #F44336; border-color: transparent;" onclick="deleteBanner('${b.id}')">
+                                <i data-lucide="trash-2" style="width: 14px;"></i> ลบ
+                            </button>
+                            <button class="btn-edit-banner" onclick="openBannerModal('${b.id}')">
+                                <i data-lucide="edit-2" style="width: 14px;"></i> แก้ไข
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+            lucide.createIcons();
+        }
+
+        function createOrderCard(order) {
+            let actionButtons = '';
+
+            // กำหนดปุ่มตามสถานะปัจจุบัน (Business Logic)
+            if (order.status === 'pending') {
+                actionButtons = `
+                <button class="action-btn btn-cancel" onclick="updateStatus('${order.id}', 'cancelled')" title="ยกเลิกออเดอร์"><i data-lucide="x"></i></button>
+                <button class="action-btn btn-accept" onclick="updateStatus('${order.id}', 'cooking')"><i data-lucide="flame"></i> รับออเดอร์/ย่าง</button>
+            `;
+            } else if (order.status === 'cooking') {
+                actionButtons = `
+                <button class="action-btn btn-ready" onclick="updateStatus('${order.id}', 'ready')" style="width: 100%; justify-content: center;"><i data-lucide="bell-ring"></i> ย่างเสร็จแล้ว (พร้อมเสิร์ฟ)</button>
+            `;
+            } else if (order.status === 'ready') {
+                actionButtons = `
+                <button class="action-btn btn-complete" onclick="updateStatus('${order.id}', 'completed')" style="width: 100%; justify-content: center;"><i data-lucide="check"></i> ลูกค้ารับอาหารแล้ว</button>
+            `;
+            } else if (order.status === 'completed') {
+                actionButtons = `<span style="color: var(--success); font-size: 0.8rem; display: flex; align-items: center; gap: 4px;"><i data-lucide="check-circle-2" style="width: 14px;"></i> ปิดจ๊อบ</span>`;
+            }
+
+            const itemsHtml = order.items.map(item => `
+            <div class="item-row">
+                <span>${item.name}</span>
+                <span>x${item.qty}</span>
+            </div>
+        `).join('');
+
+            return `
+            <div class="order-card" id="card-${order.id}">
+                <div class="order-header">
+                    <div class="queue-no">${order.queue}</div>
+                    <div class="order-time"><i data-lucide="clock" style="width: 12px;"></i> ${order.time}</div>
+                </div>
+                <div class="customer-info">
+                    <div class="customer-name">${order.customerName}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">รหัส: ${order.id}</div>
+                </div>
+                <div class="order-items">
+                    ${itemsHtml}
+                </div>
+                <div class="order-footer">
+                    <div class="total-price">฿${order.total}</div>
+                    <div style="display: flex; gap: 8px;">
+                        ${actionButtons}
+                    </div>
+                </div>
+            </div>
+        `;
+        }
+
+        // ================= ACTIONS =================
+
+        async function updateStatus(orderId, newStatus) {
+            // ในระบบจริง ตรงนี้จะมีการทำ fetch (POST) ไปยัง Google Apps Script
+            /* await fetch(API_URL + "?action=updateStatus", {
+                   method: 'POST',
+                   body: JSON.stringify({ orderId: orderId, status: newStatus })
+               });
+            */
+
+            // อัพเดท UI (Mock)
+            const orderIndex = orders.findIndex(o => o.id === orderId);
+            if (orderIndex > -1) {
+                orders[orderIndex].status = newStatus;
+
+                // Re-render
+                renderBoard();
+
+                // แจ้งเตือน
+                let msg = "";
+                if (newStatus === 'cooking') msg = "รับออเดอร์ ส่งเข้าเตาย่างแล้ว 🔥";
+                if (newStatus === 'ready') msg = "อาหารพร้อมเสิร์ฟ แจ้งเตือนลูกค้าแล้ว 🔔";
+                if (newStatus === 'completed') msg = "ออเดอร์เสร็จสมบูรณ์ ✅";
+                if (newStatus === 'cancelled') msg = "ยกเลิกออเดอร์แล้ว ❌";
+
+                showToast(msg);
+            }
+        }
+
+        function toggleBannerStatus(id, isActive) {
+            // ในระบบจริง จะส่งค่า isActive ไปอัพเดทใน Google Sheets
+            const index = banners.findIndex(b => b.id === id);
+            if (index > -1) {
+                banners[index].active = isActive;
+                renderBanners(); // รีเฟรช UI
+                if (isActive) showToast(`เปิดใช้งานแบนเนอร์แล้ว ระบบจะซิงค์ไปยังแอปลูกค้า`);
+                else showToast(`ปิดการแสดงผลแบนเนอร์แล้ว`);
+            }
+        }
+
+        // ================= BANNER CRUD OPERATIONS =================
+
+        function openBannerModal(id = null) {
+            const modal = document.getElementById('banner-modal');
+            const titleEl = document.getElementById('modal-title');
+
+            // Reset form
+            document.getElementById('banner-id').value = '';
+            document.getElementById('banner-title').value = '';
+            document.getElementById('banner-desc').value = '';
+            document.getElementById('banner-img').value = '';
+            document.getElementById('banner-btn').value = '';
+            document.getElementById('banner-action').value = 'search';
+
+            if (id) {
+                titleEl.innerText = "แก้ไขแบนเนอร์";
+                const b = banners.find(b => b.id === id);
+                if (b) {
+                    document.getElementById('banner-id').value = b.id;
+                    document.getElementById('banner-title').value = b.title;
+                    document.getElementById('banner-desc').value = b.desc;
+                    document.getElementById('banner-img').value = b.img;
+                    document.getElementById('banner-btn').value = b.btnText;
+                    document.getElementById('banner-action').value = b.action;
+                }
+            } else {
+                titleEl.innerText = "เพิ่มแบนเนอร์ใหม่";
+            }
+
+            modal.classList.add('show');
+        }
+
+        function closeBannerModal() {
+            document.getElementById('banner-modal').classList.remove('show');
+        }
+
+        function saveBanner() {
+            const id = document.getElementById('banner-id').value;
+            const newBanner = {
+                id: id || 'p' + Date.now(), // Generate ID if new
+                title: document.getElementById('banner-title').value || 'ไม่มีหัวข้อ',
+                desc: document.getElementById('banner-desc').value,
+                img: document.getElementById('banner-img').value || 'https://via.placeholder.com/600x300?text=No+Image',
+                btnText: document.getElementById('banner-btn').value || 'คลิกเลย',
+                action: document.getElementById('banner-action').value,
+                active: true
+            };
+
+            if (id) {
+                // Update existing
+                const index = banners.findIndex(b => b.id === id);
+                if (index > -1) banners[index] = { ...banners[index], ...newBanner, active: banners[index].active };
+                showToast('อัพเดทข้อมูลแบนเนอร์เรียบร้อย');
+            } else {
+                // Create new
+                banners.push(newBanner);
+                showToast('เพิ่มแบนเนอร์ใหม่เรียบร้อย');
+            }
+
+            renderBanners();
+            closeBannerModal();
+
+            // หมายเหตุ: ในระบบจริงตรงนี้ต้องมีการ fetch POST เพื่อเซฟลง Google Sheets
+        }
+
+        function deleteBanner(id) {
+            if (confirm('คุณแน่ใจหรือไม่ที่จะลบแบนเนอร์นี้? (ไม่สามารถกู้คืนได้)')) {
+                banners = banners.filter(b => b.id !== id);
+                renderBanners();
+                showToast('ลบแบนเนอร์เรียบร้อยแล้ว');
+                // หมายเหตุ: ในระบบจริงตรงนี้ต้องมีการ fetch POST เพื่อสั่งลบใน Google Sheets
+            }
+        }
+
+        // ================= UTILITIES =================
+
+        // View Switching Logic
+        function switchView(viewName) {
+            // อัพเดทเมนู Sidebar
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+            document.getElementById('nav-' + viewName).classList.add('active');
+
+            // ซ่อน/แสดงหน้าจอ
+            document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
+            document.getElementById('view-' + viewName).classList.add('active');
+
+            // ปิด Sidebar อัตโนมัติ (สำหรับมือถือ)
+            const sidebar = document.querySelector('.sidebar');
+            if (sidebar.classList.contains('open')) toggleSidebar();
+
+            // Render ข้อมูลตามหน้าที่เปิด
+            if (viewName === 'banners') renderBanners();
+        }
+
+        let toastTimeout;
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            toast.classList.add('show');
+
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // ================= MOCK REAL-TIME POLLING =================
+        // จำลองการที่ Google Sheets มีออเดอร์ใหม่เข้ามา
+        function simulateNewOrder() {
+            setTimeout(() => {
+                const newOrder = {
+                    id: 'ORD-' + Math.floor(1000 + Math.random() * 9000),
+                    queue: 'Q' + Math.floor(10 + Math.random() * 89),
+                    status: 'pending',
+                    customerName: 'ลูกค้าใหม่ (LINE)',
+                    time: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
+                    total: 60,
+                    items: [
+                        { name: 'เต้าหู้ชีส', qty: 2 },
+                        { name: 'ไส้กรอก', qty: 2 }
+                    ]
+                };
+                orders.unshift(newOrder); // Add to beginning
+                renderBoard();
+                showToast("🔔 มีออเดอร์ใหม่เข้ามารอรับ!");
+
+                // ถ้ามีการต่อลำโพง สามารถใส่เสียงแจ้งเตือน (Audio Play) ตรงนี้ได้
+            }, 15000); // จำลองออเดอร์เข้าในอีก 15 วินาที
+        }
+
+        // Initialize
+        window.onload = () => {
+            lucide.createIcons();
+            renderBoard();
+            renderBanners(); // โหลดเตรียมไว้
+            simulateNewOrder();
+            setupScrollObserver();
+        };
+
+        // Mobile Sidebar Toggle
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('open');
+            document.querySelector('.sidebar-overlay').classList.toggle('show');
+        }
+
+        // ================= QUICK NAV SCROLL =================
+        function scrollToCol(className) {
+            const col = document.querySelector('.' + className);
+            if (col) {
+                // เลื่อนไปตำแหน่งคอลัมน์นั้นๆ อย่างนุ่มนวล
+                col.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            }
+        }
+
+        function setupScrollObserver() {
+            const columns = document.querySelectorAll('.column');
+            // ตั้งค่าให้ Observer ทำงานเมื่อคอลัมน์แสดงผลเกิน 50% ของหน้าจอ
+            const observerOptions = {
+                root: document.querySelector('.board-container'),
+                threshold: 0.6
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        // ดึงชื่อคลาสเพื่อไปเทียบกับปุ่ม (เช่น col-pending)
+                        const targetClass = entry.target.classList[1];
+                        document.querySelectorAll('.quick-nav-btn').forEach(btn => {
+                            btn.classList.remove('active');
+                            if (btn.dataset.target === targetClass) {
+                                btn.classList.add('active');
+                            }
+                        });
+                    }
+                });
+            }, observerOptions);
+
+            columns.forEach(col => observer.observe(col));
+        }
+
+    </script>
+</body>
+
+</html>
