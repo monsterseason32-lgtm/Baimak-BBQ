@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>ใบหมาก BBQ หม่าล่า</title>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- ใช้ Lucide Icons -->
@@ -11,18 +12,22 @@
     <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
         :root {
-            --primary: #E53935;
-            /* แดงหม่าล่า */
-            --primary-glow: rgba(229, 57, 53, 0.4);
-            --bg-dark: #0A0A0C;
-            --surface: rgba(255, 255, 255, 0.03);
+            /* โทนสีส้มใหม่ */
+            --primary: #FF6B00;
+            --primary-light: #FF8C33;
+            --primary-dark: #E65100;
+            --primary-glow: rgba(255, 107, 0, 0.35);
+
+            --bg-dark: #0f0f12;
+            /* ดำอมเทานิดๆ ให้ดูนุ่มขึ้น */
+            --surface: rgba(255, 255, 255, 0.04);
             --surface-border: rgba(255, 255, 255, 0.08);
             --text-main: #FFFFFF;
-            --text-muted: #8E8E93;
+            --text-muted: #9E9E9E;
             --gold: #FFC107;
             --radius-lg: 24px;
             --radius-md: 16px;
-            --radius-sm: 8px;
+            --radius-sm: 10px;
         }
 
         * {
@@ -39,9 +44,10 @@
             overflow-x: hidden;
             display: flex;
             justify-content: center;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* สำหรับจำลองมุมมองมือถือบนจอใหญ่ */
+        /* Container สำหรับมือถือ */
         #app-container {
             width: 100%;
             max-width: 480px;
@@ -51,25 +57,26 @@
             box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
             overflow-x: hidden;
             overflow-y: auto;
-            padding-bottom: 80px;
-            /* เผื่อที่ให้ Bottom Nav */
+            /* เพิ่ม Safe Area สำหรับ iPhone */
+            padding-bottom: calc(90px + env(safe-area-inset-bottom));
         }
 
-        /* Cinematic Background Glows */
+        /* Cinematic Background Glows - เปลี่ยนเป็นโทนส้ม */
         .glow-blob {
             position: fixed;
             border-radius: 50%;
             filter: blur(80px);
             z-index: 0;
             pointer-events: none;
+            transition: all 1s ease;
         }
 
         .glow-1 {
             top: -100px;
             right: -100px;
-            width: 300px;
-            height: 300px;
-            background: rgba(229, 57, 53, 0.15);
+            width: 320px;
+            height: 320px;
+            background: rgba(255, 107, 0, 0.15);
         }
 
         .glow-2 {
@@ -83,8 +90,8 @@
         /* Glassmorphism Utilities */
         .glass {
             background: var(--surface);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--surface-border);
         }
 
@@ -99,7 +106,7 @@
         }
 
         .text-gradient {
-            background: linear-gradient(90deg, #FFFFFF 0%, #BDBDBD 100%);
+            background: linear-gradient(90deg, #FFFFFF 0%, #E0E0E0 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -113,11 +120,11 @@
             font-size: 0.85rem;
         }
 
-        /* Pages */
+        /* Pages & Transitions */
         .page {
             display: none;
-            padding: 20px;
-            animation: fadeIn 0.4s ease-out forwards;
+            padding: 24px 20px;
+            animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
             position: relative;
             z-index: 1;
         }
@@ -126,10 +133,10 @@
             display: block;
         }
 
-        @keyframes fadeIn {
+        @keyframes slideUpFade {
             from {
                 opacity: 0;
-                transform: translateY(10px);
+                transform: translateY(20px);
             }
 
             to {
@@ -151,33 +158,39 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            transition: opacity 0.5s;
+            transition: opacity 0.6s ease-out, visibility 0.6s;
         }
 
         .logo-container {
             width: 120px;
             height: 120px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), #8E0000);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             display: flex;
             align-items: center;
             justify-content: center;
             box-shadow: 0 0 30px var(--primary-glow);
-            margin-bottom: 20px;
-            animation: pulse 2s infinite;
+            margin-bottom: 24px;
+            animation: pulse-orange 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        @keyframes pulse {
+        @keyframes pulse-orange {
             0% {
                 box-shadow: 0 0 0 0 var(--primary-glow);
+                transform: scale(0.98);
+            }
+
+            50% {
+                transform: scale(1.02);
             }
 
             70% {
-                box-shadow: 0 0 0 20px rgba(229, 57, 53, 0);
+                box-shadow: 0 0 0 25px rgba(255, 107, 0, 0);
             }
 
             100% {
-                box-shadow: 0 0 0 0 rgba(229, 57, 53, 0);
+                box-shadow: 0 0 0 0 rgba(255, 107, 0, 0);
+                transform: scale(0.98);
             }
         }
 
@@ -186,18 +199,18 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
 
         .user-info {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
         }
 
         .avatar {
-            width: 48px;
-            height: 48px;
+            width: 52px;
+            height: 52px;
             border-radius: 50%;
             object-fit: cover;
             border: 2px solid var(--primary);
@@ -207,20 +220,20 @@
         /* Modern Search Bar */
         .search-container {
             position: relative;
-            margin-bottom: 24px;
+            margin-bottom: 28px;
         }
 
         .search-input {
             width: 100%;
-            padding: 14px 14px 14px 44px;
+            padding: 16px 16px 16px 48px;
             border-radius: 30px;
             border: 1px solid var(--surface-border);
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.04);
             color: white;
             font-family: inherit;
             font-size: 0.95rem;
             outline: none;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
             backdrop-filter: blur(10px);
         }
 
@@ -232,11 +245,16 @@
 
         .search-icon {
             position: absolute;
-            left: 16px;
+            left: 18px;
             top: 50%;
             transform: translateY(-50%);
             color: var(--text-muted);
             width: 20px;
+            transition: color 0.3s;
+        }
+
+        .search-input:focus+.search-icon {
+            color: var(--primary);
         }
 
         /* Hero Carousel (Modern Premium UI) */
@@ -244,11 +262,10 @@
             position: relative;
             border-radius: var(--radius-lg);
             overflow: hidden;
-            margin-bottom: 24px;
-            box-shadow: 0 12px 30px rgba(229, 57, 53, 0.15);
+            margin-bottom: 28px;
+            box-shadow: 0 12px 30px rgba(255, 107, 0, 0.15);
             touch-action: pan-y;
             height: 200px;
-            /* ฟิกซ์ความสูงให้ดูสวยงามสม่ำเสมอ */
             background: #111;
         }
 
@@ -280,13 +297,11 @@
             background-size: cover;
             background-position: center;
             z-index: 0;
-            transition: transform 4s linear;
-            /* เอฟเฟกต์ซูมช้าๆ */
+            transition: transform 5s ease-out;
         }
 
         .hero-slide.active .hero-bg {
             transform: scale(1.1);
-            /* ขยายรูปภาพ 10% เมื่อสไลด์ทำงาน */
         }
 
         .hero-overlay {
@@ -295,29 +310,30 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(105deg, rgba(10, 10, 12, 0.95) 0%, rgba(10, 10, 12, 0.6) 40%, rgba(0, 0, 0, 0) 100%);
+            background: linear-gradient(105deg, rgba(15, 15, 18, 0.95) 0%, rgba(15, 15, 18, 0.6) 45%, rgba(0, 0, 0, 0) 100%);
             z-index: 1;
         }
 
         .hero-content {
             position: relative;
             z-index: 2;
-            width: 80%;
+            width: 85%;
         }
 
         .hero-content h2 {
             font-size: 1.5rem;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
             transform: translateY(20px);
             opacity: 0;
             transition: all 0.6s ease 0.2s;
+            line-height: 1.2;
         }
 
         .hero-content p {
             font-size: 0.85rem;
             opacity: 0;
-            margin-bottom: 16px;
+            margin-bottom: 18px;
             color: #E0E0E0;
             text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
             transform: translateY(20px);
@@ -327,26 +343,25 @@
         .hero-btn {
             background: white;
             color: var(--bg-dark);
-            padding: 8px 20px;
+            padding: 10px 24px;
             border-radius: 30px;
             font-weight: 700;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             border: none;
             box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             opacity: 0;
             transform: translateY(20px);
             transition: all 0.6s ease 0.4s;
         }
 
         .hero-btn:active {
-            transform: scale(0.95);
+            transform: scale(0.92);
             background: var(--primary);
             color: white;
         }
 
-        /* Animation triggering classes */
         .hero-slide.active .hero-content h2,
         .hero-slide.active .hero-content p,
         .hero-slide.active .hero-btn {
@@ -354,10 +369,10 @@
             transform: translateY(0);
         }
 
-        /* Modern Progress Dots (Instagram Story style) */
+        /* Modern Progress Dots */
         .hero-dots {
             position: absolute;
-            bottom: 12px;
+            bottom: 14px;
             left: 24px;
             right: 24px;
             display: flex;
@@ -389,21 +404,31 @@
             display: flex;
             gap: 12px;
             overflow-x: auto;
-            padding-bottom: 10px;
+            padding-bottom: 12px;
             scrollbar-width: none;
-            margin-bottom: 20px;
+            /* Firefox */
+            margin-bottom: 24px;
+            -webkit-overflow-scrolling: touch;
+            /* Smooth scroll on iOS */
         }
 
         .category-scroll::-webkit-scrollbar {
             display: none;
+            /* Chrome/Safari */
         }
 
         .category-pill {
-            padding: 8px 20px;
+            padding: 10px 22px;
             border-radius: 30px;
             white-space: nowrap;
             font-size: 0.9rem;
-            transition: all 0.3s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .category-pill:active {
+            transform: scale(0.95);
         }
 
         .category-pill.active {
@@ -421,25 +446,35 @@
         }
 
         .menu-card {
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: var(--radius-lg);
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
             position: relative;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: cardEntrance 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes cardEntrance {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .menu-badge {
             position: absolute;
             top: 10px;
             left: 10px;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(4px);
-            padding: 4px 8px;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(8px);
+            padding: 4px 10px;
             border-radius: 12px;
-            font-size: 0.65rem;
+            font-size: 0.7rem;
             color: var(--gold);
             font-weight: 600;
             display: flex;
@@ -464,11 +499,11 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .menu-card:active .menu-img {
-            transform: scale(1.1);
+            transform: scale(1.08);
         }
 
         .menu-img-overlay {
@@ -476,43 +511,44 @@
             bottom: 0;
             left: 0;
             right: 0;
-            height: 50%;
+            height: 60%;
             background: linear-gradient(0deg, var(--bg-dark) 0%, transparent 100%);
             z-index: 1;
         }
 
         .menu-info {
-            padding: 12px;
+            padding: 16px 14px 14px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
             position: relative;
             z-index: 2;
-            margin-top: -20px;
+            margin-top: -24px;
         }
 
         .menu-price {
-            color: var(--gold);
+            color: var(--primary-light);
             font-weight: 700;
-            font-size: 1.1rem;
+            font-size: 1.15rem;
         }
 
         .add-btn {
-            background: linear-gradient(135deg, var(--primary), #D32F2F);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             border: none;
             color: white;
-            width: 36px;
-            height: 36px;
+            width: 38px;
+            height: 38px;
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 4px 10px var(--primary-glow);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px var(--primary-glow);
+            cursor: pointer;
         }
 
         .add-btn:active {
-            transform: scale(0.9);
+            transform: scale(0.85);
             box-shadow: 0 2px 5px var(--primary-glow);
         }
 
@@ -522,7 +558,7 @@
             bottom: 0;
             width: 100%;
             max-width: 480px;
-            height: 70px;
+            height: 75px;
             border-radius: 24px 24px 0 0;
             border-bottom: none;
             display: flex;
@@ -530,16 +566,24 @@
             align-items: center;
             z-index: 100;
             padding-bottom: env(safe-area-inset-bottom);
+            background: rgba(20, 20, 23, 0.85);
+            box-shadow: 0 -5px 30px rgba(0, 0, 0, 0.5);
         }
 
         .nav-item {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 4px;
+            gap: 6px;
             color: var(--text-muted);
-            transition: color 0.3s;
+            transition: color 0.3s, transform 0.2s;
             position: relative;
+            cursor: pointer;
+            padding: 8px 16px;
+        }
+
+        .nav-item:active {
+            transform: scale(0.9);
         }
 
         .nav-item.active {
@@ -548,25 +592,27 @@
 
         .nav-item span {
             font-size: 0.75rem;
+            font-weight: 500;
         }
 
         .cart-badge {
             position: absolute;
-            top: -5px;
-            right: -10px;
+            top: 2px;
+            right: 8px;
             background: var(--primary);
             color: white;
             font-size: 0.65rem;
             font-weight: bold;
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 50%;
             opacity: 0;
             transform: scale(0);
-            transition: all 0.3s;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
         }
 
         .cart-badge.show {
@@ -574,19 +620,39 @@
             transform: scale(1);
         }
 
+        /* Animation class for popping the badge */
+        .pop-anim {
+            animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes pop {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.4);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
         /* Cart Page */
         .cart-item {
             display: flex;
             align-items: center;
-            gap: 15px;
-            padding: 15px;
+            gap: 16px;
+            padding: 16px;
             border-radius: var(--radius-md);
-            margin-bottom: 12px;
+            margin-bottom: 14px;
+            animation: slideUpFade 0.3s ease forwards;
         }
 
         .cart-item-img {
-            width: 60px;
-            height: 60px;
+            width: 64px;
+            height: 64px;
             border-radius: var(--radius-sm);
             object-fit: cover;
         }
@@ -598,47 +664,59 @@
         .qty-controls {
             display: flex;
             align-items: center;
-            gap: 10px;
-            background: rgba(0, 0, 0, 0.3);
+            gap: 12px;
+            background: rgba(0, 0, 0, 0.4);
             border-radius: 30px;
-            padding: 4px 8px;
+            padding: 6px 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .qty-btn {
             background: none;
             border: none;
             color: white;
-            width: 24px;
-            height: 24px;
+            width: 26px;
+            height: 26px;
             display: flex;
             align-items: center;
             justify-content: center;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .qty-btn:active {
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .checkout-bar {
             position: fixed;
-            bottom: 80px;
+            bottom: calc(85px + env(safe-area-inset-bottom));
             width: calc(100% - 40px);
             max-width: 440px;
             margin: 0 20px;
-            padding: 20px;
+            padding: 16px 20px;
             border-radius: var(--radius-lg);
             display: flex;
             justify-content: space-between;
             align-items: center;
             z-index: 90;
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary), #D32F2F);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             border: none;
             color: white;
-            padding: 12px 24px;
+            padding: 14px 28px;
             border-radius: 30px;
             font-weight: 600;
             font-family: inherit;
             box-shadow: 0 4px 15px var(--primary-glow);
-            transition: transform 0.2s;
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .btn-primary:active {
@@ -647,29 +725,32 @@
 
         /* Tracking Page */
         .status-card {
-            padding: 30px 20px;
+            padding: 32px 20px;
             border-radius: var(--radius-lg);
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 32px;
+            background: linear-gradient(180deg, rgba(255, 107, 0, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
         }
 
         .status-icon {
-            width: 80px;
-            height: 80px;
-            background: rgba(229, 57, 53, 0.1);
+            width: 88px;
+            height: 88px;
+            background: rgba(255, 107, 0, 0.1);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 15px;
+            margin: 0 auto 16px;
             color: var(--primary);
+            box-shadow: 0 0 20px var(--primary-glow);
+            transition: all 0.4s ease;
         }
 
         /* Timeline */
         .timeline {
             position: relative;
             padding-left: 30px;
-            margin-top: 20px;
+            margin-top: 24px;
         }
 
         .timeline::before {
@@ -684,17 +765,16 @@
 
         .timeline-step {
             position: relative;
-            margin-bottom: 30px;
+            margin-bottom: 32px;
             opacity: 0.5;
-            transition: all 0.3s;
+            transition: all 0.4s ease;
+            transform: translateX(-10px);
         }
 
-        .timeline-step.active {
-            opacity: 1;
-        }
-
+        .timeline-step.active,
         .timeline-step.completed {
             opacity: 1;
+            transform: translateX(0);
         }
 
         .step-dot {
@@ -710,12 +790,12 @@
             align-items: center;
             justify-content: center;
             z-index: 2;
-            transition: all 0.3s;
+            transition: all 0.4s ease;
         }
 
         .timeline-step.active .step-dot {
             border-color: var(--primary);
-            box-shadow: 0 0 10px var(--primary-glow);
+            box-shadow: 0 0 15px var(--primary-glow);
         }
 
         .timeline-step.active .step-dot::after {
@@ -729,20 +809,24 @@
         .timeline-step.completed .step-dot {
             background: var(--primary);
             border-color: var(--primary);
+            box-shadow: 0 0 10px var(--primary-glow);
         }
 
         .step-content h4 {
-            margin-bottom: 4px;
+            margin-bottom: 6px;
+            font-size: 1.05rem;
         }
 
-        /* Custom Toast */
+        /* Custom Toast (Floating top) */
         .toast {
             position: fixed;
-            top: 20px;
+            top: env(safe-area-inset-top, 20px);
+            margin-top: 20px;
             left: 50%;
-            transform: translateX(-50%) translateY(-100px);
-            background: rgba(40, 40, 45, 0.9);
-            backdrop-filter: blur(10px);
+            transform: translateX(-50%) translateY(-150px);
+            background: rgba(30, 30, 35, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border: 1px solid var(--surface-border);
             color: white;
             padding: 12px 24px;
@@ -750,9 +834,10 @@
             z-index: 10000;
             display: flex;
             align-items: center;
-            gap: 10px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            gap: 12px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            white-space: nowrap;
         }
 
         .toast.show {
@@ -764,14 +849,15 @@
             position: fixed;
             top: 10px;
             right: 10px;
-            background: var(--gold);
-            color: black;
-            padding: 5px 10px;
-            border-radius: 8px;
-            font-size: 0.7rem;
+            background: var(--primary);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
             font-weight: bold;
             z-index: 999;
             cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
         }
 
         #admin-panel {
@@ -779,22 +865,31 @@
             position: fixed;
             top: 50px;
             right: 10px;
-            background: #111;
-            padding: 15px;
-            border-radius: 12px;
+            background: rgba(20, 20, 20, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 16px;
+            border-radius: 16px;
             border: 1px solid var(--surface-border);
             z-index: 999;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
 
         #admin-panel button {
             display: block;
             width: 100%;
             margin-top: 10px;
-            padding: 8px;
+            padding: 10px;
             background: #333;
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        #admin-panel button:hover {
+            background: var(--primary);
         }
     </style>
 </head>
@@ -811,20 +906,22 @@
             <div class="logo-container">
                 <i data-lucide="flame" style="width: 60px; height: 60px; color: white;"></i>
             </div>
-            <h2 class="text-gradient" style="margin-bottom: 10px;">ใบหมาก BBQ</h2>
-            <p class="text-muted">กำลังเชื่อมต่อ LINE...</p>
+            <h2 class="text-gradient" style="margin-bottom: 12px;">ใบหมาก BBQ</h2>
+            <p class="text-muted" style="display: flex; align-items: center; gap: 8px;">
+                <i data-lucide="loader-2" class="spin" style="width: 16px;"></i> กำลังเชื่อมต่อ LINE...
+            </p>
         </div>
 
         <!-- Toast Notification -->
         <div id="toast" class="toast">
-            <i data-lucide="check-circle" style="color: #4CAF50; width: 20px;"></i>
+            <i data-lucide="check-circle-2" style="color: var(--primary); width: 20px;"></i>
             <span id="toast-msg">ข้อความ</span>
         </div>
 
         <!-- Admin Demo Toggle -->
         <div class="admin-demo" onclick="toggleAdmin()">⚙️ Admin Demo</div>
         <div id="admin-panel">
-            <p style="font-size: 0.8rem; margin-bottom: 10px;">จำลองการอัพเดทจาก Google Sheets</p>
+            <p style="font-size: 0.8rem; margin-bottom: 10px; color: var(--primary);">จำลองแอดมินอัปเดตสถานะ</p>
             <button onclick="updateOrderStatus('pending')">1. รอรับออเดอร์</button>
             <button onclick="updateOrderStatus('cooking')">2. กำลังย่าง🔥</button>
             <button onclick="updateOrderStatus('ready')">3. พร้อมเสิร์ฟ✅</button>
@@ -834,19 +931,19 @@
         <div id="page-menu" class="page active">
             <div class="header-profile">
                 <div class="user-info">
-                    <img id="user-avatar" src="https://ui-avatars.com/api/?name=User&background=111&color=fff"
+                    <img id="user-avatar" src="https://ui-avatars.com/api/?name=User&background=FF6B00&color=fff"
                         alt="User" class="avatar">
                     <div>
                         <h3 id="user-name">สวัสดี, ลูกค้า</h3>
-                        <p class="text-primary" style="font-size: 0.75rem; font-weight: 500;">พร้อมลุยหม่าล่าหรือยัง? 🔥
+                        <p class="text-primary" style="font-size: 0.8rem; font-weight: 500;">พร้อมลุยหม่าล่าหรือยัง? 🔥
                         </p>
                     </div>
                 </div>
                 <div
-                    style="position: relative; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 50%; border: 1px solid var(--surface-border);">
-                    <i data-lucide="bell" style="color: var(--text-main); width: 20px; height: 20px;"></i>
+                    style="position: relative; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 50%; border: 1px solid var(--surface-border); cursor: pointer;">
+                    <i data-lucide="bell" style="color: var(--text-main); width: 22px; height: 22px;"></i>
                     <span
-                        style="position: absolute; top: 8px; right: 10px; width: 8px; height: 8px; background: var(--primary); border-radius: 50%; box-shadow: 0 0 8px var(--primary);"></span>
+                        style="position: absolute; top: 10px; right: 12px; width: 8px; height: 8px; background: var(--primary); border-radius: 50%; box-shadow: 0 0 8px var(--primary);"></span>
                 </div>
             </div>
 
@@ -855,7 +952,7 @@
                 <input type="text" class="search-input" placeholder="ค้นหาเมนู (เช่น สามชั้น, เต้าหู้)...">
             </div>
 
-            <!-- Hero Carousel (Dynamic Structure) -->
+            <!-- Hero Carousel -->
             <div class="hero-carousel" id="hero-carousel">
                 <div class="hero-slides" id="hero-slides">
                     <!-- Slides will be rendered here via JS -->
@@ -865,8 +962,8 @@
                 </div>
             </div>
 
-            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 16px;">
-                <h2 style="font-size: 1.3rem;">หมวดหมู่<span class="text-primary">อาหาร</span></h2>
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 18px;">
+                <h2 style="font-size: 1.35rem;">หมวดหมู่<span class="text-primary">อาหาร</span></h2>
             </div>
 
             <div class="category-scroll" id="category-container">
@@ -880,12 +977,16 @@
 
         <!-- ================= PAGE 2: CART ================= -->
         <div id="page-cart" class="page">
-            <h1 style="margin-bottom: 20px;">ตะกร้า<span class="text-primary">ของฉัน</span></h1>
+            <h1 style="margin-bottom: 24px;">ตะกร้า<span class="text-primary">ของฉัน</span></h1>
 
-            <div id="cart-empty" style="text-align: center; padding: 40px 0; color: var(--text-muted); display: none;">
-                <i data-lucide="shopping-cart"
-                    style="width: 64px; height: 64px; opacity: 0.5; margin-bottom: 15px;"></i>
-                <p>ยังไม่มีรายการอาหาร</p>
+            <div id="cart-empty" style="text-align: center; padding: 60px 0; color: var(--text-muted); display: none;">
+                <div
+                    style="width: 80px; height: 80px; border-radius: 50%; background: rgba(255,255,255,0.03); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+                    <i data-lucide="shopping-bag"
+                        style="width: 40px; height: 40px; color: var(--primary); opacity: 0.7;"></i>
+                </div>
+                <p style="font-size: 1.1rem; color: #fff; margin-bottom: 8px;">ยังไม่มีรายการอาหาร</p>
+                <p style="font-size: 0.85rem;">ลองดูเมนูแนะนำของเราสิครับ</p>
             </div>
 
             <div id="cart-items-container" style="margin-bottom: 120px;">
@@ -894,51 +995,54 @@
 
             <div class="glass checkout-bar" id="checkout-bar" style="display: none;">
                 <div>
-                    <p class="text-muted" style="font-size: 0.8rem;">ราคารวม</p>
-                    <h2 class="text-primary">฿<span id="cart-total">0</span></h2>
+                    <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 2px;">ราคารวมทั้งหมด</p>
+                    <h2 class="text-primary" style="font-size: 1.5rem;">฿<span id="cart-total">0</span></h2>
                 </div>
-                <button class="btn-primary" onclick="submitOrder()">ยืนยันออเดอร์ <i data-lucide="arrow-right"
-                        style="width: 18px; display: inline-block; vertical-align: middle; margin-left: 5px;"></i></button>
+                <button class="btn-primary" onclick="submitOrder()">
+                    ยืนยันออเดอร์ <i data-lucide="arrow-right" style="width: 18px;"></i>
+                </button>
             </div>
         </div>
 
         <!-- ================= PAGE 3: TRACKING ================= -->
         <div id="page-tracking" class="page">
-            <h1 style="margin-bottom: 20px;">สถานะ<span class="text-primary">ออเดอร์</span></h1>
+            <h1 style="margin-bottom: 24px;">สถานะ<span class="text-primary">ออเดอร์</span></h1>
 
             <div class="glass status-card">
                 <div class="status-icon" id="main-status-icon">
                     <i data-lucide="clipboard-list" style="width: 40px; height: 40px;"></i>
                 </div>
-                <h2 id="main-status-title">กำลังส่งออเดอร์...</h2>
+                <h2 id="main-status-title" style="margin-bottom: 8px;">กำลังส่งออเดอร์...</h2>
                 <p class="text-muted" id="main-status-desc">รอสักครู่ ระบบกำลังบันทึกลงฐานข้อมูล</p>
-                <div style="margin-top: 15px; font-size: 0.9rem;">
-                    คิวที่: <strong class="text-gold" id="queue-number">--</strong>
+                <div
+                    style="margin-top: 20px; font-size: 1rem; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; display: inline-block;">
+                    คิวของคุณ: <strong class="text-primary" style="font-size: 1.2rem; margin-left: 8px;"
+                        id="queue-number">--</strong>
                 </div>
             </div>
 
-            <h3>อัพเดทสถานะ (Real-time)</h3>
+            <h3 style="margin-bottom: 16px;">อัปเดตสถานะ <span class="text-muted"
+                    style="font-weight: normal; font-size: 0.8rem;">(Real-time)</span></h3>
             <div class="timeline" id="tracking-timeline">
-                <!-- Timeline Steps -->
                 <div class="timeline-step active" id="step-1">
                     <div class="step-dot"><i data-lucide="check" style="width: 12px; display:none;"></i></div>
                     <div class="step-content">
                         <h4>รอร้านรับออเดอร์</h4>
-                        <p class="text-muted" style="font-size: 0.8rem;">ข้อมูลส่งถึงร้านเรียบร้อย</p>
+                        <p class="text-muted" style="font-size: 0.85rem;">ข้อมูลส่งถึงร้านเรียบร้อย</p>
                     </div>
                 </div>
                 <div class="timeline-step" id="step-2">
                     <div class="step-dot"><i data-lucide="check" style="width: 12px; display:none;"></i></div>
                     <div class="step-content">
                         <h4>กำลังย่าง 🔥</h4>
-                        <p class="text-muted" style="font-size: 0.8rem;">เชฟกำลังทาซอสหม่าล่าสูตรเด็ด</p>
+                        <p class="text-muted" style="font-size: 0.85rem;">เชฟกำลังทาซอสหม่าล่าสูตรเด็ด</p>
                     </div>
                 </div>
                 <div class="timeline-step" id="step-3">
                     <div class="step-dot"><i data-lucide="check" style="width: 12px; display:none;"></i></div>
                     <div class="step-content">
                         <h4>พร้อมเสิร์ฟ / รับอาหาร</h4>
-                        <p class="text-muted" style="font-size: 0.8rem;">อาหารร้อนๆ พร้อมทานแล้ว!</p>
+                        <p class="text-muted" style="font-size: 0.85rem;">อาหารร้อนๆ พร้อมทานแล้ว!</p>
                     </div>
                 </div>
             </div>
@@ -952,7 +1056,7 @@
             </div>
             <div class="nav-item" onclick="switchPage('cart')" id="nav-cart">
                 <div class="cart-badge" id="nav-cart-badge">0</div>
-                <i data-lucide="shopping-cart"></i>
+                <i data-lucide="shopping-bag"></i>
                 <span>ตะกร้า</span>
             </div>
             <div class="nav-item" onclick="switchPage('tracking')" id="nav-tracking">
@@ -964,24 +1068,23 @@
 
     <script>
         // ================= CONFIG & ARCHITECTURE MOCK =================
-        // ในโปรดักชั่นจริง URL นี้จะได้จากการ Deploy Google Apps Script
         const API_URL = "https://script.google.com/macros/s/AKfycbxYnt6AODwWQM2AupdcBiF1_05aZYgibMfRJ7ZvsLeyytN_rrvxbBl0DHKEUo9p7PnAcQ/exec";
 
         // ================= STATE MANAGEMENT =================
         const AppState = {
             user: { name: "กำลังโหลด...", picUrl: "" },
             menu: [],
-            promotions: [], // เพิ่ม State สำหรับเก็บแบนเนอร์
+            promotions: [],
             categories: ['ทั้งหมด', 'เนื้อสัตว์', 'ลูกชิ้น', 'ผัก', 'เส้น'],
             activeCategory: 'ทั้งหมด',
             cart: [],
-            currentOrder: null // null | 'pending' | 'cooking' | 'ready'
+            currentOrder: null
         };
 
-        // ================= MOCK DATA (จำลองข้อมูลจาก Google Sheets) =================
+        // ================= MOCK DATA =================
         const MockPromotions = [
             { id: 'p1', title: '<span class="text-primary">เซ็ตหม่าล่า</span> โคตรคุ้ม!', desc: 'อิ่มจุกๆ ลดพิเศษ 20% เฉพาะสั่งผ่านแอพ', img: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80', btnText: 'สั่งเลยตอนนี้', action: 'search' },
-            { id: 'p2', title: 'ใหม่! <span class="text-gold">ชีสเยิ้มมม</span>', desc: 'สายชีสห้ามพลาด เต้าหู้ชีสสุดฟิน', img: 'https://images.unsplash.com/photo-1582878826629-29b7ad1cb431?auto=format&fit=crop&w=600&q=80', btnText: 'ดูเมนูเลย', action: 'ลูกชิ้น' },
+            { id: 'p2', title: 'ใหม่! <span style="color:#FFC107;">ชีสเยิ้มมม</span>', desc: 'สายชีสห้ามพลาด เต้าหู้ชีสสุดฟิน', img: 'https://images.unsplash.com/photo-1582878826629-29b7ad1cb431?auto=format&fit=crop&w=600&q=80', btnText: 'ดูเมนูเลย', action: 'ลูกชิ้น' },
             { id: 'p3', title: 'สายผัก รักสุขภาพ', desc: 'ผักสด สะอาด คัดสรรมาเพื่อคุณ', img: 'https://images.unsplash.com/photo-1509358271058-acd22cc93898?auto=format&fit=crop&w=600&q=80', btnText: 'สายตี้ผัก', action: 'ผัก' }
         ];
 
@@ -996,177 +1099,122 @@
             { id: 'n1', name: 'เส้นมันหนึบ', price: 15, category: 'เส้น', img: 'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=300&q=80' }
         ];
 
-        // ================= CORE FUNCTIONS (Architecture Implementation) =================
+        // Add loading spin CSS animation dynamically
+        const style = document.createElement('style');
+        style.innerHTML = `@keyframes spin { 100% { transform: rotate(360deg); } } .spin { animation: spin 2s linear infinite; }`;
+        document.head.appendChild(style);
 
-        // 1. LIFF Initialization (Hybrid: Local & Production)
+        // ================= CORE FUNCTIONS =================
         async function initializeLiff() {
-            // ตรวจสอบว่าเป็นเครื่อง Local หรือการจำลองหรือไม่
             const isLocal = window.location.hostname === 'localhost' ||
                 window.location.hostname === '127.0.0.1' ||
                 window.location.search.includes('serverWindowId');
 
             if (isLocal) {
-                console.log("🛠️ Running in Local Simulation Mode...");
                 AppState.user = {
-                    name: "ผู้ทดสอบระบบ (Local)",
-                    picUrl: "https://ui-avatars.com/api/?name=Tester&background=FFC107&color=000",
+                    name: "ผู้ทดสอบระบบ",
+                    picUrl: "https://ui-avatars.com/api/?name=Tester&background=FF6B00&color=fff",
                     userId: "U_MOCK_USER_LOCAL"
                 };
-                // อัพเดท UI จำลอง
-                document.getElementById('user-name').innerText = "สวัสดี, " + AppState.user.name;
-                document.getElementById('user-avatar').src = AppState.user.picUrl;
-                return; // ข้ามการเรียกใช้ LIFF SDK บนเครื่อง Local
+                updateUserProfileUI();
+                return;
             }
 
             try {
                 await liff.init({ liffId: "2009635252-NSmFIvAB" });
-
-                if (!liff.isLoggedIn()) {
-                    liff.login();
-                    return;
-                }
+                if (!liff.isLoggedIn()) { liff.login(); return; }
 
                 const profile = await liff.getProfile();
-                console.log("LIFF Profile loaded:", profile);
-
-                // ล้าง URL ให้สะอาด (ลบ ?code=...&state=...) เพื่อความสวยงามและความปลอดภัย
                 if (window.history.replaceState) {
                     const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
                     window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
                 }
 
-                // บันทึกข้อมูลจริงจาก LINE Profile
                 AppState.user = {
                     name: profile.displayName || "คุณลูกค้า",
-                    picUrl: profile.pictureUrl || "https://ui-avatars.com/api/?name=" + (profile.displayName || "User") + "&background=111&color=fff",
+                    picUrl: profile.pictureUrl || "https://ui-avatars.com/api/?name=" + (profile.displayName || "User") + "&background=FF6B00&color=fff",
                     userId: profile.userId
                 };
 
-                // บันทึกข้อมูลผู้ใช้ลง Google Sheets เพื่อสะสมฐานข้อมูล
                 saveUserProfile(AppState.user);
-
-                // อัพเดท UI จริง
-                document.getElementById('user-name').innerText = "สวัสดี, " + AppState.user.name;
-                document.getElementById('user-avatar').src = AppState.user.picUrl;
+                updateUserProfileUI();
 
             } catch (error) {
-                console.error("LIFF Initialization failed:", error);
                 showToast("ไม่สามารถเชื่อมต่อ LINE ได้ กรุณาลองใหม่อีกครั้ง");
+                // Fallback to mock on error
+                AppState.user = { name: "ผู้เยี่ยมชม", picUrl: "https://ui-avatars.com/api/?name=Guest&background=FF6B00&color=fff", userId: "guest" };
+                updateUserProfileUI();
             }
         }
 
-        // 2. Fetch Data from Apps Script -> Google Sheets (Real - Using POST for CORS Stability)
+        function updateUserProfileUI() {
+            document.getElementById('user-name').innerText = "สวัสดี, " + AppState.user.name;
+            document.getElementById('user-avatar').src = AppState.user.picUrl;
+        }
+
         async function fetchMenuData() {
             try {
-                const response = await fetch(`${API_URL}?action=getMenu`, {
-                    method: 'POST',
-                    body: JSON.stringify({})
-                });
+                const response = await fetch(`${API_URL}?action=getMenu`, { method: 'POST', body: JSON.stringify({}) });
                 const res = await response.json();
-                // รองรับทั้งแบบคืนค่าเป็น Array โดยตรง หรือคืนค่าเป็น Object {success, data}
                 const data = Array.isArray(res) ? res : (res && res.data ? res.data : null);
                 return Array.isArray(data) ? data : MockDatabase;
-            } catch (error) {
-                console.error("Fetch Menu Error:", error);
-                return MockDatabase;
-            }
+            } catch (error) { return MockDatabase; }
         }
 
         async function fetchPromotionsData() {
             try {
-                const response = await fetch(`${API_URL}?action=getPromotions`, {
-                    method: 'POST',
-                    body: JSON.stringify({})
-                });
+                const response = await fetch(`${API_URL}?action=getPromotions`, { method: 'POST', body: JSON.stringify({}) });
                 const res = await response.json();
                 const data = Array.isArray(res) ? res : (res && res.data ? res.data : null);
                 return Array.isArray(data) ? data : MockPromotions;
-            } catch (error) {
-                console.error("Fetch Promos Error:", error);
-                return MockPromotions;
-            }
+            } catch (error) { return MockPromotions; }
         }
 
-        // 3. Submit Order to Apps Script (Real)
         async function submitOrderToBackend(orderData) {
             try {
-                const response = await fetch(`${API_URL}?action=createOrder`, {
-                    method: 'POST',
-                    body: JSON.stringify(orderData)
-                });
+                const response = await fetch(`${API_URL}?action=createOrder`, { method: 'POST', body: JSON.stringify(orderData) });
                 const res = await response.json();
-                if (!res.success) {
-                    throw new Error(res.message || "Submit failed");
-                }
+                if (!res.success) throw new Error(res.message);
                 return res;
-            } catch (error) {
-                console.error("Submit Order Error:", error);
-                throw error;
-            }
+            } catch (error) { throw error; }
         }
 
-        // 4. Save User Profile to Apps Script (Real)
         async function saveUserProfile(userData) {
-            try {
-                const response = await fetch(`${API_URL}?action=saveUser`, {
-                    method: 'POST',
-                    body: JSON.stringify(userData)
-                });
-                const res = await response.json();
-                if (res.success) {
-                    console.log("User Profile saved to Sheets");
-                } else {
-                    console.error("Save User Failed:", res.message);
-                }
-            } catch (error) {
-                console.error("Save User Error:", error);
-            }
+            try { fetch(`${API_URL}?action=saveUser`, { method: 'POST', body: JSON.stringify(userData) }); } catch (e) { }
         }
 
         // ================= UI RENDERING & LOGIC =================
-
         async function initApp() {
-            // เริ่มต้นแอพ
+            lucide.createIcons();
             await initializeLiff();
 
-            // โหลดข้อมูลแบบคู่ขนานเพื่อความรวดเร็ว
-            const [menuData, promosData] = await Promise.all([
-                fetchMenuData(),
-                fetchPromotionsData()
-            ]);
-
+            const [menuData, promosData] = await Promise.all([fetchMenuData(), fetchPromotionsData()]);
             AppState.menu = menuData;
             AppState.promotions = promosData;
 
             renderCategories();
             renderMenu();
-            renderHeroBanner(); // สร้างแบนเนอร์จากข้อมูล
+            renderHeroBanner();
 
-            // Setup Search Listener
             const searchInput = document.querySelector('.search-input');
             if (searchInput) {
                 searchInput.addEventListener('input', (e) => {
-                    const term = e.target.value.toLowerCase();
-                    renderMenu(term);
+                    renderMenu(e.target.value.toLowerCase());
                 });
             }
 
-            // ปิด Splash Screen
-            document.getElementById('splash-screen').style.opacity = '0';
+            // Hide Splash smoothly
+            const splash = document.getElementById('splash-screen');
+            splash.style.opacity = '0';
             setTimeout(() => {
-                document.getElementById('splash-screen').style.display = 'none';
-                lucide.createIcons(); // โหลดไอคอน
-            }, 500);
+                splash.style.visibility = 'hidden';
+                splash.style.display = 'none';
+            }, 600);
         }
 
         // ================= CAROUSEL LOGIC =================
-        let currentSlide = 0;
-        let totalSlides = 0;
-        let slideInterval;
-        let progressAnimation;
-        let touchStartX = 0;
-        let touchEndX = 0;
-        const slideDuration = 4000; // 4 วินาทีต่อสไลด์
+        let currentSlide = 0, totalSlides = 0, progressAnimation, touchStartX = 0, touchEndX = 0;
+        const slideDuration = 4000;
 
         function renderHeroBanner() {
             const slidesContainer = document.getElementById('hero-slides');
@@ -1178,35 +1226,30 @@
             }
 
             totalSlides = AppState.promotions.length;
-
             slidesContainer.innerHTML = AppState.promotions.map((promo, idx) => `
-            <div class="hero-slide ${idx === 0 ? 'active' : ''}" id="slide-${idx}">
-                <div class="hero-bg" style="background-image: url('${promo.img}')"></div>
-                <div class="hero-overlay"></div>
-                <div class="hero-content">
-                    <h2>${promo.title}</h2>
-                    <p>${promo.desc}</p>
-                    <button class="hero-btn" onclick="handlePromoAction('${promo.action}')">${promo.btnText}</button>
+                <div class="hero-slide ${idx === 0 ? 'active' : ''}" id="slide-${idx}">
+                    <div class="hero-bg" style="background-image: url('${promo.img}')"></div>
+                    <div class="hero-overlay"></div>
+                    <div class="hero-content">
+                        <h2>${promo.title}</h2>
+                        <p>${promo.desc}</p>
+                        <button class="hero-btn" onclick="handlePromoAction('${promo.action}')">${promo.btnText}</button>
+                    </div>
                 </div>
-            </div>
-        `).join('');
+            `).join('');
 
             dotsContainer.innerHTML = AppState.promotions.map((_, idx) => `
-            <div class="hero-dot-wrapper" onclick="goToSlide(${idx})">
-                <div class="hero-dot-progress" id="dot-progress-${idx}"></div>
-            </div>
-        `).join('');
+                <div class="hero-dot-wrapper" onclick="goToSlide(${idx})">
+                    <div class="hero-dot-progress" id="dot-progress-${idx}"></div>
+                </div>
+            `).join('');
 
             initCarousel();
         }
 
         function handlePromoAction(action) {
-            if (action === 'search') {
-                document.querySelector('.search-input').focus();
-            } else {
-                filterCategory(action);
-                document.getElementById('menu-container').scrollIntoView({ behavior: 'smooth' });
-            }
+            if (action === 'search') document.querySelector('.search-input').focus();
+            else { filterCategory(action); document.getElementById('menu-container').scrollIntoView({ behavior: 'smooth' }); }
         }
 
         function initCarousel() {
@@ -1214,242 +1257,160 @@
             if (carousel && totalSlides > 1) {
                 carousel.addEventListener('mouseenter', pauseSlideShow);
                 carousel.addEventListener('mouseleave', resumeSlideShow);
-
-                carousel.addEventListener('touchstart', (e) => {
-                    touchStartX = e.changedTouches[0].screenX;
-                    pauseSlideShow();
-                }, { passive: true });
-
-                carousel.addEventListener('touchend', (e) => {
-                    touchEndX = e.changedTouches[0].screenX;
-                    handleSwipe();
-                    resumeSlideShow();
-                }, { passive: true });
-
+                carousel.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; pauseSlideShow(); }, { passive: true });
+                carousel.addEventListener('touchend', (e) => { touchEndX = e.changedTouches[0].screenX; if (touchEndX < touchStartX - 50) nextSlide(); if (touchEndX > touchStartX + 50) prevSlide(); resumeSlideShow(); }, { passive: true });
                 startSlideProgress();
             } else if (totalSlides === 1) {
-                // ถ้ามีสไลด์เดียว ให้เติมหลอดให้เต็ม
                 document.getElementById('dot-progress-0').style.width = '100%';
             }
         }
 
-        function handleSwipe() {
-            if (touchEndX < touchStartX - 50) nextSlide(); // ปัดซ้าย
-            if (touchEndX > touchStartX + 50) prevSlide(); // ปัดขวา
-        }
-
-        function goToSlide(index) {
-            currentSlide = index;
-            updateCarousel();
-        }
-
-        function nextSlide() {
-            currentSlide = (currentSlide + 1) % totalSlides;
-            updateCarousel();
-        }
-
-        function prevSlide() {
-            currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
-            updateCarousel();
-        }
+        function goToSlide(index) { currentSlide = index; updateCarousel(); }
+        function nextSlide() { currentSlide = (currentSlide + 1) % totalSlides; updateCarousel(); }
+        function prevSlide() { currentSlide = (currentSlide - 1 + totalSlides) % totalSlides; updateCarousel(); }
 
         function updateCarousel() {
             const slides = document.getElementById('hero-slides');
-
             if (slides) {
-                // เลื่อนกล่องหุ้ม
                 slides.style.transform = `translateX(-${currentSlide * 100}%)`;
-
-                // อัพเดทคลาส Active เพื่อเล่น Animation ภายในสไลด์
-                document.querySelectorAll('.hero-slide').forEach((slide, idx) => {
-                    slide.classList.toggle('active', idx === currentSlide);
-                });
-
-                // รีเซ็ตหลอด Progress ทุกอัน
+                document.querySelectorAll('.hero-slide').forEach((slide, idx) => slide.classList.toggle('active', idx === currentSlide));
                 document.querySelectorAll('.hero-dot-progress').forEach((dot, idx) => {
-                    dot.style.transition = 'none'; // ปิด transition เพื่อเซ็ตค่าเป็น 0 ทันที
-                    if (idx < currentSlide) dot.style.width = '100%';
-                    else if (idx > currentSlide) dot.style.width = '0%';
-                    else dot.style.width = '0%';
+                    dot.style.transition = 'none';
+                    dot.style.width = idx < currentSlide ? '100%' : '0%';
                 });
-
-                // เริ่มรันหลอดปัจจุบันใหม่
-                setTimeout(() => {
-                    startSlideProgress();
-                }, 50);
+                setTimeout(() => startSlideProgress(), 50);
             }
         }
 
-        let startTime;
-        let isPaused = false;
-        let remainingTime = slideDuration;
-
+        let startTime, isPaused = false, remainingTime = slideDuration;
         function startSlideProgress() {
             cancelAnimationFrame(progressAnimation);
-            isPaused = false;
-            startTime = null;
-
+            isPaused = false; startTime = null; remainingTime = slideDuration;
             const activeDot = document.getElementById(`dot-progress-${currentSlide}`);
             if (!activeDot) return;
-            activeDot.style.transition = 'none'; // ควบคุมความกว้างด้วย JS ล้วนๆ
+            activeDot.style.transition = 'none';
 
             const animateProgress = (timestamp) => {
                 if (isPaused) return;
                 if (!startTime) startTime = timestamp;
-
-                const elapsedTime = timestamp - startTime;
-                const progress = Math.min((elapsedTime / remainingTime) * 100, 100);
-
+                const progress = Math.min(((timestamp - startTime) / remainingTime) * 100, 100);
                 activeDot.style.width = `${progress}%`;
-
-                if (progress < 100) {
-                    progressAnimation = requestAnimationFrame(animateProgress);
-                } else {
-                    remainingTime = slideDuration; // รีเซ็ตเวลาสำหรับสไลด์ถัดไป
-                    nextSlide();
-                }
+                if (progress < 100) progressAnimation = requestAnimationFrame(animateProgress);
+                else { remainingTime = slideDuration; nextSlide(); }
             };
             progressAnimation = requestAnimationFrame(animateProgress);
         }
 
-        function pauseSlideShow() {
-            isPaused = true;
-            cancelAnimationFrame(progressAnimation);
-        }
-
+        function pauseSlideShow() { isPaused = true; cancelAnimationFrame(progressAnimation); }
         function resumeSlideShow() {
             if (!isPaused) return;
-            // คำนวณเวลาที่เหลืออยู่ (คำนวณแบบคร่าวๆ จาก width ล่าสุด)
             const activeDot = document.getElementById(`dot-progress-${currentSlide}`);
             const currentWidth = parseFloat(activeDot.style.width) || 0;
             remainingTime = slideDuration * (1 - (currentWidth / 100));
-
-            isPaused = false;
-            startTime = null; // รีเซ็ตให้ requestAnimationFrame นับใหม่จาก % ปัจจุบัน
+            isPaused = false; startTime = null;
             progressAnimation = requestAnimationFrame((timestamp) => {
                 startTime = timestamp;
                 const animateProgress = (ts) => {
                     if (isPaused) return;
-                    const elapsedTime = ts - startTime;
-                    const progress = currentWidth + ((elapsedTime / remainingTime) * (100 - currentWidth));
+                    const progress = currentWidth + (((ts - startTime) / remainingTime) * (100 - currentWidth));
                     activeDot.style.width = `${Math.min(progress, 100)}%`;
-
-                    if (progress < 100) {
-                        progressAnimation = requestAnimationFrame(animateProgress);
-                    } else {
-                        remainingTime = slideDuration;
-                        nextSlide();
-                    }
+                    if (progress < 100) progressAnimation = requestAnimationFrame(animateProgress);
+                    else { remainingTime = slideDuration; nextSlide(); }
                 }
                 requestAnimationFrame(animateProgress);
             });
         }
 
+        // ================= MENU & CATEGORIES =================
         function renderCategories() {
             const container = document.getElementById('category-container');
-
-            // เพิ่ม Icon ให้หมวดหมู่
-            const getIcon = (cat) => {
-                if (cat === 'ทั้งหมด') return 'layout-dashboard';
-                if (cat === 'เนื้อสัตว์') return 'beef';
-                if (cat === 'ลูกชิ้น') return 'circle-dot';
-                if (cat === 'ผัก') return 'leaf';
-                if (cat === 'เส้น') return 'git-commit';
-                return 'utensils';
-            };
+            const getIcon = (cat) => ({ 'ทั้งหมด': 'layout-dashboard', 'เนื้อสัตว์': 'beef', 'ลูกชิ้น': 'circle-dot', 'ผัก': 'leaf', 'เส้น': 'git-commit' })[cat] || 'utensils';
 
             container.innerHTML = AppState.categories.map(cat => `
-            <div class="category-pill ${cat === AppState.activeCategory ? 'active' : 'glass'}" 
-                 onclick="filterCategory('${cat}')" style="display: flex; align-items: center; gap: 6px;">
-                <i data-lucide="${getIcon(cat)}" style="width: 14px; height: 14px;"></i>
-                ${cat}
-            </div>
-        `).join('');
+                <div class="category-pill ${cat === AppState.activeCategory ? 'active' : 'glass'}" 
+                     onclick="filterCategory('${cat}')" style="display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="${getIcon(cat)}" style="width: 16px; height: 16px;"></i> ${cat}
+                </div>
+            `).join('');
             lucide.createIcons();
         }
 
-        function filterCategory(cat) {
-            AppState.activeCategory = cat;
-            renderCategories();
-            renderMenu();
-        }
+        function filterCategory(cat) { AppState.activeCategory = cat; renderCategories(); renderMenu(); }
 
         function renderMenu(searchTerm = '') {
             const container = document.getElementById('menu-container');
+            if (!Array.isArray(AppState.menu)) AppState.menu = MockDatabase;
 
-            // ป้องกัน Error หาก AppState.menu ไม่ใช่ Array
-            if (!Array.isArray(AppState.menu)) {
-                console.warn("AppState.menu is not an array, using mock data.");
-                AppState.menu = MockDatabase;
-            }
-
-            let filtered = AppState.activeCategory === 'ทั้งหมด'
-                ? AppState.menu
-                : AppState.menu.filter(item => item.category === AppState.activeCategory);
-
-            if (searchTerm) {
-                filtered = filtered.filter(item => item.name.toLowerCase().includes(searchTerm));
-            }
+            let filtered = AppState.activeCategory === 'ทั้งหมด' ? AppState.menu : AppState.menu.filter(item => item.category === AppState.activeCategory);
+            if (searchTerm) filtered = filtered.filter(item => item.name.toLowerCase().includes(searchTerm));
 
             if (filtered.length === 0) {
-                container.innerHTML = `<div style="grid-column: span 2; text-align: center; padding: 40px 0; color: var(--text-muted);"><i data-lucide="search-x" style="width: 48px; height: 48px; opacity: 0.5; margin-bottom: 10px;"></i><p>ไม่พบเมนูที่ค้นหา</p></div>`;
+                container.innerHTML = `<div style="grid-column: span 2; text-align: center; padding: 50px 0; color: var(--text-muted);"><i data-lucide="search-x" style="width: 48px; height: 48px; opacity: 0.5; margin-bottom: 15px;"></i><p>ไม่พบเมนูที่ค้นหา</p></div>`;
                 lucide.createIcons();
                 return;
             }
 
             container.innerHTML = filtered.map((item, index) => {
-                // จำลองการติดป้ายขายดี (ถ้าเป็นเมนูเนื้อสัตว์หรือราคาตั้งแต่ 15 บาทขึ้นไป)
                 const isPopular = item.category === 'เนื้อสัตว์' || item.price >= 15;
-                const badgeHtml = isPopular ? `<div class="menu-badge"><i data-lucide="star" style="width: 10px; fill: var(--gold);"></i> ขายดี</div>` : '';
-
+                const badgeHtml = isPopular ? `<div class="menu-badge"><i data-lucide="star" style="width: 12px; fill: var(--gold);"></i> ขายดี</div>` : '';
                 return `
-            <div class="menu-card" style="animation: fadeIn 0.4s ease-out forwards; animation-delay: ${index * 0.05}s; opacity: 0;">
-                ${badgeHtml}
-                <div class="menu-img-wrap">
-                    <img src="${item.img}" class="menu-img" alt="${item.name}">
-                    <div class="menu-img-overlay"></div>
-                </div>
-                <div class="menu-info">
-                    <div style="font-size: 0.95rem; font-weight: 500;">${item.name}</div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
-                        <span class="menu-price">฿${item.price}</span>
-                        <button class="add-btn" onclick="addToCart('${item.id}')">
-                            <i data-lucide="plus" style="width: 20px; height: 20px;"></i>
-                        </button>
+                <div class="menu-card" style="animation-delay: ${index * 0.05}s;">
+                    ${badgeHtml}
+                    <div class="menu-img-wrap">
+                        <img src="${item.img}" class="menu-img" alt="${item.name}" loading="lazy">
+                        <div class="menu-img-overlay"></div>
                     </div>
-                </div>
-            </div>
-            `;
+                    <div class="menu-info">
+                        <div style="font-size: 0.95rem; font-weight: 500; line-height: 1.3;">${item.name}</div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+                            <span class="menu-price">฿${item.price}</span>
+                            <button class="add-btn" onclick="addToCart('${item.id}', event)">
+                                <i data-lucide="plus" style="width: 18px; height: 18px;"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>`;
             }).join('');
             lucide.createIcons();
         }
 
-        function addToCart(id) {
+        // ================= CART LOGIC =================
+        function addToCart(id, event) {
             const item = AppState.menu.find(i => i.id === id);
             const existing = AppState.cart.find(i => i.id === id);
+            if (existing) existing.qty += 1;
+            else AppState.cart.push({ ...item, qty: 1 });
 
-            if (existing) {
-                existing.qty += 1;
-            } else {
-                AppState.cart.push({ ...item, qty: 1 });
+            // Button micro-interaction
+            if (event) {
+                const btn = event.currentTarget;
+                btn.style.transform = "scale(0.8)";
+                setTimeout(() => btn.style.transform = "scale(1)", 150);
             }
 
             updateCartBadge();
             showToast(`เพิ่ม ${item.name} ลงตะกร้าแล้ว`);
-            // สร้าง Effect สั่นเบาๆ ให้มือถือ (ถ้าเบราว์เซอร์รองรับ)
             if (navigator.vibrate) navigator.vibrate(50);
         }
 
         function updateCartBadge() {
             const totalItems = AppState.cart.reduce((sum, item) => sum + item.qty, 0);
             const badge = document.getElementById('nav-cart-badge');
+
             if (totalItems > 0) {
                 badge.innerText = totalItems;
-                badge.classList.add('show');
+                if (!badge.classList.contains('show')) {
+                    badge.classList.add('show');
+                } else {
+                    // Trigger pop animation
+                    badge.classList.remove('pop-anim');
+                    void badge.offsetWidth; // trigger reflow
+                    badge.classList.add('pop-anim');
+                }
             } else {
                 badge.classList.remove('show');
             }
-            renderCartPage(); // อัพเดทหน้าตะกร้าหากเปิดอยู่
+            if (document.getElementById('page-cart').classList.contains('active')) renderCartPage();
         }
 
         function renderCartPage() {
@@ -1468,22 +1429,21 @@
             checkoutBar.style.display = 'flex';
 
             let total = 0;
-            container.innerHTML = AppState.cart.map(item => {
+            container.innerHTML = AppState.cart.map((item, index) => {
                 total += item.price * item.qty;
                 return `
-                <div class="glass cart-item">
+                <div class="glass cart-item" style="animation-delay: ${index * 0.05}s;">
                     <img src="${item.img}" class="cart-item-img">
                     <div class="cart-item-info">
-                        <div style="font-size: 0.95rem;">${item.name}</div>
-                        <div class="text-primary" style="font-weight: 600; font-size: 0.9rem;">฿${item.price * item.qty}</div>
+                        <div style="font-size: 0.95rem; font-weight: 500; margin-bottom: 4px;">${item.name}</div>
+                        <div class="text-primary" style="font-weight: 600; font-size: 1rem;">฿${item.price * item.qty}</div>
                     </div>
                     <div class="qty-controls">
                         <button class="qty-btn" onclick="updateQty('${item.id}', -1)"><i data-lucide="minus" style="width: 14px;"></i></button>
-                        <span style="font-size: 0.9rem; width: 16px; text-align: center;">${item.qty}</span>
+                        <span style="font-size: 0.95rem; width: 20px; text-align: center; font-weight: 500;">${item.qty}</span>
                         <button class="qty-btn" onclick="updateQty('${item.id}', 1)"><i data-lucide="plus" style="width: 14px;"></i></button>
                     </div>
-                </div>
-            `;
+                </div>`;
             }).join('');
 
             document.getElementById('cart-total').innerText = total;
@@ -1494,9 +1454,7 @@
             const index = AppState.cart.findIndex(i => i.id === id);
             if (index > -1) {
                 AppState.cart[index].qty += change;
-                if (AppState.cart[index].qty <= 0) {
-                    AppState.cart.splice(index, 1);
-                }
+                if (AppState.cart[index].qty <= 0) AppState.cart.splice(index, 1);
                 updateCartBadge();
             }
         }
@@ -1506,11 +1464,10 @@
 
             switchPage('tracking');
             document.getElementById('main-status-title').innerText = "กำลังบันทึกออเดอร์...";
-            document.getElementById('main-status-desc').innerText = "กรุณารอสักครู่ ระบบกำลังส่งข้อมูล";
-            document.getElementById('main-status-icon').innerHTML = `<i data-lucide="loader" class="spin" style="width: 40px; height: 40px;"></i>`;
+            document.getElementById('main-status-desc').innerText = "กรุณารอสักครู่ ระบบกำลังส่งข้อมูลไปยังร้าน";
+            document.getElementById('main-status-icon').innerHTML = `<i data-lucide="loader-2" class="spin" style="width: 44px; height: 44px;"></i>`;
             lucide.createIcons();
 
-            // ข้อมูลส่งไป Google Sheets
             const orderData = {
                 userId: AppState.user.userId,
                 customerName: AppState.user.name,
@@ -1519,68 +1476,79 @@
                 timestamp: new Date().toISOString()
             };
 
-            const res = await submitOrderToBackend(orderData);
-
-            if (res.success) {
-                AppState.cart = []; // เคลียร์ตะกร้า
-                updateCartBadge();
-                document.getElementById('queue-number').innerText = res.queue;
+            try {
+                const res = await submitOrderToBackend(orderData);
+                if (res.success) {
+                    AppState.cart = [];
+                    updateCartBadge();
+                    document.getElementById('queue-number').innerText = res.queue;
+                    updateOrderStatus('pending');
+                }
+            } catch (err) {
+                showToast("จำลองออเดอร์สำเร็จ (Local Mode)");
+                AppState.cart = []; updateCartBadge();
+                document.getElementById('queue-number').innerText = "Q" + Math.floor(Math.random() * 99);
                 updateOrderStatus('pending');
             }
         }
 
-        // ================= REAL-TIME TRACKING (MOCK POLLING) =================
-
+        // ================= TRACKING =================
         function updateOrderStatus(status) {
-            // อัพเดทสถานะของ UI ในหน้า Tracking
             AppState.currentOrder = status;
-
-            const steps = ['step-1', 'step-2', 'step-3'];
-            steps.forEach(s => {
+            ['step-1', 'step-2', 'step-3'].forEach(s => {
                 document.getElementById(s).classList.remove('active', 'completed');
                 document.getElementById(s).querySelector('.step-dot').innerHTML = '';
             });
 
-            const iconContainer = document.getElementById('main-status-icon');
-            const titleContainer = document.getElementById('main-status-title');
-            const descContainer = document.getElementById('main-status-desc');
+            const iconC = document.getElementById('main-status-icon');
+            const titleC = document.getElementById('main-status-title');
+            const descC = document.getElementById('main-status-desc');
+
+            const makeCheck = () => `<i data-lucide="check" style="width: 14px; color: white;"></i>`;
 
             if (status === 'pending') {
                 document.getElementById('step-1').classList.add('active');
-                iconContainer.innerHTML = `<i data-lucide="clock" style="width: 40px; height: 40px;"></i>`;
-                titleContainer.innerText = "รอร้านรับออเดอร์";
-                descContainer.innerText = "ส่งเข้า Google Sheets ของร้านแล้ว";
+                iconC.innerHTML = `<i data-lucide="clock" style="width: 44px; height: 44px;"></i>`;
+                iconC.style.background = 'rgba(255, 107, 0, 0.1)';
+                iconC.style.color = 'var(--primary)';
+                titleC.innerText = "รอร้านรับออเดอร์";
+                titleC.style.color = "var(--text-main)";
+                descC.innerText = "ส่งเข้าคิวของร้านเรียบร้อยแล้ว";
             }
             else if (status === 'cooking') {
                 document.getElementById('step-1').classList.add('completed');
-                document.getElementById('step-1').querySelector('.step-dot').innerHTML = `<i data-lucide="check" style="width: 14px; color: white;"></i>`;
+                document.getElementById('step-1').querySelector('.step-dot').innerHTML = makeCheck();
                 document.getElementById('step-2').classList.add('active');
 
-                iconContainer.innerHTML = `<i data-lucide="flame" style="width: 40px; height: 40px; color: var(--primary);"></i>`;
-                iconContainer.style.background = 'rgba(229, 57, 53, 0.2)';
-                titleContainer.innerText = "กำลังย่างหอมๆ 🔥";
-                descContainer.innerText = "เชฟกำลังปรุงอาหารให้คุณ";
+                iconC.innerHTML = `<i data-lucide="flame" style="width: 44px; height: 44px;"></i>`;
+                iconC.style.background = 'rgba(255, 107, 0, 0.2)';
+                iconC.style.color = 'var(--primary)';
+                iconC.style.boxShadow = '0 0 30px var(--primary-glow)';
+                titleC.innerText = "กำลังย่างหอมๆ 🔥";
+                titleC.style.color = "var(--text-main)";
+                descC.innerText = "เชฟกำลังปรุงอาหารให้คุณอย่างสุดฝีมือ";
             }
             else if (status === 'ready') {
                 document.getElementById('step-1').classList.add('completed');
                 document.getElementById('step-2').classList.add('completed');
-                document.getElementById('step-1').querySelector('.step-dot').innerHTML = `<i data-lucide="check" style="width: 14px; color: white;"></i>`;
-                document.getElementById('step-2').querySelector('.step-dot').innerHTML = `<i data-lucide="check" style="width: 14px; color: white;"></i>`;
+                document.getElementById('step-1').querySelector('.step-dot').innerHTML = makeCheck();
+                document.getElementById('step-2').querySelector('.step-dot').innerHTML = makeCheck();
                 document.getElementById('step-3').classList.add('active');
 
-                iconContainer.innerHTML = `<i data-lucide="party-popper" style="width: 40px; height: 40px; color: #4CAF50;"></i>`;
-                iconContainer.style.background = 'rgba(76, 175, 80, 0.1)';
-                titleContainer.innerText = "อาหารพร้อมเสิร์ฟ!";
-                titleContainer.style.color = "#4CAF50";
-                descContainer.innerText = "มารับอาหารที่หน้าร้านได้เลยครับ";
+                iconC.innerHTML = `<i data-lucide="party-popper" style="width: 44px; height: 44px;"></i>`;
+                iconC.style.background = 'rgba(76, 175, 80, 0.15)';
+                iconC.style.color = '#4CAF50';
+                iconC.style.boxShadow = '0 0 30px rgba(76, 175, 80, 0.3)';
+                titleC.innerText = "อาหารพร้อมเสิร์ฟ!";
+                titleC.style.color = "#4CAF50";
+                descC.innerText = "อาหารเสร็จแล้ว มารับที่หน้าร้านได้เลยครับ";
             }
 
             lucide.createIcons();
-            showToast("สถานะออเดอร์อัพเดทแล้ว");
+            showToast("สถานะออเดอร์อัปเดตแล้ว");
         }
 
         // ================= UTILITIES =================
-
         function switchPage(pageId) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -1588,7 +1556,8 @@
             document.getElementById(`page-${pageId}`).classList.add('active');
             document.getElementById(`nav-${pageId}`).classList.add('active');
 
-            window.scrollTo(0, 0);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (pageId === 'cart') renderCartPage();
         }
 
         let toastTimeout;
@@ -1596,28 +1565,15 @@
             const toast = document.getElementById('toast');
             document.getElementById('toast-msg').innerText = msg;
             toast.classList.add('show');
-
             clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
+            toastTimeout = setTimeout(() => toast.classList.remove('show'), 3500);
         }
 
-        // Admin Demo Toggle function
         function toggleAdmin() {
             const panel = document.getElementById('admin-panel');
             panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
         }
 
-        // Add spin animation to CSS dynamically for loading icon
-        const style = document.createElement('style');
-        style.innerHTML = `
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        .spin { animation: spin 2s linear infinite; }
-    `;
-        document.head.appendChild(style);
-
-        // Boot the app
         window.onload = initApp;
 
     </script>
