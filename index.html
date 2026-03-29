@@ -1094,7 +1094,11 @@
                     method: 'POST',
                     body: JSON.stringify(orderData)
                 });
-                return await response.json();
+                const res = await response.json();
+                if (!res.success) {
+                    throw new Error(res.message || "Submit failed");
+                }
+                return res;
             } catch (error) {
                 console.error("Submit Order Error:", error);
                 throw error;
@@ -1104,11 +1108,16 @@
         // 4. Save User Profile to Apps Script (Real)
         async function saveUserProfile(userData) {
             try {
-                await fetch(`${API_URL}?action=saveUser`, {
+                const response = await fetch(`${API_URL}?action=saveUser`, {
                     method: 'POST',
                     body: JSON.stringify(userData)
                 });
-                console.log("User Profile saved to Sheets");
+                const res = await response.json();
+                if (res.success) {
+                    console.log("User Profile saved to Sheets");
+                } else {
+                    console.error("Save User Failed:", res.message);
+                }
             } catch (error) {
                 console.error("Save User Error:", error);
             }
