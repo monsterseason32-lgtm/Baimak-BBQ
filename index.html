@@ -1011,6 +1011,12 @@
                 const profile = await liff.getProfile();
                 console.log("LIFF Profile loaded:", profile);
 
+                // ล้าง URL ให้สะอาด (ลบ ?code=...&state=...) เพื่อความสวยงามและความปลอดภัย
+                if (window.history.replaceState) {
+                    const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+                    window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
+                }
+
                 // บันทึกข้อมูลจริงจาก LINE Profile
                 AppState.user = {
                     name: profile.displayName || "คุณลูกค้า",
