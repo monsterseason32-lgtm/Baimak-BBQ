@@ -746,28 +746,29 @@
             transition: all 0.4s ease;
         }
 
-        /* Timeline */
+        /* Modern Timeline */
         .timeline {
             position: relative;
-            padding-left: 30px;
-            margin-top: 24px;
+            padding-left: 45px;
+            margin-top: 32px;
         }
 
         .timeline::before {
             content: '';
             position: absolute;
-            left: 11px;
+            left: 17px;
             top: 10px;
-            bottom: 10px;
+            bottom: 40px;
             width: 2px;
-            background: var(--surface-border);
+            background: linear-gradient(180deg, var(--primary) 0%, var(--surface-border) 100%);
+            opacity: 0.3;
         }
 
         .timeline-step {
             position: relative;
-            margin-bottom: 32px;
-            opacity: 0.5;
-            transition: all 0.4s ease;
+            margin-bottom: 40px;
+            opacity: 0.4;
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
             transform: translateX(-10px);
         }
 
@@ -779,42 +780,68 @@
 
         .step-dot {
             position: absolute;
-            left: -30px;
-            top: 0;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: var(--bg-dark);
-            border: 2px solid var(--surface-border);
+            left: -45px;
+            top: 2px;
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--surface-border);
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 2;
             transition: all 0.4s ease;
+            color: var(--text-muted);
         }
 
         .timeline-step.active .step-dot {
             border-color: var(--primary);
-            box-shadow: 0 0 15px var(--primary-glow);
+            background: rgba(255, 107, 0, 0.1);
+            color: var(--primary);
+            box-shadow: 0 0 20px var(--primary-glow);
+            animation: pulse-glow 2s infinite;
         }
 
-        .timeline-step.active .step-dot::after {
-            content: '';
-            width: 10px;
-            height: 10px;
-            background: var(--primary);
-            border-radius: 50%;
+        @keyframes pulse-glow {
+            0% {
+                box-shadow: 0 0 5px var(--primary-glow);
+            }
+
+            50% {
+                box-shadow: 0 0 25px var(--primary-glow);
+            }
+
+            100% {
+                box-shadow: 0 0 5px var(--primary-glow);
+            }
         }
 
         .timeline-step.completed .step-dot {
             background: var(--primary);
             border-color: var(--primary);
-            box-shadow: 0 0 10px var(--primary-glow);
+            color: white;
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        .step-content {
+            background: rgba(255, 255, 255, 0.02);
+            padding: 16px 20px;
+            border-radius: var(--radius-md);
+            border: 1px solid transparent;
+            transition: all 0.4s ease;
+        }
+
+        .timeline-step.active .step-content {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 107, 0, 0.2);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
         }
 
         .step-content h4 {
-            margin-bottom: 6px;
-            font-size: 1.05rem;
+            margin-bottom: 4px;
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
         }
 
         /* Custom Toast (Floating top) */
@@ -989,7 +1016,7 @@
                 <p style="font-size: 0.85rem;">ลองดูเมนูแนะนำของเราสิครับ</p>
             </div>
 
-            <div id="cart-items-container" style="margin-bottom: 120px;">
+            <div id="cart-items-container" style="padding-bottom: 180px;">
                 <!-- Render via JS -->
             </div>
 
@@ -1025,24 +1052,27 @@
                     style="font-weight: normal; font-size: 0.8rem;">(Real-time)</span></h3>
             <div class="timeline" id="tracking-timeline">
                 <div class="timeline-step active" id="step-1">
-                    <div class="step-dot"><i data-lucide="check" style="width: 12px; display:none;"></i></div>
+                    <div class="step-dot"><i data-lucide="clipboard-list" style="width: 18px;"></i></div>
                     <div class="step-content">
                         <h4>รอร้านรับออเดอร์</h4>
-                        <p class="text-muted" style="font-size: 0.85rem;">ข้อมูลส่งถึงร้านเรียบร้อย</p>
+                        <p class="text-muted" style="font-size: 0.85rem;">ข้อมูลส่งถึงร้านเรียบร้อย
+                            ระบบกำลังแจ้งเตือนเชฟ</p>
                     </div>
                 </div>
                 <div class="timeline-step" id="step-2">
-                    <div class="step-dot"><i data-lucide="check" style="width: 12px; display:none;"></i></div>
+                    <div class="step-dot"><i data-lucide="flame" style="width: 18px;"></i></div>
                     <div class="step-content">
-                        <h4>กำลังย่าง 🔥</h4>
-                        <p class="text-muted" style="font-size: 0.85rem;">เชฟกำลังทาซอสหม่าล่าสูตรเด็ด</p>
+                        <h4>กำลังย่างอย่างพิถีพิถัน</h4>
+                        <p class="text-muted" style="font-size: 0.85rem;">
+                            เชฟกำลังทาซอสหม่าล่าสูตรเด็ดและย่างให้เกรียมสวย</p>
                     </div>
                 </div>
                 <div class="timeline-step" id="step-3">
-                    <div class="step-dot"><i data-lucide="check" style="width: 12px; display:none;"></i></div>
+                    <div class="step-dot"><i data-lucide="package-check" style="width: 18px;"></i></div>
                     <div class="step-content">
-                        <h4>พร้อมเสิร์ฟ / รับอาหาร</h4>
-                        <p class="text-muted" style="font-size: 0.85rem;">อาหารร้อนๆ พร้อมทานแล้ว!</p>
+                        <h4>พร้อมเสิร์ฟความอร่อย</h4>
+                        <p class="text-muted" style="font-size: 0.85rem;">อาหารร้อนๆ พร้อมทานแล้ว!
+                            เชิญรับประทานได้เลยครับ</p>
                     </div>
                 </div>
             </div>
@@ -1062,6 +1092,50 @@
             <div class="nav-item" onclick="switchPage('tracking')" id="nav-tracking">
                 <i data-lucide="map-pin"></i>
                 <span>สถานะ</span>
+            </div>
+        </div>
+
+        <!-- ================= MODAL: SPICINESS SELECTION ================= -->
+        <div class="modal-overlay" id="spice-modal"
+            style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px;">
+            <div class="glass"
+                style="width: 100%; max-width: 360px; border-radius: var(--radius-lg); padding: 24px; animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1);">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <div
+                        style="width: 60px; height: 60px; background: rgba(255,107,0,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; color: var(--primary);">
+                        <i data-lucide="flame" style="width: 32px; height: 32px;"></i>
+                    </div>
+                    <h3 id="spice-item-name" style="font-size: 1.25rem; margin-bottom: 4px;">เลือกระดับความเผ็ด</h3>
+                    <p class="text-muted" style="font-size: 0.85rem;">กรุณาเลือกรสชาติที่ต้องการ</p>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px;" id="spice-options">
+                    <button class="spice-btn" onclick="selectSpice('เผ็ดมาก')"
+                        style="background: rgba(255,255,255,0.05); border: 1px solid var(--surface-border); padding: 14px; border-radius: var(--radius-md); color: white; text-align: left; display: flex; justify-content: space-between; align-items: center; font-family: inherit;">
+                        <span>🌶️🌶️🌶️ เผ็ดมาก</span>
+                        <i data-lucide="chevron-right" style="width: 16px; opacity: 0.5;"></i>
+                    </button>
+                    <button class="spice-btn" onclick="selectSpice('เผ็ดกลาง')"
+                        style="background: rgba(255,255,255,0.05); border: 1px solid var(--surface-border); padding: 14px; border-radius: var(--radius-md); color: white; text-align: left; display: flex; justify-content: space-between; align-items: center; font-family: inherit;">
+                        <span>🌶️🌶️ เผ็ดกลาง (ปกติ)</span>
+                        <i data-lucide="chevron-right" style="width: 16px; opacity: 0.5;"></i>
+                    </button>
+                    <button class="spice-btn" onclick="selectSpice('เผ็ดน้อย')"
+                        style="background: rgba(255,255,255,0.05); border: 1px solid var(--surface-border); padding: 14px; border-radius: var(--radius-md); color: white; text-align: left; display: flex; justify-content: space-between; align-items: center; font-family: inherit;">
+                        <span>🌶️ เผ็ดน้อย</span>
+                        <i data-lucide="chevron-right" style="width: 16px; opacity: 0.5;"></i>
+                    </button>
+                    <button class="spice-btn" onclick="selectSpice('ไม่พริก')"
+                        style="background: rgba(255,255,255,0.05); border: 1px solid var(--surface-border); padding: 14px; border-radius: var(--radius-md); color: white; text-align: left; display: flex; justify-content: space-between; align-items: center; font-family: inherit;">
+                        <span>🚫 ไม่พริก</span>
+                        <i data-lucide="chevron-right" style="width: 16px; opacity: 0.5;"></i>
+                    </button>
+                </div>
+
+                <button class="btn-primary" onclick="closeSpiceModal()"
+                    style="width: 100%; justify-content: center; background: rgba(255,255,255,0.05); color: var(--text-muted); box-shadow: none;">
+                    ยกเลิก
+                </button>
             </div>
         </div>
     </div>
@@ -1089,14 +1163,14 @@
         ];
 
         const MockDatabase = [
-            { id: 'm1', name: 'หมูสามชั้นสไลด์', price: 15, category: 'เนื้อสัตว์', img: 'https://images.unsplash.com/photo-1628268909376-e8c44bb3153f?auto=format&fit=crop&w=300&q=80' },
-            { id: 'm2', name: 'เนื้อโคขุน', price: 20, category: 'เนื้อสัตว์', img: 'https://images.unsplash.com/photo-1603360946369-dc9bb6258143?auto=format&fit=crop&w=300&q=80' },
-            { id: 'm3', name: 'เบคอนพันเห็ดเข็มทอง', price: 15, category: 'เนื้อสัตว์', img: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=300&q=80' },
-            { id: 'b1', name: 'ไส้กรอกหนังกรอบ', price: 10, category: 'ลูกชิ้น', img: 'https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?auto=format&fit=crop&w=300&q=80' },
-            { id: 'b2', name: 'เต้าหู้ชีส', price: 15, category: 'ลูกชิ้น', img: 'https://images.unsplash.com/photo-1582878826629-29b7ad1cb431?auto=format&fit=crop&w=300&q=80' },
-            { id: 'v1', name: 'เห็ดออรินจิ', price: 10, category: 'ผัก', img: 'https://images.unsplash.com/photo-1509358271058-acd22cc93898?auto=format&fit=crop&w=300&q=80' },
-            { id: 'v2', name: 'บล็อคโคลี่', price: 10, category: 'ผัก', img: 'https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?auto=format&fit=crop&w=300&q=80' },
-            { id: 'n1', name: 'เส้นมันหนึบ', price: 15, category: 'เส้น', img: 'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=300&q=80' }
+            { id: 'm1', name: 'หมูสามชั้นสไลด์', price: 15, category: 'เนื้อสัตว์', img: 'https://images.unsplash.com/photo-1628268909376-e8c44bb3153f?auto=format&fit=crop&w=300&q=80', hasSpiciness: true },
+            { id: 'm2', name: 'เนื้อโคขุน', price: 20, category: 'เนื้อสัตว์', img: 'https://images.unsplash.com/photo-1603360946369-dc9bb6258143?auto=format&fit=crop&w=300&q=80', hasSpiciness: true },
+            { id: 'm3', name: 'เบคอนพันเห็ดเข็มทอง', price: 15, category: 'เนื้อสัตว์', img: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=300&q=80', hasSpiciness: true },
+            { id: 'b1', name: 'ไส้กรอกหนังกรอบ', price: 10, category: 'ลูกชิ้น', img: 'https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?auto=format&fit=crop&w=300&q=80', hasSpiciness: true },
+            { id: 'b2', name: 'เต้าหู้ชีส', price: 15, category: 'ลูกชิ้น', img: 'https://images.unsplash.com/photo-1582878826629-29b7ad1cb431?auto=format&fit=crop&w=300&q=80', hasSpiciness: true },
+            { id: 'v1', name: 'เห็ดออรินจิ', price: 10, category: 'ผัก', img: 'https://images.unsplash.com/photo-1509358271058-acd22cc93898?auto=format&fit=crop&w=300&q=80', hasSpiciness: true },
+            { id: 'v2', name: 'บล็อคโคลี่', price: 10, category: 'ผัก', img: 'https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?auto=format&fit=crop&w=300&q=80', hasSpiciness: true },
+            { id: 'n1', name: 'เส้นมันหนึบ', price: 15, category: 'เส้น', img: 'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=300&q=80', hasSpiciness: true }
         ];
 
         // Add loading spin CSS animation dynamically
@@ -1157,7 +1231,13 @@
                 const response = await fetch(`${API_URL}?action=getMenu`, { method: 'POST', body: JSON.stringify({}) });
                 const res = await response.json();
                 const data = Array.isArray(res) ? res : (res && res.data ? res.data : null);
-                return Array.isArray(data) ? data : MockDatabase;
+                if (Array.isArray(data)) {
+                    return data.map(m => ({
+                        ...m,
+                        hasSpiciness: m.hasSpiciness !== false // Default to true
+                    }));
+                }
+                return MockDatabase;
             } catch (error) { return MockDatabase; }
         }
 
@@ -1375,11 +1455,18 @@
         }
 
         // ================= CART LOGIC =================
+        let pendingItem = null;
+        let pendingEditIndex = null;
+
         function addToCart(id, event) {
             const item = AppState.menu.find(i => i.id === id);
-            const existing = AppState.cart.find(i => i.id === id);
-            if (existing) existing.qty += 1;
-            else AppState.cart.push({ ...item, qty: 1 });
+
+            if (item.hasSpiciness) {
+                openSpiceModal(item);
+                return;
+            }
+
+            performAddToCart(item);
 
             // Button micro-interaction
             if (event) {
@@ -1387,9 +1474,70 @@
                 btn.style.transform = "scale(0.8)";
                 setTimeout(() => btn.style.transform = "scale(1)", 150);
             }
+        }
+
+        function openSpiceModal(item, index = null) {
+            pendingItem = item;
+            pendingEditIndex = index;
+            document.getElementById('spice-item-name').innerText = index !== null ? `เปลี่ยนรสชาติ: ${item.name}` : item.name;
+            document.getElementById('spice-modal').style.display = 'flex';
+            lucide.createIcons();
+        }
+
+        function editSpice(index) {
+            const item = AppState.cart[index];
+            openSpiceModal(item, index);
+        }
+
+        function closeSpiceModal() {
+            document.getElementById('spice-modal').style.display = 'none';
+            pendingItem = null;
+            pendingEditIndex = null;
+        }
+
+        function selectSpice(spiceLevel) {
+            if (pendingEditIndex !== null) {
+                // Editing existing cart item
+                const editingItem = AppState.cart[pendingEditIndex];
+
+                // Check if another item with the same spiciness already exists
+                const existingIndex = AppState.cart.findIndex((i, idx) =>
+                    idx !== pendingEditIndex && i.id === editingItem.id && i.spiciness === spiceLevel
+                );
+
+                if (existingIndex > -1) {
+                    // Merge quantities
+                    AppState.cart[existingIndex].qty += editingItem.qty;
+                    AppState.cart.splice(pendingEditIndex, 1);
+                } else {
+                    // Just update spiciness
+                    editingItem.spiciness = spiceLevel;
+                }
+
+                closeSpiceModal();
+                updateCartBadge();
+                showToast(`เปลี่ยนเป็น ${spiceLevel} เรียบร้อย`);
+                return;
+            }
+
+            if (pendingItem) {
+                performAddToCart(pendingItem, spiceLevel);
+                closeSpiceModal();
+            }
+        }
+
+        function performAddToCart(item, spiciness = null) {
+            // Find if item with SAME spiciness already in cart
+            const existing = AppState.cart.find(i => i.id === item.id && i.spiciness === spiciness);
+
+            if (existing) {
+                existing.qty += 1;
+            } else {
+                AppState.cart.push({ ...item, qty: 1, spiciness: spiciness });
+            }
 
             updateCartBadge();
-            showToast(`เพิ่ม ${item.name} ลงตะกร้าแล้ว`);
+            showToast(`เพิ่ม ${item.name}${spiciness ? ' (' + spiciness + ')' : ''} ลงตะกร้าแล้ว`);
             if (navigator.vibrate) navigator.vibrate(50);
         }
 
@@ -1435,13 +1583,17 @@
                 <div class="glass cart-item" style="animation-delay: ${index * 0.05}s;">
                     <img src="${item.img}" class="cart-item-img">
                     <div class="cart-item-info">
-                        <div style="font-size: 0.95rem; font-weight: 500; margin-bottom: 4px;">${item.name}</div>
+                        <div style="font-size: 0.95rem; font-weight: 500; margin-bottom: 2px;">${item.name}</div>
+                        ${item.spiciness ? `
+                            <div onclick="editSpice(${index})" style="font-size: 0.75rem; color: var(--primary); margin-bottom: 4px; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                                (${item.spiciness}) <i data-lucide="edit-3" style="width: 10px; opacity:0.7;"></i>
+                            </div>` : ''}
                         <div class="text-primary" style="font-weight: 600; font-size: 1rem;">฿${item.price * item.qty}</div>
                     </div>
                     <div class="qty-controls">
-                        <button class="qty-btn" onclick="updateQty('${item.id}', -1)"><i data-lucide="minus" style="width: 14px;"></i></button>
+                        <button class="qty-btn" onclick="updateQty('${item.id}', ${item.spiciness ? `'${item.spiciness}'` : 'null'}, -1)"><i data-lucide="minus" style="width: 14px;"></i></button>
                         <span style="font-size: 0.95rem; width: 20px; text-align: center; font-weight: 500;">${item.qty}</span>
-                        <button class="qty-btn" onclick="updateQty('${item.id}', 1)"><i data-lucide="plus" style="width: 14px;"></i></button>
+                        <button class="qty-btn" onclick="updateQty('${item.id}', ${item.spiciness ? `'${item.spiciness}'` : 'null'}, 1)"><i data-lucide="plus" style="width: 14px;"></i></button>
                     </div>
                 </div>`;
             }).join('');
@@ -1450,8 +1602,8 @@
             lucide.createIcons();
         }
 
-        function updateQty(id, change) {
-            const index = AppState.cart.findIndex(i => i.id === id);
+        function updateQty(id, spiciness, change) {
+            const index = AppState.cart.findIndex(i => i.id === id && i.spiciness === spiciness);
             if (index > -1) {
                 AppState.cart[index].qty += change;
                 if (AppState.cart[index].qty <= 0) AppState.cart.splice(index, 1);
