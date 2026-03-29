@@ -124,6 +124,7 @@ function doPost(e) {
       case 'saveBanner': responseData = saveBanner(payload); break;
       case 'deleteBanner': responseData = deleteBanner(payload.id); break;
       case 'toggleBanner': responseData = toggleBanner(payload.id, payload.active); break;
+      case 'reorderBanners': responseData = reorderBanners(payload); break;
 
       default:
         responseData = { success: false, message: 'Invalid Action: ' + action };
@@ -266,6 +267,30 @@ function toggleBanner(id, active) {
     }
   }
   return { success: false };
+}
+
+function reorderBanners(payload) {
+  const sheet = getSheet('Promotions');
+  const data = sheet.getDataRange().getValues();
+  if (data.length <= 1) return { success: true }; // ข้ามหากมีแค่หัวตาราง
+
+  const headers = data.shift(); // ดึง Header ออกมาเก็บไว้ชั่วคราว
+  const newOrderIds = payload.bannerIds || [];
+  
+  // จัดเรียงข้อมูลตามลำดับ ID ที่ส่งมาจาก Frontend
+  data.sort((a, b) => {
+    let indexA = newOrderIds.indexOf(a[0]);
+    let indexB = newOrderIds.indexOf(b[0]);
+    if (indexA === -1) indexA = 999;
+    if (indexB === -1) indexB = 999;
+    return indexA - indexB;
+  });
+  
+  // ลบข้อมูลเดิมแล้วเขียนข้อมูลชุดใหม่ทับลงไป
+  sheet.getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn()).clearContent();
+  sheet.getRange(2, 1, data.length, data[0].length).setValues(data);
+  
+  return { success: true };
 }
 
 // ==========================================
