@@ -1055,23 +1055,32 @@
             }
         }
 
-        // 2. Fetch Data from Apps Script -> Google Sheets (Real)
+        // 2. Fetch Data from Apps Script -> Google Sheets (Real - Using POST for CORS Stability)
         async function fetchMenuData() {
             try {
-                const response = await fetch(`${API_URL}?action=getMenu`);
-                const data = await response.json();
-                return data;
+                const response = await fetch(`${API_URL}?action=getMenu`, {
+                    method: 'POST',
+                    body: JSON.stringify({})
+                });
+                const res = await response.json();
+                // รองรับทั้งแบบคืนค่าเป็น Array โดยตรง หรือคืนค่าเป็น Object {success, data}
+                const data = Array.isArray(res) ? res : (res && res.data ? res.data : null);
+                return Array.isArray(data) ? data : MockDatabase;
             } catch (error) {
                 console.error("Fetch Menu Error:", error);
-                return MockDatabase; // Fallback to mock if API fails
+                return MockDatabase;
             }
         }
 
         async function fetchPromotionsData() {
             try {
-                const response = await fetch(`${API_URL}?action=getPromotions`);
-                const data = await response.json();
-                return data;
+                const response = await fetch(`${API_URL}?action=getPromotions`, {
+                    method: 'POST',
+                    body: JSON.stringify({})
+                });
+                const res = await response.json();
+                const data = Array.isArray(res) ? res : (res && res.data ? res.data : null);
+                return Array.isArray(data) ? data : MockPromotions;
             } catch (error) {
                 console.error("Fetch Promos Error:", error);
                 return MockPromotions;
@@ -1358,6 +1367,13 @@
 
         function renderMenu(searchTerm = '') {
             const container = document.getElementById('menu-container');
+
+            // ป้องกัน Error หาก AppState.menu ไม่ใช่ Array
+            if (!Array.isArray(AppState.menu)) {
+                console.warn("AppState.menu is not an array, using mock data.");
+                AppState.menu = MockDatabase;
+            }
+
             let filtered = AppState.activeCategory === 'ทั้งหมด'
                 ? AppState.menu
                 : AppState.menu.filter(item => item.category === AppState.activeCategory);
