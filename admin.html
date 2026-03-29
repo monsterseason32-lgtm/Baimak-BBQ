@@ -8,16 +8,24 @@
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- ใช้ Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- เพิ่ม SortableJS สำหรับฟีเจอร์ลากวางเปลี่ยนลำดับ -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <style>
         :root {
-            --primary: #E53935;
-            --primary-hover: #D32F2F;
-            --bg-dark: #0A0A0C;
-            --bg-panel: #141417;
-            --surface: rgba(255, 255, 255, 0.05);
-            --surface-border: rgba(255, 255, 255, 0.1);
+            /* โทนสีส้มใหม่ให้เข้ากับแอปพลิเคชันลูกค้า */
+            --primary: #FF6B00;
+            --primary-light: #FF8C33;
+            --primary-dark: #E65100;
+            --primary-glow: rgba(255, 107, 0, 0.35);
+
+            --bg-dark: #0f0f12;
+            /* ดำอมเทานิดๆ */
+            --bg-panel: #16161a;
+            /* พื้นหลังแผงควบคุมที่สว่างกว่านิดหน่อย */
+            --surface: rgba(255, 255, 255, 0.04);
+            --surface-border: rgba(255, 255, 255, 0.08);
             --text-main: #FFFFFF;
-            --text-muted: #8E8E93;
+            --text-muted: #9E9E9E;
             --success: #4CAF50;
             --warning: #FFC107;
             --info: #2196F3;
@@ -39,6 +47,7 @@
             display: flex;
             height: 100vh;
             overflow: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
         /* Glassmorphism Utilities */
@@ -63,28 +72,30 @@
         .brand {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
             margin-bottom: 40px;
         }
 
         .brand-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--primary), #8E0000);
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
+            box-shadow: 0 0 15px var(--primary-glow);
         }
 
         .brand-text h2 {
-            font-size: 1.2rem;
+            font-size: 1.25rem;
             font-weight: 600;
+            letter-spacing: 0.5px;
         }
 
         .brand-text span {
             font-size: 0.8rem;
-            color: var(--primary);
+            color: var(--primary-light);
         }
 
         .nav-menu {
@@ -102,8 +113,9 @@
             border-radius: var(--radius-sm);
             color: var(--text-muted);
             text-decoration: none;
-            transition: all 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
+            font-weight: 500;
         }
 
         .nav-link:hover {
@@ -114,7 +126,7 @@
         .nav-link.active {
             background: var(--primary);
             color: white;
-            box-shadow: 0 4px 15px rgba(229, 57, 53, 0.3);
+            box-shadow: 0 4px 15px var(--primary-glow);
         }
 
         /* Main Content */
@@ -126,7 +138,7 @@
         }
 
         .topbar {
-            height: 80px;
+            height: 85px;
             border-bottom: 1px solid var(--surface-border);
             display: flex;
             align-items: center;
@@ -144,14 +156,15 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 8px 16px;
+            padding: 8px 18px;
             border-radius: 30px;
             background: var(--surface);
             border: 1px solid var(--surface-border);
+            font-size: 0.95rem;
         }
 
         .stat-badge strong {
-            color: var(--gold, #FFC107);
+            color: var(--gold);
         }
 
         /* Board Area */
@@ -181,6 +194,8 @@
             justify-content: space-between;
             align-items: center;
             font-weight: 600;
+            background: rgba(255, 255, 255, 0.01);
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
         }
 
         .col-count {
@@ -205,8 +220,25 @@
         }
 
         .column-body::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.15);
             border-radius: 10px;
+        }
+
+        .column-body::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        /* Animations */
+        @keyframes cardEntrance {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* Order Card */
@@ -217,12 +249,13 @@
             border: 1px solid var(--surface-border);
             transition: transform 0.2s, box-shadow 0.2s;
             position: relative;
+            animation: cardEntrance 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
         .order-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
+            border-color: rgba(255, 255, 255, 0.15);
         }
 
         .order-header {
@@ -235,7 +268,7 @@
         }
 
         .queue-no {
-            font-size: 1.2rem;
+            font-size: 1.25rem;
             font-weight: 700;
             color: var(--warning);
         }
@@ -249,24 +282,31 @@
         }
 
         .customer-info {
-            margin-bottom: 12px;
+            margin-bottom: 14px;
         }
 
         .customer-name {
             font-weight: 500;
-            font-size: 0.95rem;
+            font-size: 1rem;
         }
 
         .order-items {
-            font-size: 0.85rem;
-            color: #CCC;
-            margin-bottom: 16px;
+            font-size: 0.9rem;
+            color: #DDD;
+            margin-bottom: 18px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: var(--radius-sm);
         }
 
         .item-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
+        }
+
+        .item-row:last-child {
+            margin-bottom: 0;
         }
 
         .order-footer {
@@ -277,7 +317,8 @@
 
         .total-price {
             font-weight: 600;
-            color: var(--primary);
+            color: var(--primary-light);
+            font-size: 1.1rem;
         }
 
         .action-btn {
@@ -291,21 +332,27 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            transition: background 0.2s;
+            transition: all 0.2s;
+        }
+
+        .action-btn:active {
+            transform: scale(0.95);
         }
 
         .btn-accept {
-            background: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
+            box-shadow: 0 4px 15px var(--primary-glow);
         }
 
         .btn-accept:hover {
-            background: var(--primary-hover);
+            filter: brightness(1.1);
         }
 
         .btn-ready {
             background: var(--info);
             color: white;
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
         }
 
         .btn-ready:hover {
@@ -315,6 +362,7 @@
         .btn-complete {
             background: var(--success);
             color: white;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
         }
 
         .btn-complete:hover {
@@ -328,7 +376,7 @@
         }
 
         .btn-cancel:hover {
-            background: rgba(255, 0, 0, 0.1);
+            background: rgba(244, 67, 54, 0.1);
             color: #F44336;
             border-color: #F44336;
         }
@@ -362,6 +410,19 @@
             flex: 1;
             height: 100%;
             overflow: hidden;
+            animation: slideUpFade 0.4s ease forwards;
+        }
+
+        @keyframes slideUpFade {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .view-section.active {
@@ -375,7 +436,7 @@
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 24px;
         }
 
         .banner-header-actions {
@@ -386,7 +447,7 @@
         }
 
         .btn-add {
-            background: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
             border: none;
             padding: 10px 20px;
@@ -397,7 +458,7 @@
             align-items: center;
             gap: 8px;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(229, 57, 53, 0.3);
+            box-shadow: 0 4px 15px var(--primary-glow);
             transition: all 0.2s;
         }
 
@@ -406,60 +467,119 @@
         }
 
         .banner-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
         }
 
         .banner-card {
             background: var(--bg-panel);
-            border-radius: var(--radius-lg);
+            border-radius: var(--radius-md);
             border: 1px solid var(--surface-border);
             overflow: hidden;
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
+            align-items: stretch;
+            transition: transform 0.2s, box-shadow 0.2s;
+            background-color: var(--bg-panel);
+        }
+
+        .banner-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        /* สไตล์สำหรับตอนกำลังลาก (Drag) */
+        .banner-card.sortable-ghost {
+            opacity: 0.4;
+            background-color: var(--surface);
+            border: 2px dashed var(--primary);
+        }
+
+        .drag-handle {
+            width: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+            color: var(--text-muted);
+            border-right: 1px solid var(--surface-border);
+            background: rgba(255, 255, 255, 0.02);
+            flex-shrink: 0;
+            transition: color 0.2s, background 0.2s;
+        }
+
+        .drag-handle:hover {
+            color: var(--primary);
+            background: rgba(255, 107, 0, 0.1);
+        }
+
+        .drag-handle:active {
+            cursor: grabbing;
         }
 
         .banner-card-img {
-            width: 100%;
-            height: 160px;
+            width: 100px;
             object-fit: cover;
-            border-bottom: 1px solid var(--surface-border);
+            border-bottom: none;
+            border-right: 1px solid var(--surface-border);
+            flex-shrink: 0;
         }
 
         .banner-card-body {
-            padding: 16px;
+            padding: 14px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
+            flex: 1;
+            min-width: 0;
         }
 
         .banner-card-title {
             font-weight: 600;
-            font-size: 1.1rem;
+            font-size: 1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .banner-card-desc {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--text-muted);
-            line-height: 1.4;
-            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .banner-card-footer {
-            margin-top: 12px;
+            margin-top: auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-top: 12px;
+            padding-top: 10px;
             border-top: 1px dashed var(--surface-border);
+        }
+
+        @media (max-width: 480px) {
+            .btn-text-hide {
+                display: none;
+            }
+
+            .banner-card-img {
+                width: 80px;
+            }
+
+            .drag-handle {
+                width: 36px;
+            }
         }
 
         /* Toggle Switch */
         .switch {
             position: relative;
             display: inline-block;
-            width: 44px;
+            width: 46px;
             height: 24px;
         }
 
@@ -498,39 +618,40 @@
         }
 
         input:checked+.slider:before {
-            transform: translateX(20px);
+            transform: translateX(22px);
         }
 
         .btn-edit-banner {
             background: transparent;
             border: 1px solid var(--surface-border);
             color: var(--text-main);
-            padding: 6px 12px;
+            padding: 6px 14px;
             border-radius: 16px;
             font-family: inherit;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 4px;
+            transition: all 0.2s;
         }
 
         .btn-edit-banner:hover {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.08);
         }
 
         /* Auto Refresh Indicator */
         .refresh-indicator {
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 0.8rem;
+            gap: 10px;
+            font-size: 0.85rem;
             color: var(--text-muted);
         }
 
         .pulse-dot {
-            width: 8px;
-            height: 8px;
+            width: 10px;
+            height: 10px;
             background-color: var(--success);
             border-radius: 50%;
             box-shadow: 0 0 10px var(--success);
@@ -539,7 +660,7 @@
 
         @keyframes pulse-green {
             0% {
-                box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4);
+                box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.6);
             }
 
             70% {
@@ -585,7 +706,7 @@
             right: 0;
             bottom: 0;
             background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(8px);
             z-index: 2000;
             display: none;
             align-items: center;
@@ -603,13 +724,14 @@
             background: var(--bg-panel);
             border: 1px solid var(--surface-border);
             border-radius: var(--radius-lg);
-            padding: 24px;
+            padding: 28px;
             width: 90%;
             max-width: 500px;
             transform: translateY(20px);
-            transition: transform 0.3s;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             max-height: 90vh;
             overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
         }
 
         .modal-overlay.show .modal-content {
@@ -620,35 +742,37 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
 
         .form-group {
-            margin-bottom: 16px;
+            margin-bottom: 20px;
         }
 
         .form-group label {
             display: block;
             margin-bottom: 8px;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             color: var(--text-muted);
         }
 
         .form-control {
             width: 100%;
-            padding: 12px;
+            padding: 14px;
             border-radius: var(--radius-sm);
             border: 1px solid var(--surface-border);
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.03);
             color: white;
             font-family: inherit;
             font-size: 0.95rem;
+            transition: all 0.3s;
         }
 
         .form-control:focus {
             border-color: var(--primary);
             outline: none;
-            box-shadow: 0 0 10px rgba(229, 57, 53, 0.2);
+            box-shadow: 0 0 10px var(--primary-glow);
+            background: rgba(255, 255, 255, 0.06);
         }
 
         textarea.form-control {
@@ -660,7 +784,7 @@
             display: flex;
             justify-content: flex-end;
             gap: 12px;
-            margin-top: 24px;
+            margin-top: 28px;
         }
 
         .btn-outline {
@@ -671,6 +795,11 @@
             border-radius: var(--radius-sm);
             cursor: pointer;
             font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.05);
         }
 
         /* Responsive Design for Mobile */
@@ -706,7 +835,6 @@
             .sidebar {
                 position: fixed;
                 left: -260px;
-                /* ซ่อนไปด้านซ้าย */
                 top: 0;
                 bottom: 0;
                 transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -723,7 +851,7 @@
 
             .topbar {
                 height: auto;
-                padding: 16px;
+                padding: 16px 20px;
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 16px;
@@ -737,7 +865,7 @@
             }
 
             .topbar-header h1 {
-                font-size: 1.2rem !important;
+                font-size: 1.25rem !important;
             }
 
             .stats-container {
@@ -745,26 +873,21 @@
                 overflow-x: auto;
                 padding-bottom: 8px;
                 scrollbar-width: none;
-                /* Firefox */
             }
 
             .stats-container::-webkit-scrollbar {
                 display: none;
-                /* Safari/Chrome */
             }
 
             .board-container {
                 padding: 16px;
                 padding-bottom: 90px;
-                /* เพิ่มพื้นที่ด้านล่างไม่ให้การ์ดโดน Quick Nav บัง */
                 scroll-snap-type: x mandatory;
-                /* ล็อคตำแหน่งเวลาปัด */
                 gap: 16px;
             }
 
             .column {
                 flex: 0 0 85vw;
-                /* ความกว้าง 85% ของจอ เพื่อให้เห็นคอลัมน์ถัดไปนิดนึง */
                 scroll-snap-align: center;
             }
         }
@@ -781,7 +904,7 @@
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid var(--surface-border);
             border-radius: 30px;
-            padding: 6px;
+            padding: 8px;
             z-index: 90;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
         }
@@ -790,7 +913,7 @@
             background: transparent;
             border: none;
             color: var(--text-muted);
-            padding: 8px 16px;
+            padding: 10px 18px;
             border-radius: 20px;
             font-family: inherit;
             font-size: 0.85rem;
@@ -804,8 +927,8 @@
         }
 
         .quick-nav-btn i {
-            width: 16px;
-            height: 16px;
+            width: 18px;
+            height: 18px;
         }
 
         .quick-nav-btn.active {
@@ -880,8 +1003,8 @@
             <header class="topbar">
                 <div class="topbar-header">
                     <div>
-                        <h1 style="font-size: 1.4rem;">หน้าครัว (Kitchen Display)</h1>
-                        <p class="text-muted" style="font-size: 0.85rem;">ออเดอร์จะอัพเดทอัตโนมัติจาก Google Sheets</p>
+                        <h1 style="font-size: 1.45rem;">หน้าครัว (Kitchen Display)</h1>
+                        <p class="text-muted" style="font-size: 0.85rem;">ออเดอร์จะอัปเดตอัตโนมัติจาก Google Sheets</p>
                     </div>
                     <button class="menu-toggle" onclick="toggleSidebar()">
                         <i data-lucide="menu" style="width: 28px; height: 28px;"></i>
@@ -892,11 +1015,11 @@
                         <div class="pulse-dot"></div> เชื่อมต่อแบบ Real-time
                     </div>
                     <div class="stat-badge">
-                        <i data-lucide="bell" style="width: 16px; color: var(--warning);"></i>
+                        <i data-lucide="bell" style="width: 18px; color: var(--warning);"></i>
                         <span>รอรับ: <strong id="stat-pending">0</strong></span>
                     </div>
                     <div class="stat-badge">
-                        <i data-lucide="flame" style="width: 16px; color: var(--primary);"></i>
+                        <i data-lucide="flame" style="width: 18px; color: var(--primary);"></i>
                         <span>กำลังย่าง: <strong id="stat-cooking">0</strong></span>
                     </div>
                 </div>
@@ -908,7 +1031,7 @@
                 <div class="column col-pending">
                     <div class="column-header">
                         <span style="display: flex; align-items: center; gap: 8px;">
-                            <i data-lucide="clock" style="width: 18px; color: var(--warning);"></i> ใหม่
+                            <i data-lucide="clock" style="width: 20px; color: var(--warning);"></i> ใหม่
                         </span>
                         <span class="col-count" id="count-pending">0</span>
                     </div>
@@ -921,7 +1044,7 @@
                 <div class="column col-cooking">
                     <div class="column-header">
                         <span style="display: flex; align-items: center; gap: 8px;">
-                            <i data-lucide="flame" style="width: 18px; color: var(--primary);"></i> กำลังย่าง
+                            <i data-lucide="flame" style="width: 20px; color: var(--primary);"></i> กำลังย่าง
                         </span>
                         <span class="col-count" id="count-cooking">0</span>
                     </div>
@@ -934,7 +1057,7 @@
                 <div class="column col-ready">
                     <div class="column-header">
                         <span style="display: flex; align-items: center; gap: 8px;">
-                            <i data-lucide="bell-ring" style="width: 18px; color: var(--info);"></i> พร้อมเสิร์ฟ
+                            <i data-lucide="bell-ring" style="width: 20px; color: var(--info);"></i> พร้อมเสิร์ฟ
                         </span>
                         <span class="col-count" id="count-ready">0</span>
                     </div>
@@ -947,7 +1070,7 @@
                 <div class="column col-completed">
                     <div class="column-header">
                         <span style="display: flex; align-items: center; gap: 8px;">
-                            <i data-lucide="check-circle-2" style="width: 18px; color: var(--success);"></i>
+                            <i data-lucide="check-circle-2" style="width: 20px; color: var(--success);"></i>
                             เสร็จสิ้นแล้ว
                         </span>
                         <span class="col-count" id="count-completed">0</span>
@@ -980,7 +1103,7 @@
             <header class="topbar">
                 <div class="topbar-header">
                     <div>
-                        <h1 style="font-size: 1.4rem;">จัดการแบนเนอร์ / โปรโมชั่น</h1>
+                        <h1 style="font-size: 1.45rem;">จัดการแบนเนอร์ / โปรโมชั่น</h1>
                         <p class="text-muted" style="font-size: 0.85rem;">
                             ภาพปกและโปรโมชั่นที่จะแสดงผลบนหน้าแอปพลิเคชันลูกค้า</p>
                     </div>
@@ -1016,10 +1139,10 @@
             </div>
             <input type="hidden" id="banner-id">
 
-            <div id="banner-preview-container" style="margin-bottom: 15px; text-align: center; display: none;">
-                <p style="font-size: 0.7rem; color: var(--text-muted); margin-bottom: 5px;">ตัวอย่างภาพ:</p>
+            <div id="banner-preview-container" style="margin-bottom: 20px; text-align: center; display: none;">
+                <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px;">ตัวอย่างภาพ:</p>
                 <img id="banner-preview-img" src=""
-                    style="width: 100%; max-height: 150px; object-fit: cover; border-radius: 8px; border: 1px solid var(--surface-border);">
+                    style="width: 100%; max-height: 160px; object-fit: cover; border-radius: 12px; border: 1px solid var(--surface-border); box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
             </div>
 
             <div class="form-group">
@@ -1035,15 +1158,15 @@
                 <div style="display: flex; gap: 8px;">
                     <input type="url" id="banner-img" class="form-control" placeholder="https://..." style="flex: 1;">
                     <button class="btn-outline" onclick="document.getElementById('file-input').click()"
-                        style="padding: 0 12px; height: 42px; display: flex; align-items: center; gap: 4px;">
-                        <i data-lucide="image" style="width: 16px;"></i> เลือกรูป
+                        style="padding: 0 14px; height: 46px; display: flex; align-items: center; gap: 6px;">
+                        <i data-lucide="image" style="width: 18px;"></i> เลือกรูป
                     </button>
                     <input type="file" id="file-input" style="display: none;" accept="image/*"
                         onchange="handleFileUpload(this)">
                 </div>
-                <div id="upload-status" style="font-size: 0.75rem; margin-top: 4px; display: none;"></div>
+                <div id="upload-status" style="font-size: 0.8rem; margin-top: 6px; display: none;"></div>
             </div>
-            <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                 <div>
                     <label>ข้อความปุ่มกด</label>
                     <input type="text" id="banner-btn" class="form-control" placeholder="เช่น สั่งเลย">
@@ -1071,7 +1194,7 @@
     <!-- Toast Notification -->
     <div id="toast" class="toast">
         <i data-lucide="info" style="color: var(--info); width: 24px;"></i>
-        <div id="toast-msg">อัพเดทสถานะสำเร็จ</div>
+        <div id="toast-msg">อัปเดตสถานะสำเร็จ</div>
     </div>
 
     <script>
@@ -1097,7 +1220,10 @@
 
         async function fetchBanners() {
             try {
-                const response = await fetch(API_URL + "?action=getPromotions");
+                const response = await fetch(API_URL + "?action=getPromotions", {
+                    method: 'POST',
+                    body: JSON.stringify({})
+                });
                 const data = await response.json();
                 banners = data;
                 renderBanners();
@@ -1153,9 +1279,7 @@
             const container = document.getElementById('col-pending');
             if (!container) return;
 
-            // ตรวจสอบว่า orders เป็น Array หรือไม่
             if (!Array.isArray(orders)) {
-                console.warn("Orders is not an array, resetting to empty.");
                 orders = [];
             }
 
@@ -1168,14 +1292,16 @@
 
             // Clear existing
             Object.values(cols).forEach(col => {
-                if (col) col.innerHTML = ''; // Added check to prevent null errors
+                if (col) col.innerHTML = '';
             });
 
             const counts = { pending: 0, cooking: 0, ready: 0, completed: 0 };
 
-            orders.forEach(order => {
+            orders.forEach((order, index) => {
                 counts[order.status]++;
-                const cardHtml = createOrderCard(order);
+                // Add staggered animation delay
+                const delay = (index % 5) * 0.05;
+                const cardHtml = createOrderCard(order, delay);
                 if (cols[order.status]) {
                     cols[order.status].insertAdjacentHTML('beforeend', cardHtml);
                 }
@@ -1191,30 +1317,40 @@
             document.getElementById('stat-pending').innerText = counts.pending;
             document.getElementById('stat-cooking').innerText = counts.cooking;
 
-            // Re-init icons for newly added HTML
             lucide.createIcons();
         }
 
         function renderBanners() {
             const container = document.getElementById('banner-list-container');
             container.innerHTML = banners.map(b => `
-            <div class="banner-card">
+            <div class="banner-card" data-id="${b.id}">
+                <div class="drag-handle" title="ลากเพื่อเปลี่ยนลำดับ">
+                    <i data-lucide="grip-vertical" style="width: 20px;"></i>
+                </div>
                 <img src="${b.img}" alt="Banner Image" class="banner-card-img" style="filter: ${b.active ? 'none' : 'grayscale(100%)'}; opacity: ${b.active ? '1' : '0.5'};">
                 <div class="banner-card-body">
-                    <div class="banner-card-title">${b.title}</div>
-                    <div class="banner-card-desc">${b.desc}</div>
-                    <div style="font-size: 0.8rem; color: var(--primary); margin-top: 8px;">ปุ่ม: [${b.btnText}] -> ${b.action}</div>
-                    <div class="banner-card-footer">
-                        <label class="switch" title="เปิด/ปิดการแสดงผล">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+                        <div style="min-width: 0; flex: 1;">
+                            <div class="banner-card-title">${b.title}</div>
+                            <div class="banner-card-desc">${b.desc}</div>
+                        </div>
+                        <label class="switch" title="เปิด/ปิดการแสดงผล" style="flex-shrink: 0; transform: scale(0.85); transform-origin: top right;">
                             <input type="checkbox" ${b.active ? 'checked' : ''} onchange="toggleBannerStatus('${b.id}', this.checked)">
                             <span class="slider"></span>
                         </label>
-                        <div style="display: flex; gap: 8px;">
-                            <button class="btn-edit-banner" style="color: #F44336; border-color: transparent;" onclick="deleteBanner('${b.id}')">
-                                <i data-lucide="trash-2" style="width: 14px;"></i> ลบ
-                            </button>
+                    </div>
+                    <div style="font-size: 0.75rem; color: var(--primary); margin-top: 2px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        <i data-lucide="mouse-pointer-click" style="width: 12px; height: 12px; display:inline-block; vertical-align:middle;"></i> 
+                        [${b.btnText}] ➔ ${b.action}
+                    </div>
+                    <div class="banner-card-footer">
+                        <span style="font-size: 0.7rem; color: var(--surface-border); font-family: monospace;">ID: ${b.id}</span>
+                        <div style="display: flex; gap: 6px;">
                             <button class="btn-edit-banner" onclick="openBannerModal('${b.id}')">
-                                <i data-lucide="edit-2" style="width: 14px;"></i> แก้ไข
+                                <i data-lucide="edit-2" style="width: 14px; height: 14px;"></i><span class="btn-text-hide" style="margin-left: 4px;">แก้ไข</span>
+                            </button>
+                            <button class="btn-edit-banner" style="color: #F44336; border-color: transparent;" onclick="deleteBanner('${b.id}')">
+                                <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i><span class="btn-text-hide" style="margin-left: 4px;">ลบ</span>
                             </button>
                         </div>
                     </div>
@@ -1222,12 +1358,46 @@
             </div>
         `).join('');
             lucide.createIcons();
+            initSortable(); // เรียกระบบ Drag & Drop หลังจากเรนเดอร์ UI
         }
 
-        function createOrderCard(order) {
+        let sortableInstance;
+        function initSortable() {
+            const el = document.getElementById('banner-list-container');
+            if (sortableInstance) sortableInstance.destroy();
+
+            sortableInstance = new Sortable(el, {
+                handle: '.drag-handle', // ลากผ่านไอคอน Grip เท่านั้น (กันปัญหาปัดเลื่อนจอบนมือถือ)
+                animation: 250,
+                ghostClass: 'sortable-ghost',
+                onEnd: async function (evt) {
+                    const newOrderIds = Array.from(el.children).map(child => child.dataset.id);
+                    // เรียง Local Array ตามลำดับใหม่
+                    banners.sort((a, b) => newOrderIds.indexOf(a.id) - newOrderIds.indexOf(b.id));
+
+                    try {
+                        showToast("กำลังบันทึกลำดับใหม่...");
+                        const response = await fetch(API_URL + "?action=reorderBanners", {
+                            method: 'POST',
+                            body: JSON.stringify({ bannerIds: newOrderIds })
+                        });
+                        const res = await response.json();
+                        if (res.success) {
+                            showToast("บันทึกลำดับแบนเนอร์เรียบร้อยแล้ว ✅");
+                        } else {
+                            throw new Error(res.message);
+                        }
+                    } catch (err) {
+                        console.error("Reorder Error:", err);
+                        showToast("เปลี่ยนลำดับสำเร็จ (จำลองเฉพาะบนหน้าจอ)");
+                    }
+                }
+            });
+        }
+
+        function createOrderCard(order, delay) {
             let actionButtons = '';
 
-            // กำหนดปุ่มตามสถานะปัจจุบัน (Business Logic)
             if (order.status === 'pending') {
                 actionButtons = `
                 <button class="action-btn btn-cancel" onclick="updateStatus('${order.id}', 'cancelled')" title="ยกเลิกออเดอร์"><i data-lucide="x"></i></button>
@@ -1242,25 +1412,25 @@
                 <button class="action-btn btn-complete" onclick="updateStatus('${order.id}', 'completed')" style="width: 100%; justify-content: center;"><i data-lucide="check"></i> ลูกค้ารับอาหารแล้ว</button>
             `;
             } else if (order.status === 'completed') {
-                actionButtons = `<span style="color: var(--success); font-size: 0.8rem; display: flex; align-items: center; gap: 4px;"><i data-lucide="check-circle-2" style="width: 14px;"></i> ปิดจ๊อบ</span>`;
+                actionButtons = `<span style="color: var(--success); font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 6px;"><i data-lucide="check-circle-2" style="width: 16px;"></i> ปิดจ๊อบ</span>`;
             }
 
             const itemsHtml = order.items.map(item => `
             <div class="item-row">
                 <span>${item.name}</span>
-                <span>x${item.qty}</span>
+                <span style="font-weight: 500;">x${item.qty}</span>
             </div>
         `).join('');
 
             return `
-            <div class="order-card" id="card-${order.id}">
+            <div class="order-card" id="card-${order.id}" style="animation-delay: ${delay}s">
                 <div class="order-header">
                     <div class="queue-no">${order.queue}</div>
-                    <div class="order-time"><i data-lucide="clock" style="width: 12px;"></i> ${order.time}</div>
+                    <div class="order-time"><i data-lucide="clock" style="width: 14px;"></i> ${order.time}</div>
                 </div>
                 <div class="customer-info">
                     <div class="customer-name">${order.customerName}</div>
-                    <div style="font-size: 0.75rem; color: var(--text-muted);">รหัส: ${order.id}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">รหัส: ${order.id}</div>
                 </div>
                 <div class="order-items">
                     ${itemsHtml}
@@ -1279,7 +1449,7 @@
 
         async function updateStatus(orderId, newStatus) {
             try {
-                // อัพเดท UI ทันทีแบบ Optimistic
+                // อัปเดต UI ทันทีแบบ Optimistic
                 const orderIndex = orders.findIndex(o => o.id === orderId);
                 if (orderIndex > -1) {
                     orders[orderIndex].status = newStatus;
@@ -1301,11 +1471,10 @@
                 if (newStatus === 'cancelled') msg = "ยกเลิกออเดอร์แล้ว ❌";
                 showToast(msg);
 
-                // Fetch อีกครั้งเพื่อให้แน่ใจว่าซิงค์กับ Sheets
                 fetchOrders();
             } catch (error) {
                 console.error("Update Status Error:", error);
-                showToast("เกิดข้อผิดพลาดในการอัพเดทสถานะ");
+                showToast("เกิดข้อผิดพลาดในการอัปเดตสถานะ");
             }
         }
 
@@ -1326,7 +1495,7 @@
                 }
             } catch (error) {
                 console.error("Toggle Banner Error:", error);
-                showToast("ไม่สามารถอัพเดทสถานะแบนเนอร์ได้");
+                showToast("ไม่สามารถอัปเดตสถานะแบนเนอร์ได้");
             }
         }
 
@@ -1355,7 +1524,6 @@
                     document.getElementById('banner-btn').value = b.btnText;
                     document.getElementById('banner-action').value = b.action;
 
-                    // Show Preview if exists
                     if (b.img) {
                         document.getElementById('banner-preview-img').src = b.img;
                         document.getElementById('banner-preview-container').style.display = 'block';
@@ -1376,7 +1544,7 @@
         async function saveBanner() {
             const id = document.getElementById('banner-id').value;
             const newBanner = {
-                id: id || 'p' + Date.now(), // Generate ID if new
+                id: id || 'p' + Date.now(),
                 title: document.getElementById('banner-title').value || 'ไม่มีหัวข้อ',
                 desc: document.getElementById('banner-desc').value,
                 img: document.getElementById('banner-img').value || 'https://via.placeholder.com/600x300?text=No+Image',
@@ -1385,7 +1553,6 @@
                 active: true
             };
 
-            // ส่งข้อมูลไปบันทึกใน Google Sheets
             try {
                 const response = await fetch(API_URL + "?action=saveBanner", {
                     method: 'POST',
@@ -1394,13 +1561,10 @@
                 const res = await response.json();
                 if (!res.success) throw new Error(res.message);
 
-                if (id) {
-                    showToast('อัพเดทข้อมูลแบนเนอร์เรียบร้อย');
-                } else {
-                    showToast('เพิ่มแบนเนอร์ใหม่เรียบร้อย');
-                }
+                if (id) showToast('อัปเดตข้อมูลแบนเนอร์เรียบร้อย');
+                else showToast('เพิ่มแบนเนอร์ใหม่เรียบร้อย');
 
-                fetchBanners(); // รีโหลดข้อมูลจริง
+                fetchBanners();
             } catch (error) {
                 console.error("Save Banner Error:", error);
                 showToast("เกิดข้อผิดพลาดในการบันทึกแบนเนอร์");
@@ -1442,7 +1606,7 @@
 
             statusEl.style.display = 'block';
             statusEl.style.color = 'var(--text-muted)';
-            statusEl.innerHTML = '<i data-lucide="loader-2" style="width:12px; display:inline-block; animation:spin 1s linear infinite;"></i> กำลังอัปโหลด...';
+            statusEl.innerHTML = '<i data-lucide="loader-2" style="width:14px; display:inline-block; animation:spin 1s linear infinite; vertical-align:middle;"></i> กำลังอัปโหลด...';
             lucide.createIcons();
 
             try {
@@ -1458,46 +1622,40 @@
 
                 if (data.success) {
                     urlInput.value = data.data.url;
-                    // Update Preview
                     const previewImg = document.getElementById('banner-preview-img');
                     const previewCont = document.getElementById('banner-preview-container');
                     previewImg.src = data.data.url;
                     previewCont.style.display = 'block';
 
                     statusEl.style.color = 'var(--success)';
-                    statusEl.innerText = '✅ อัปโหลดสำเร็จ!';
+                    statusEl.innerHTML = '<i data-lucide="check" style="width:14px; vertical-align:middle;"></i> อัปโหลดสำเร็จ!';
+                    lucide.createIcons();
                     showToast("อัปโหลดรูปภาพสำเร็จ ลิงก์ถูกกรอกให้แล้ว");
                 } else {
                     throw new Error(data.error.message);
                 }
             } catch (error) {
                 console.error("Upload failed:", error);
-                statusEl.style.color = 'var(--primary)';
+                statusEl.style.color = '#F44336';
                 statusEl.innerText = '❌ ผิดพลาด: ' + error.message;
                 showToast("อัปโหลดรูปภาพล้มเหลว");
             }
 
-            // Clear input
             input.value = '';
         }
 
         // ================= UTILITIES =================
 
-        // View Switching Logic
         function switchView(viewName) {
-            // อัพเดทเมนู Sidebar
             document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
             document.getElementById('nav-' + viewName).classList.add('active');
 
-            // ซ่อน/แสดงหน้าจอ
             document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
             document.getElementById('view-' + viewName).classList.add('active');
 
-            // ปิด Sidebar อัตโนมัติ (สำหรับมือถือ)
             const sidebar = document.querySelector('.sidebar');
             if (sidebar.classList.contains('open')) toggleSidebar();
 
-            // Render ข้อมูลตามหน้าที่เปิด
             if (viewName === 'banners') renderBanners();
         }
 
@@ -1513,8 +1671,6 @@
             }, 3000);
         }
 
-        // ================= MOCK REAL-TIME POLLING =================
-        // จำลองการที่ Google Sheets มีออเดอร์ใหม่เข้ามา
         function simulateNewOrder() {
             setTimeout(() => {
                 const newOrder = {
@@ -1529,27 +1685,26 @@
                         { name: 'ไส้กรอก', qty: 2 }
                     ]
                 };
-                orders.unshift(newOrder); // Add to beginning
+                orders.unshift(newOrder);
                 renderBoard();
                 showToast("🔔 มีออเดอร์ใหม่เข้ามารอรับ!");
-
-                // ถ้ามีการต่อลำโพง สามารถใส่เสียงแจ้งเตือน (Audio Play) ตรงนี้ได้
-            }, 15000); // จำลองออเดอร์เข้าในอีก 15 วินาที
+            }, 15000);
         }
 
-        // Initialize
         window.onload = () => {
             lucide.createIcons();
-            fetchOrders();   // ดึงออเดอร์จริงจาก Sheets
-            fetchBanners();  // ดึงแบนเนอร์จริงจาก Sheets
+            fetchOrders();
+            fetchBanners();
 
-            // ตั้งเวลาดึงข้อมูลออเดอร์ใหม่ทุกๆ 30 วินาที (Polling)
             setInterval(fetchOrders, 30000);
-
             setupScrollObserver();
+
+            // CSS Animation for loader spin
+            const style = document.createElement('style');
+            style.innerHTML = `@keyframes spin { 100% { transform: rotate(360deg); } }`;
+            document.head.appendChild(style);
         };
 
-        // Mobile Sidebar Toggle
         function toggleSidebar() {
             document.querySelector('.sidebar').classList.toggle('open');
             document.querySelector('.sidebar-overlay').classList.toggle('show');
@@ -1559,14 +1714,12 @@
         function scrollToCol(className) {
             const col = document.querySelector('.' + className);
             if (col) {
-                // เลื่อนไปตำแหน่งคอลัมน์นั้นๆ อย่างนุ่มนวล
                 col.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
             }
         }
 
         function setupScrollObserver() {
             const columns = document.querySelectorAll('.column');
-            // ตั้งค่าให้ Observer ทำงานเมื่อคอลัมน์แสดงผลเกิน 50% ของหน้าจอ
             const observerOptions = {
                 root: document.querySelector('.board-container'),
                 threshold: 0.6
@@ -1575,7 +1728,6 @@
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
-                        // ดึงชื่อคลาสเพื่อไปเทียบกับปุ่ม (เช่น col-pending)
                         const targetClass = entry.target.classList[1];
                         document.querySelectorAll('.quick-nav-btn').forEach(btn => {
                             btn.classList.remove('active');
