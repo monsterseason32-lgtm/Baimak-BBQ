@@ -1271,10 +1271,12 @@
                     renderBoard();
                 }
 
-                await fetch(API_URL + "?action=updateStatus", {
+                const response = await fetch(API_URL + "?action=updateStatus", {
                     method: 'POST',
                     body: JSON.stringify({ orderId: orderId, status: newStatus })
                 });
+                const res = await response.json();
+                if (!res.success) throw new Error(res.message);
 
                 // แจ้งเตือน
                 let msg = "";
@@ -1363,10 +1365,12 @@
 
             // ส่งข้อมูลไปบันทึกใน Google Sheets
             try {
-                await fetch(API_URL + "?action=saveBanner", {
+                const response = await fetch(API_URL + "?action=saveBanner", {
                     method: 'POST',
                     body: JSON.stringify(newBanner)
                 });
+                const res = await response.json();
+                if (!res.success) throw new Error(res.message);
 
                 if (id) {
                     showToast('อัพเดทข้อมูลแบนเนอร์เรียบร้อย');
@@ -1387,10 +1391,12 @@
         async function deleteBanner(id) {
             if (confirm('คุณแน่ใจหรือไม่ที่จะลบแบนเนอร์นี้? (ไม่สามารถกู้คืนได้)')) {
                 try {
-                    await fetch(API_URL + "?action=deleteBanner", {
+                    const response = await fetch(API_URL + "?action=deleteBanner", {
                         method: 'POST',
                         body: JSON.stringify({ id: id })
                     });
+                    const res = await response.json();
+                    if (!res.success) throw new Error(res.message);
 
                     banners = banners.filter(b => b.id !== id);
                     renderBanners();
