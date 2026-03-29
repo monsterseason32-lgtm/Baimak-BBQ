@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- ใช้ Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
         :root {
             --primary: #E53935;
@@ -833,8 +834,8 @@
         <div id="page-menu" class="page active">
             <div class="header-profile">
                 <div class="user-info">
-                    <img id="user-avatar" src="https://via.placeholder.com/150/111/fff?text=User" alt="User"
-                        class="avatar">
+                    <img id="user-avatar" src="https://ui-avatars.com/api/?name=User&background=111&color=fff"
+                        alt="User" class="avatar">
                     <div>
                         <h3 id="user-name">สวัสดี, ลูกค้า</h3>
                         <p class="text-primary" style="font-size: 0.75rem; font-weight: 500;">พร้อมลุยหม่าล่าหรือยัง? 🔥
@@ -997,24 +998,33 @@
 
         // ================= CORE FUNCTIONS (Architecture Implementation) =================
 
-        // 1. LIFF Initialization (Mock)
+        // 1. LIFF Initialization (Real Authentication)
         async function initializeLiff() {
-            await liff.init({ liffId: "2009635252-NSmFIvAB" });
-            if (liff.isLoggedIn()) {
-                const profile = await liff.getProfile();
+            try {
+                await liff.init({ liffId: "2009635252-NSmFIvAB" });
 
-                console.log("LIFF Init Mock...");
-                return new Promise(resolve => {
-                    setTimeout(() => {
-                        AppState.user = {
-                            name: "คุณลูกค้า สุดหล่อ",
-                            picUrl: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80"
-                        };
-                        document.getElementById('user-name').innerText = AppState.user.name;
-                        document.getElementById('user-avatar').src = AppState.user.picUrl;
-                        resolve();
-                    }, 1000);
-                });
+                if (!liff.isLoggedIn()) {
+                    liff.login();
+                    return;
+                }
+
+                const profile = await liff.getProfile();
+                console.log("LIFF Profile loaded:", profile);
+
+                // บันทึกข้อมูลจริงจาก LINE Profile
+                AppState.user = {
+                    name: profile.displayName || "คุณลูกค้า",
+                    picUrl: profile.pictureUrl || "https://ui-avatars.com/api/?name=" + (profile.displayName || "User") + "&background=111&color=fff",
+                    userId: profile.userId
+                };
+
+                // อัพเดท UI
+                document.getElementById('user-name').innerText = "สวัสดี, " + AppState.user.name;
+                document.getElementById('user-avatar').src = AppState.user.picUrl;
+
+            } catch (error) {
+                console.error("LIFF Initialization failed:", error);
+                showToast("ไม่สามารถเชื่อมต่อ LINE ได้ กรุณาลองใหม่อีกครั้ง");
             }
         }
 
