@@ -964,7 +964,7 @@
     <script>
         // ================= CONFIG & ARCHITECTURE MOCK =================
         // ในโปรดักชั่นจริง URL นี้จะได้จากการ Deploy Google Apps Script
-        const API_URL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbxYnt6AODwWQM2AupdcBiF1_05aZYgibMfRJ7ZvsLeyytN_rrvxbBl0DHKEUo9p7PnAcQ/exec";
 
         // ================= STATE MANAGEMENT =================
         const AppState = {
@@ -999,21 +999,23 @@
 
         // 1. LIFF Initialization (Mock)
         async function initializeLiff() {
-            // ของจริงจะใช้: await liff.init({ liffId: "YOUR_LIFF_ID" });
-            // if(liff.isLoggedIn()){ const profile = await liff.getProfile(); ... }
+            await liff.init({ liffId: "2009635252-NSmFIvAB" });
+            if (liff.isLoggedIn()) {
+                const profile = await liff.getProfile();
 
-            console.log("LIFF Init Mock...");
-            return new Promise(resolve => {
-                setTimeout(() => {
-                    AppState.user = {
-                        name: "คุณลูกค้า สุดหล่อ",
-                        picUrl: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80"
-                    };
-                    document.getElementById('user-name').innerText = AppState.user.name;
-                    document.getElementById('user-avatar').src = AppState.user.picUrl;
-                    resolve();
-                }, 1000);
-            });
+                console.log("LIFF Init Mock...");
+                return new Promise(resolve => {
+                    setTimeout(() => {
+                        AppState.user = {
+                            name: "คุณลูกค้า สุดหล่อ",
+                            picUrl: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80"
+                        };
+                        document.getElementById('user-name').innerText = AppState.user.name;
+                        document.getElementById('user-avatar').src = AppState.user.picUrl;
+                        resolve();
+                    }, 1000);
+                });
+            }
         }
 
         // 2. Fetch Data from Apps Script -> Google Sheets (Mock)
