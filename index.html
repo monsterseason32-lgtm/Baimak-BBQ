@@ -998,8 +998,26 @@
 
         // ================= CORE FUNCTIONS (Architecture Implementation) =================
 
-        // 1. LIFF Initialization (Real Authentication)
+        // 1. LIFF Initialization (Hybrid: Local & Production)
         async function initializeLiff() {
+            // ตรวจสอบว่าเป็นเครื่อง Local หรือการจำลองหรือไม่
+            const isLocal = window.location.hostname === 'localhost' ||
+                window.location.hostname === '127.0.0.1' ||
+                window.location.search.includes('serverWindowId');
+
+            if (isLocal) {
+                console.log("🛠️ Running in Local Simulation Mode...");
+                AppState.user = {
+                    name: "ผู้ทดสอบระบบ (Local)",
+                    picUrl: "https://ui-avatars.com/api/?name=Tester&background=FFC107&color=000",
+                    userId: "U_MOCK_USER_LOCAL"
+                };
+                // อัพเดท UI จำลอง
+                document.getElementById('user-name').innerText = "สวัสดี, " + AppState.user.name;
+                document.getElementById('user-avatar').src = AppState.user.picUrl;
+                return; // ข้ามการเรียกใช้ LIFF SDK บนเครื่อง Local
+            }
+
             try {
                 await liff.init({ liffId: "2009635252-NSmFIvAB" });
 
@@ -1024,7 +1042,10 @@
                     userId: profile.userId
                 };
 
-                // อัพเดท UI
+                // บันทึกข้อมูลผู้ใช้ลง Google Sheets เพื่อสะสมฐานข้อมูล
+                saveUserProfile(AppState.user);
+
+                // อัพเดท UI จริง
                 document.getElementById('user-name').innerText = "สวัสดี, " + AppState.user.name;
                 document.getElementById('user-avatar').src = AppState.user.picUrl;
 
@@ -1034,34 +1055,54 @@
             }
         }
 
-        // 2. Fetch Data from Apps Script -> Google Sheets (Mock)
+        // 2. Fetch Data from Apps Script -> Google Sheets (Real)
         async function fetchMenuData() {
-            /* ของจริงจะเขียนแบบนี้:
-               const response = await fetch(`${API_URL}?action=getMenu`);
-               const data = await response.json();
-               return data;
-            */
-            console.log("Fetching data from Google Sheets Mock...");
-            return new Promise(resolve => {
-                setTimeout(() => resolve(MockDatabase), 800);
-            });
+            try {
+                const response = await fetch(`${API_URL}?action=getMenu`);
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error("Fetch Menu Error:", error);
+                return MockDatabase; // Fallback to mock if API fails
+            }
         }
 
         async function fetchPromotionsData() {
-            return new Promise(resolve => setTimeout(() => resolve(MockPromotions), 500));
+            try {
+                const response = await fetch(`${API_URL}?action=getPromotions`);
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error("Fetch Promos Error:", error);
+                return MockPromotions;
+            }
         }
 
-        // 3. Submit Order to Apps Script (Mock)
+        // 3. Submit Order to Apps Script (Real)
         async function submitOrderToBackend(orderData) {
-            /* ของจริง:
-               fetch(`${API_URL}?action=createOrder`, {
-                   method: 'POST',
-                   body: JSON.stringify(orderData)
-               });
-            */
-            return new Promise(resolve => {
-                setTimeout(() => resolve({ success: true, queue: Math.floor(Math.random() * 20) + 1 }), 1500);
-            });
+            try {
+                const response = await fetch(`${API_URL}?action=createOrder`, {
+                    method: 'POST',
+                    body: JSON.stringify(orderData)
+                });
+                return await response.json();
+            } catch (error) {
+                console.error("Submit Order Error:", error);
+                throw error;
+            }
+        }
+
+        // 4. Save User Profile to Apps Script (Real)
+        async function saveUserProfile(userData) {
+            try {
+                await fetch(`${API_URL}?action=saveUser`, {
+                    method: 'POST',
+                    body: JSON.stringify(userData)
+                });
+                console.log("User Profile saved to Sheets");
+            } catch (error) {
+                console.error("Save User Error:", error);
+            }
         }
 
         // ================= UI RENDERING & LOGIC =================
@@ -1444,9 +1485,10 @@
             document.getElementById('main-status-icon').innerHTML = `<i data-lucide="loader" class="spin" style="width: 40px; height: 40px;"></i>`;
             lucide.createIcons();
 
-            // จำลองการส่งข้อมูลไป Google Sheets
+            // ข้อมูลส่งไป Google Sheets
             const orderData = {
-                user: AppState.user.name,
+                userId: AppState.user.userId,
+                customerName: AppState.user.name,
                 items: AppState.cart,
                 total: document.getElementById('cart-total').innerText,
                 timestamp: new Date().toISOString()
