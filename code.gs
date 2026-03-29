@@ -26,7 +26,7 @@ function initDatabase() {
       sheet = ss.insertSheet(name);
       if (name === 'Orders') sheet.appendRow(['Timestamp', 'Order ID', 'Queue', 'User ID', 'Customer Name', 'Items', 'Total', 'Status']);
       if (name === 'Users') sheet.appendRow(['User ID', 'Display Name', 'Picture URL', 'Last Login']);
-      if (name === 'Menu') sheet.appendRow(['id', 'name', 'price', 'category', 'img']);
+      if (name === 'Menu') sheet.appendRow(['id', 'name', 'price', 'category', 'img', 'hasSpiciness']);
       if (name === 'Promotions') sheet.appendRow(['id', 'title', 'desc', 'img', 'btnText', 'action', 'active']);
       Logger.log('Created sheet: ' + name);
     } else {
@@ -46,14 +46,14 @@ function seedDatabase() {
   if (promoSheet.getLastRow() > 1) promoSheet.getRange(2, 1, promoSheet.getLastRow()-1, 7).clearContent();
 
   const mockMenu = [
-    ['m1', 'หมูสามชั้นสไลด์', 15, 'เนื้อสัตว์', 'https://images.unsplash.com/photo-1628268909376-e8c44bb3153f?auto=format&fit=crop&w=300&q=80'],
-    ['m2', 'เนื้อโคขุน', 20, 'เนื้อสัตว์', 'https://images.unsplash.com/photo-1603360946369-dc9bb6258143?auto=format&fit=crop&w=300&q=80'],
-    ['m3', 'เบคอนพันเห็ดเข็มทอง', 15, 'เนื้อสัตว์', 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=300&q=80'],
-    ['b1', 'ไส้กรอกหนังกรอบ', 10, 'ลูกชิ้น', 'https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?auto=format&fit=crop&w=300&q=80'],
-    ['b2', 'เต้าหู้ชีส', 15, 'ลูกชิ้น', 'https://images.unsplash.com/photo-1582878826629-29b7ad1cb431?auto=format&fit=crop&w=300&q=80'],
-    ['v1', 'เห็ดออรินจิ', 10, 'ผัก', 'https://images.unsplash.com/photo-1509358271058-acd22cc93898?auto=format&fit=crop&w=300&q=80'],
-    ['v2', 'บล็อคโคลี่', 10, 'ผัก', 'https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?auto=format&fit=crop&w=300&q=80'],
-    ['n1', 'เส้นมันหนึบ', 15, 'เส้น', 'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=300&q=80']
+    ['m1', 'หมูสามชั้นสไลด์', 15, 'เนื้อสัตว์', 'https://images.unsplash.com/photo-1628268909376-e8c44bb3153f?auto=format&fit=crop&w=300&q=80', true],
+    ['m2', 'เนื้อโคขุน', 20, 'เนื้อสัตว์', 'https://images.unsplash.com/photo-1603360946369-dc9bb6258143?auto=format&fit=crop&w=300&q=80', true],
+    ['m3', 'เบคอนพันเห็ดเข็มทอง', 15, 'เนื้อสัตว์', 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=300&q=80', true],
+    ['b1', 'ไส้กรอกหนังกรอบ', 10, 'ลูกชิ้น', 'https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?auto=format&fit=crop&w=300&q=80', true],
+    ['b2', 'เต้าหู้ชีส', 15, 'ลูกชิ้น', 'https://images.unsplash.com/photo-1582878826629-29b7ad1cb431?auto=format&fit=crop&w=300&q=80', true],
+    ['v1', 'เห็ดออรินจิ', 10, 'ผัก', 'https://images.unsplash.com/photo-1509358271058-acd22cc93898?auto=format&fit=crop&w=300&q=80', true],
+    ['v2', 'บล็อคโคลี่', 10, 'ผัก', 'https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?auto=format&fit=crop&w=300&q=80', true],
+    ['n1', 'เส้นมันหนึบ', 15, 'เส้น', 'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=300&q=80', true]
   ];
 
   const mockPromos = [
@@ -115,6 +115,10 @@ function doPost(e) {
       case 'getPromotions': responseData = getPromotionsData(); break;
       case 'getOrders': responseData = getOrdersData(); break;
       
+      // จัดการเมนู (Admin)
+      case 'saveMenu': responseData = saveMenu(payload); break;
+      case 'deleteMenu': responseData = deleteMenu(payload.id); break;
+      
       // บันทึกข้อมูล
       case 'saveUser': responseData = saveUser(payload); break;
       case 'createOrder': responseData = createOrder(payload); break;
@@ -149,7 +153,8 @@ function doGet(e) {
 function getMenuData() {
   const data = getSheetData('Menu');
   return data.map(row => ({
-    id: row[0], name: row[1], price: row[2], category: row[3], img: row[4]
+    id: row[0], name: row[1], price: row[2], category: row[3], img: row[4], 
+    hasSpiciness: row[5] === true || row[5] === 'TRUE'
   })).filter(i => i.id);
 }
 
@@ -222,6 +227,43 @@ function updateOrderStatus(orderId, status) {
     }
   }
   return { success: false, message: 'Order not found' };
+}
+
+// ==========================================
+// 5. ฟังก์ชันการจัดการเมนู (Menu Management)
+// ==========================================
+
+function saveMenu(menu) {
+  const sheet = getSheet('Menu');
+  const values = sheet.getDataRange().getValues();
+  let foundRow = -1;
+  
+  for (let i = 1; i < values.length; i++) {
+    if (values[i][0] === menu.id) {
+      foundRow = i + 1;
+      break;
+    }
+  }
+  
+  const rowData = [menu.id, menu.name, menu.price, menu.category, menu.img, menu.hasSpiciness];
+  if (foundRow > -1) {
+    sheet.getRange(foundRow, 1, 1, 6).setValues([rowData]);
+  } else {
+    sheet.appendRow(rowData);
+  }
+  return { success: true };
+}
+
+function deleteMenu(id) {
+  const sheet = getSheet('Menu');
+  const values = sheet.getDataRange().getValues();
+  for (let i = 1; i < values.length; i++) {
+    if (values[i][0] === id) {
+      sheet.deleteRow(i + 1);
+      return { success: true };
+    }
+  }
+  return { success: false };
 }
 
 function saveBanner(banner) {
