@@ -870,54 +870,6 @@
         .toast.show {
             transform: translateX(-50%) translateY(0);
         }
-
-        /* Admin Demo Tool (For presentation) */
-        .admin-demo {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            background: var(--primary);
-            color: white;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            z-index: 999;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-        }
-
-        #admin-panel {
-            display: none;
-            position: fixed;
-            top: 50px;
-            right: 10px;
-            background: rgba(20, 20, 20, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 16px;
-            border-radius: 16px;
-            border: 1px solid var(--surface-border);
-            z-index: 999;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        }
-
-        #admin-panel button {
-            display: block;
-            width: 100%;
-            margin-top: 10px;
-            padding: 10px;
-            background: #333;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-family: inherit;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        #admin-panel button:hover {
-            background: var(--primary);
-        }
     </style>
 </head>
 
@@ -945,14 +897,6 @@
             <span id="toast-msg">ข้อความ</span>
         </div>
 
-        <!-- Admin Demo Toggle -->
-        <div class="admin-demo" onclick="toggleAdmin()">⚙️ Admin Demo</div>
-        <div id="admin-panel">
-            <p style="font-size: 0.8rem; margin-bottom: 10px; color: var(--primary);">จำลองแอดมินอัปเดตสถานะ</p>
-            <button onclick="updateOrderStatus('pending')">1. รอรับออเดอร์</button>
-            <button onclick="updateOrderStatus('cooking')">2. กำลังย่าง🔥</button>
-            <button onclick="updateOrderStatus('ready')">3. พร้อมเสิร์ฟ✅</button>
-        </div>
 
         <!-- ================= PAGE 1: MENU ================= -->
         <div id="page-menu" class="page active">
@@ -1155,23 +1099,9 @@
             currentOrder: null
         };
 
-        // ================= MOCK DATA =================
-        const MockPromotions = [
-            { id: 'p1', title: '<span class="text-primary">เซ็ตหม่าล่า</span> โคตรคุ้ม!', desc: 'อิ่มจุกๆ ลดพิเศษ 20% เฉพาะสั่งผ่านแอพ', img: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80', btnText: 'สั่งเลยตอนนี้', action: 'search' },
-            { id: 'p2', title: 'ใหม่! <span style="color:#FFC107;">ชีสเยิ้มมม</span>', desc: 'สายชีสห้ามพลาด เต้าหู้ชีสสุดฟิน', img: 'https://images.unsplash.com/photo-1582878826629-29b7ad1cb431?auto=format&fit=crop&w=600&q=80', btnText: 'ดูเมนูเลย', action: 'ลูกชิ้น' },
-            { id: 'p3', title: 'สายผัก รักสุขภาพ', desc: 'ผักสด สะอาด คัดสรรมาเพื่อคุณ', img: 'https://images.unsplash.com/photo-1509358271058-acd22cc93898?auto=format&fit=crop&w=600&q=80', btnText: 'สายตี้ผัก', action: 'ผัก' }
-        ];
-
-        const MockDatabase = [
-            { id: 'm1', name: 'หมูสามชั้นสไลด์', price: 15, category: 'เนื้อสัตว์', img: 'https://images.unsplash.com/photo-1628268909376-e8c44bb3153f?auto=format&fit=crop&w=300&q=80', hasSpiciness: true },
-            { id: 'm2', name: 'เนื้อโคขุน', price: 20, category: 'เนื้อสัตว์', img: 'https://images.unsplash.com/photo-1603360946369-dc9bb6258143?auto=format&fit=crop&w=300&q=80', hasSpiciness: true },
-            { id: 'm3', name: 'เบคอนพันเห็ดเข็มทอง', price: 15, category: 'เนื้อสัตว์', img: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=300&q=80', hasSpiciness: true },
-            { id: 'b1', name: 'ไส้กรอกหนังกรอบ', price: 10, category: 'ลูกชิ้น', img: 'https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?auto=format&fit=crop&w=300&q=80', hasSpiciness: true },
-            { id: 'b2', name: 'เต้าหู้ชีส', price: 15, category: 'ลูกชิ้น', img: 'https://images.unsplash.com/photo-1582878826629-29b7ad1cb431?auto=format&fit=crop&w=300&q=80', hasSpiciness: true },
-            { id: 'v1', name: 'เห็ดออรินจิ', price: 10, category: 'ผัก', img: 'https://images.unsplash.com/photo-1509358271058-acd22cc93898?auto=format&fit=crop&w=300&q=80', hasSpiciness: true },
-            { id: 'v2', name: 'บล็อคโคลี่', price: 10, category: 'ผัก', img: 'https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?auto=format&fit=crop&w=300&q=80', hasSpiciness: true },
-            { id: 'n1', name: 'เส้นมันหนึบ', price: 15, category: 'เส้น', img: 'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=300&q=80', hasSpiciness: true }
-        ];
+        // ================= MOCK DATA (DEPRECATED) =================
+        const MockPromotions = [];
+        const MockDatabase = [];
 
         // Add loading spin CSS animation dynamically
         const style = document.createElement('style');
@@ -1186,9 +1116,9 @@
 
             if (isLocal) {
                 AppState.user = {
-                    name: "ผู้ทดสอบระบบ",
-                    picUrl: "https://ui-avatars.com/api/?name=Tester&background=FF6B00&color=fff",
-                    userId: "U_MOCK_USER_LOCAL"
+                    name: "Admin (Local)",
+                    picUrl: "https://ui-avatars.com/api/?name=Admin&background=FFB300&color=fff",
+                    userId: "ADMIN_LOCAL_TEST"
                 };
                 updateUserProfileUI();
                 return;
@@ -1237,8 +1167,8 @@
                         hasSpiciness: m.hasSpiciness !== false // Default to true
                     }));
                 }
-                return MockDatabase;
-            } catch (error) { return MockDatabase; }
+                return [];
+            } catch (error) { return []; }
         }
 
         async function fetchPromotionsData() {
@@ -1246,8 +1176,8 @@
                 const response = await fetch(`${API_URL}?action=getPromotions`, { method: 'POST', body: JSON.stringify({}) });
                 const res = await response.json();
                 const data = Array.isArray(res) ? res : (res && res.data ? res.data : null);
-                return Array.isArray(data) ? data : MockPromotions;
-            } catch (error) { return MockPromotions; }
+                return Array.isArray(data) ? data : [];
+            } catch (error) { return []; }
         }
 
         async function submitOrderToBackend(orderData) {
@@ -1637,10 +1567,9 @@
                     updateOrderStatus('pending');
                 }
             } catch (err) {
-                showToast("จำลองออเดอร์สำเร็จ (Local Mode)");
-                AppState.cart = []; updateCartBadge();
-                document.getElementById('queue-number').innerText = "Q" + Math.floor(Math.random() * 99);
-                updateOrderStatus('pending');
+                console.error("Submit Order Error:", err);
+                showToast("ไม่สามารถส่งออเดอร์ได้ กรุณาลองใหม่อีกครั้ง");
+                switchPage('cart');
             }
         }
 
@@ -1721,10 +1650,6 @@
             toastTimeout = setTimeout(() => toast.classList.remove('show'), 3500);
         }
 
-        function toggleAdmin() {
-            const panel = document.getElementById('admin-panel');
-            panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-        }
 
         window.onload = initApp;
 
