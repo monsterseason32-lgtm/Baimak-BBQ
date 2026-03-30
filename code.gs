@@ -28,7 +28,7 @@ function initDatabase() {
     let sheet = ss.getSheetByName(name);
     if (!sheet) {
       sheet = ss.insertSheet(name);
-      if (name === 'Orders') sheet.appendRow(['Timestamp', 'Order ID', 'Queue', 'User ID', 'Customer Name', 'Items', 'Total', 'Status']);
+      if (name === 'Orders') sheet.appendRow(['Timestamp', 'Order ID', 'Queue', 'User ID', 'Customer Name', 'Items', 'Total', 'Status', 'Delivery', 'Payment', 'Phone', 'Address', 'Lat', 'Lng', 'Change']);
       if (name === 'Users') sheet.appendRow(['User ID', 'Display Name', 'Picture URL', 'Last Login']);
       if (name === 'Menu') sheet.appendRow(['id', 'name', 'price', 'category', 'img', 'hasSpiciness', 'isVisible']);
       if (name === 'Promotions') sheet.appendRow(['id', 'title', 'desc', 'img', 'btnText', 'action', 'active']);
@@ -154,6 +154,13 @@ function getOrdersData() {
     timestamp: row[0], id: row[1], queue: row[2], userId: row[3], 
     customerName: row[4], items: JSON.parse(row[5] || '[]'), 
     total: row[6], status: row[7],
+    delivery: row[8] || 'pickup',
+    payment: row[9] || 'cash',
+    phone: row[10] || '',
+    address: row[11] || '',
+    lat: row[12] || null,
+    lng: row[13] || null,
+    changeFrom: row[14] || null,
     time: row[0] instanceof Date ? Utilities.formatDate(row[0], "GMT+7", "HH:mm") : ""
   })).reverse();
 }
@@ -188,9 +195,31 @@ function createOrder(order) {
   const orderId = 'ORD-' + Math.floor(1000 + Math.random() * 9000);
   const queueNo = 'Q' + (sheet.getLastRow()).toString().padStart(2, '0');
   
+  // Extract meta info if present
+  let delivery = 'pickup';
+  let payment = 'cash';
+  let phone = '';
+  let address = '';
+  let lat = '';
+  let lng = '';
+  let changeFrom = '';
+  
+  const metaIndex = order.items.findIndex(i => i.isMeta);
+  if (metaIndex > -1) {
+    const meta = order.items.splice(metaIndex, 1)[0];
+    delivery = meta.delivery || 'pickup';
+    payment = meta.payment || 'cash';
+    phone = meta.phone || '';
+    address = meta.address || '';
+    lat = meta.lat || '';
+    lng = meta.lng || '';
+    changeFrom = meta.changeFrom || '';
+  }
+
   sheet.appendRow([
     new Date(), orderId, queueNo, order.userId, 
-    order.customerName, JSON.stringify(order.items), order.total, 'pending'
+    order.customerName, JSON.stringify(order.items), order.total, 'pending',
+    delivery, payment, phone, address, lat, lng, changeFrom
   ]);
   
   sendNotification({
