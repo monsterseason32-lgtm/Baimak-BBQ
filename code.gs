@@ -26,7 +26,7 @@ function initDatabase() {
       sheet = ss.insertSheet(name);
       if (name === 'Orders') sheet.appendRow(['Timestamp', 'Order ID', 'Queue', 'User ID', 'Customer Name', 'Items', 'Total', 'Status']);
       if (name === 'Users') sheet.appendRow(['User ID', 'Display Name', 'Picture URL', 'Last Login']);
-      if (name === 'Menu') sheet.appendRow(['id', 'name', 'price', 'category', 'img', 'hasSpiciness']);
+      if (name === 'Menu') sheet.appendRow(['id', 'name', 'price', 'category', 'img', 'hasSpiciness', 'isVisible']);
       if (name === 'Promotions') sheet.appendRow(['id', 'title', 'desc', 'img', 'btnText', 'action', 'active']);
       Logger.log('Created sheet: ' + name);
     } else {
@@ -87,6 +87,7 @@ function doPost(e) {
       // จัดการเมนู (Admin)
       case 'saveMenu': responseData = saveMenu(payload); break;
       case 'deleteMenu': responseData = deleteMenu(payload.id); break;
+      case 'toggleMenu': responseData = toggleMenu(payload.id, payload.isVisible); break;
       
       // บันทึกข้อมูล
       case 'saveUser': responseData = saveUser(payload); break;
@@ -123,7 +124,8 @@ function getMenuData() {
   const data = getSheetData('Menu');
   return data.map(row => ({
     id: row[0], name: row[1], price: row[2], category: row[3], img: row[4], 
-    hasSpiciness: row[5] === true || row[5] === 'TRUE'
+    hasSpiciness: row[5] === true || row[5] === 'TRUE',
+    isVisible: row[6] !== false && row[6] !== 'FALSE'
   })).filter(i => i.id);
 }
 
@@ -214,9 +216,9 @@ function saveMenu(menu) {
     }
   }
   
-  const rowData = [menu.id, menu.name, menu.price, menu.category, menu.img, menu.hasSpiciness];
+  const rowData = [menu.id, menu.name, menu.price, menu.category, menu.img, menu.hasSpiciness, menu.isVisible];
   if (foundRow > -1) {
-    sheet.getRange(foundRow, 1, 1, 6).setValues([rowData]);
+    sheet.getRange(foundRow, 1, 1, 7).setValues([rowData]);
   } else {
     sheet.appendRow(rowData);
   }
@@ -229,6 +231,18 @@ function deleteMenu(id) {
   for (let i = 1; i < values.length; i++) {
     if (values[i][0] === id) {
       sheet.deleteRow(i + 1);
+      return { success: true };
+    }
+  }
+  return { success: false };
+}
+
+function toggleMenu(id, isVisible) {
+  const sheet = getSheet('Menu');
+  const values = sheet.getDataRange().getValues();
+  for (let i = 1; i < values.length; i++) {
+    if (values[i][0] === id) {
+      sheet.getRange(i + 1, 7).setValue(isVisible);
       return { success: true };
     }
   }
