@@ -8,6 +8,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- ใช้ Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- LIFF SDK -->
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <!-- เพิ่ม SortableJS สำหรับฟีเจอร์ลากวางเปลี่ยนลำดับ -->
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <style>
@@ -1373,8 +1375,29 @@
         <div id="toast-msg">อัปเดตสถานะสำเร็จ</div>
     </div>
 
+    <!-- Access Denied Overlay -->
+    <div id="access-denied-overlay"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-dark); z-index: 10000; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px;">
+        <div
+            style="background: rgba(255,107,0,0.1); width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 24px; color: var(--primary);">
+            <i data-lucide="shield-alert" style="width: 44px; height: 44px;"></i>
+        </div>
+        <h1 style="font-size: 1.75rem; margin-bottom: 12px; font-weight: 600;">การเข้าถึงถูกปฏิเสธ</h1>
+        <p
+            style="color: var(--text-muted); max-width: 320px; margin-bottom: 32px; line-height: 1.6; font-size: 0.95rem;">
+            ขออภัย คุณไม่ได้รับอนุญาตให้ใช้งานระบบจัดการนี้ เฉพาะผู้ดูแลระบบที่ได้รับสิทธิ์เท่านั้น</p>
+        <button onclick="liff.closeWindow()" class="btn-add"
+            style="padding: 14px 40px; border-radius: var(--radius-md); font-weight: 500; box-shadow: 0 10px 20px var(--primary-glow);">
+            กลับสู่หน้าร้าน
+        </button>
+    </div>
+
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbxYnt6AODwWQM2AupdcBiF1_05aZYgibMfRJ7ZvsLeyytN_rrvxbBl0DHKEUo9p7PnAcQ/exec";
+        const ADMIN_IDS = [
+            "Uebe28230ac7292dc4d7e729a83da110e",
+            "U8344212719a6a2a91fb597be9d7314cc"
+        ];
 
         // ================= DATABASE OPERATIONS =================
         async function fetchOrders() {
@@ -2043,14 +2066,50 @@
         }
 
 
-        window.onload = () => {
+        window.onload = async () => {
             lucide.createIcons();
-            fetchOrders();
-            fetchBanners();
-            fetchMenus();
 
-            setInterval(fetchOrders, 30000);
-            setupScrollObserver();
+            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+            if (isLocal) {
+                console.log("Local Mode: Skipping LIFF Authentication");
+                fetchOrders();
+                fetchBanners();
+                fetchMenus();
+                setInterval(fetchOrders, 30000);
+                setupScrollObserver();
+            } else {
+                // Check Access Permissions via LIFF
+                try {
+                    await liff.init({ liffId: "2009635252-NSmFIvAB" });
+                    if (!liff.isLoggedIn()) {
+                        liff.login();
+                        return;
+                    }
+
+                    const profile = await liff.getProfile();
+                    const userId = profile.userId;
+
+                    if (!ADMIN_IDS.includes(userId)) {
+                        document.getElementById('access-denied-overlay').style.display = 'flex';
+                        lucide.createIcons();
+                        return;
+                    }
+
+                    // Authorized: Load Data
+                    fetchOrders();
+                    fetchBanners();
+                    fetchMenus();
+
+                    setInterval(fetchOrders, 30000);
+                    setupScrollObserver();
+
+                } catch (err) {
+                    console.error("Auth Error:", err);
+                    document.getElementById('access-denied-overlay').style.display = 'flex';
+                    document.getElementById('access-denied-overlay').querySelector('p').innerText = "ไม่สามารถยืนยันตัวตนได้ กรุณาลองใหม่อีกครั้ง";
+                }
+            }
 
             // CSS Animation for loader spin
             const style = document.createElement('style');
