@@ -32,6 +32,7 @@ function initDatabase() {
       if (name === 'Users') sheet.appendRow(['User ID', 'Display Name', 'Picture URL', 'Last Login']);
       if (name === 'Menu') sheet.appendRow(['id', 'name', 'price', 'category', 'img', 'hasSpiciness', 'isVisible']);
       if (name === 'Promotions') sheet.appendRow(['id', 'title', 'desc', 'img', 'btnText', 'action', 'active']);
+      if (name === 'Notifications') sheet.appendRow(['id', 'userId', 'title', 'message', 'timestamp', 'isRead', 'type']);
       Logger.log('Created sheet: ' + name);
     } else {
       Logger.log('Sheet already exists: ' + name);
@@ -103,6 +104,11 @@ function doPost(e) {
       case 'deleteBanner': responseData = deleteBanner(payload.id); break;
       case 'toggleBanner': responseData = toggleBanner(payload.id, payload.active); break;
       case 'reorderBanners': responseData = reorderBanners(payload); break;
+      
+      // การแจ้งเตือน (Notifications)
+      case 'getNotifications': responseData = getNotifications(payload.userId); break;
+      case 'markRead': responseData = markNotificationRead(payload.id); break;
+      case 'sendNotification': responseData = sendNotification(payload); break;
 
       default:
         responseData = { success: false, message: 'Invalid Action: ' + action };
@@ -187,6 +193,13 @@ function createOrder(order) {
     order.customerName, JSON.stringify(order.items), order.total, 'pending'
   ]);
   
+  sendNotification({
+    userId: order.userId,
+    title: "ยืนยันออเดอร์ใหม่",
+    message: `ออเดอร์ #${orderId} (คิว ${queueNo}) ได้รับข้อมูลแล้ว รอดำเนินการครับ`,
+    type: 'system'
+  });
+
   return { success: true, orderId: orderId, queue: queueNo };
 }
 
@@ -198,6 +211,10 @@ function updateOrderStatus(orderId, status) {
   for (let i = 1; i < values.length; i++) {
     if (values[i][1] === orderId) {
       sheet.getRange(i + 1, 8).setValue(status);
+      
+      const userId = values[i][3];
+      sendStatusNotification(userId, orderId, status);
+
       return { success: true };
     }
   }
@@ -331,6 +348,74 @@ function getSheetData(sheetName) {
   const values = range.getValues();
   values.shift(); // Remove headers
   return values;
+}
+
+// ==========================================
+// 6. ฟังก์ชันการแจ้งเตือน (Notifications)
+// ==========================================
+
+function getNotifications(userId) {
+  const data = getSheetData('Notifications');
+  // กรองเฉพาะของผู้ใช้ หรือที่เป็นแบบ 'broadcast' (ส่งถึงทุกคน)
+  return data
+    .filter(row => row[1] === userId || row[1] === 'broadcast')
+    .map(row => ({
+      id: row[0],
+      userId: row[1],
+      title: row[2],
+      message: row[3],
+      timestamp: row[4],
+      isRead: row[5] === true || row[5] === 'TRUE',
+      type: row[6]
+    }))
+    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+    .slice(0, 30); // เอาแค่ 30 รายการล่าสุด
+}
+
+function markNotificationRead(id) {
+  const sheet = getSheet('Notifications');
+  const values = sheet.getDataRange().getValues();
+  for (let i = 1; i < values.length; i++) {
+    if (values[i][0] === id) {
+      sheet.getRange(i + 1, 6).setValue(true);
+      return { success: true };
+    }
+  }
+  return { success: false };
+}
+
+function sendNotification(payload) {
+  const sheet = getSheet('Notifications');
+  const newRow = [
+    'nt' + Date.now(),
+    payload.userId || 'broadcast',
+    payload.title || 'แจ้งเตือนใหม่',
+    payload.message || '',
+    new Date(),
+    false,
+    payload.type || 'admin'
+  ];
+  sheet.appendRow(newRow);
+  return { success: true };
+}
+
+// ฟังก์ชันภายในสำหรับส่งแจ้งเตือนสถานะอัตโนมัติ
+function sendStatusNotification(userId, orderId, status) {
+  let title = "อัปเดตสถานะออเดอร์";
+  let message = "";
+  
+  if (status === 'cooking') message = `ออเดอร์ #${orderId} กำลังเริ่มย่างแล้วครับ 🔥`;
+  if (status === 'ready') message = `ออเดอร์ #${orderId} ย่างเสร็จพร้อมเสิร์ฟแล้วครับ! 🔔`;
+  if (status === 'completed') message = `ขอบคุณที่ใช้บริการครับ ออเดอร์ #${orderId} เรียบร้อยแล้ว ✅`;
+  
+  if (message) {
+    sendNotification({
+      userId: userId,
+      title: title,
+      message: message,
+      type: 'system'
+    });
+  }
 }
 
 // ==========================================
