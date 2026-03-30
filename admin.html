@@ -350,9 +350,32 @@
             box-shadow: 0 4px 15px var(--primary-glow);
         }
 
+        .btn-message {
+            background: rgba(255, 107, 0, 0.1);
+            color: var(--primary);
+            border: 1px solid rgba(255, 107, 0, 0.2);
+            padding: 5px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .btn-message:hover {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 10px var(--primary-glow);
+        }
+
+
         .btn-accept:hover {
             filter: brightness(1.1);
         }
+
 
         .btn-ready {
             background: var(--info);
@@ -1662,6 +1685,38 @@
         <div id="toast-msg">อัปเดตสถานะสำเร็จ</div>
     </div>
 
+    <!-- Message Modal -->
+    <div class="modal-overlay" id="message-modal">
+        <div class="modal-content glass" style="max-width: 400px; padding: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="font-size: 1.25rem;">ส่งข้อความหาลูกค้า</h2>
+                <button onclick="closeMessageModal()"
+                    style="background:none; border:none; color:var(--text-muted); cursor:pointer;">
+                    <i data-lucide="x" style="width: 20px;"></i>
+                </button>
+            </div>
+            <input type="hidden" id="msg-user-id">
+            <div style="margin-bottom: 16px;">
+                <label
+                    style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px;">หัวข้อ</label>
+                <input type="text" id="msg-title" class="form-control" style="width: 100%;"
+                    placeholder="เช่น การอัปเดตออเดอร์">
+            </div>
+            <div style="margin-bottom: 24px;">
+                <label
+                    style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px;">ข้อความ</label>
+                <textarea id="msg-text" class="form-control" style="width: 100%; height: 100px; resize: none;"
+                    placeholder="พิมพ์เนื้อหาที่ต้องการส่ง..."></textarea>
+            </div>
+            <div style="display: flex; gap: 12px;">
+                <button class="btn-outline" style="flex: 1;" onclick="closeMessageModal()">ยกเลิก</button>
+                <button class="btn-add" style="flex: 2; justify-content: center;" onclick="sendManualMessage()">
+                    <i data-lucide="send" style="width: 18px;"></i> ส่งข้อความ
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Access Denied Overlay -->
     <div id="access-denied-overlay"
         style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-dark); z-index: 10000; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px;">
@@ -1963,6 +2018,9 @@
             <div class="order-card" id="card-${order.id}" style="animation-delay: ${delay}s">
                 <div class="order-header">
                     <div class="queue-no">${order.queue}</div>
+                    <button class="btn-message" onclick="openMessageModal('${order.userId}', '${order.customerName}')">
+                        <i data-lucide="message-square" style="width: 14px;"></i> ทักแชท
+                    </button>
                     <div class="order-time"><i data-lucide="clock" style="width: 14px;"></i> ${order.time}</div>
                 </div>
                 <div class="customer-info">
@@ -2034,26 +2092,70 @@
                 console.error("Toggle Banner Error:", error);
                 showToast("ไม่สามารถอัปเดตสถานะแบนเนอร์ได้");
             }
-        }
+            async function toggleMenuStatus(id, isVisible) {
+                try {
+                    const index = menus.findIndex(m => m.id === id);
+                    if (index > -1) {
+                        menus[index].isVisible = isVisible;
+                        renderMenus();
 
-        async function toggleMenuStatus(id, isVisible) {
-            try {
-                const index = menus.findIndex(m => m.id === id);
-                if (index > -1) {
-                    menus[index].isVisible = isVisible;
-                    renderMenus();
+                        await fetch(API_URL + "?action=toggleMenu", {
+                            method: 'POST',
+                            body: JSON.stringify({ id: id, isVisible: isVisible })
+                        });
 
-                    await fetch(API_URL + "?action=toggleMenu", {
-                        method: 'POST',
-                        body: JSON.stringify({ id: id, isVisible: isVisible })
-                    });
-
-                    if (isVisible) showToast(`เปิดการแสดงผลเมนู "${menus[index].name}" ✅`);
-                    else showToast(`ซ่อนเมนู "${menus[index].name}" แล้ว`);
+                        if (isVisible) showToast(`เปิดการแสดงผลเมนู "${menus[index].name}" ✅`);
+                        else showToast(`ซ่อนเมนู "${menus[index].name}" แล้ว`);
+                    }
+                } catch (error) {
+                    console.error("Toggle Menu Error:", error);
+                    showToast("ไม่สามารถอัปเดตสถานะเมนูได้");
                 }
-            } catch (error) {
-                console.error("Toggle Menu Error:", error);
-                showToast("ไม่สามารถอัปเดตสถานะเมนูได้");
+            }
+
+            // ================= MESSAGING =================
+            function openMessageModal(userId, name) {
+                document.getElementById('msg-user-id').value = userId;
+                document.getElementById('msg-title').value = "แจ้งเตือนจากร้านใบหมาก";
+                document.getElementById('msg-text').value = "";
+                document.getElementById('message-modal').classList.add('show');
+            }
+
+            function closeMessageModal() {
+                document.getElementById('message-modal').classList.remove('show');
+            }
+
+            async function sendManualMessage() {
+                const userId = document.getElementById('msg-user-id').value;
+                const title = document.getElementById('msg-title').value;
+                const message = document.getElementById('msg-text').value;
+
+                if (!message) {
+                    showToast("กรุณาพิมพ์ข้อความก่อนส่ง");
+                    return;
+                }
+
+                try {
+                    showToast("กำลังส่งข้อความ...");
+                    const response = await fetch(API_URL + "?action=sendNotification", {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            userId: userId,
+                            title: title,
+                            message: message,
+                            type: 'admin'
+                        })
+                    });
+                    const res = await response.json();
+                    if (res.success) {
+                        showToast("ส่งข้อความสำเร็จแล้ว ✅");
+                        closeMessageModal();
+                    } else {
+                        throw new Error(res.message);
+                    }
+                } catch (err) {
+                    showToast("ส่งข้อความไม่สำเร็จ กรุณาลองใหม่");
+                }
             }
         }
 
@@ -2252,12 +2354,15 @@
 
             statusEl.style.display = 'block';
             statusEl.style.color = 'var(--text-muted)';
-            statusEl.innerHTML = '<i data-lucide="loader-2" style="width:14px; display:inline-block; animation:spin 1s linear infinite; vertical-align:middle;"></i> กำลังอัปโหลด...';
+            statusEl.innerHTML = '<i data-lucide="loader-2" style="width:14px; display:inline-block; animation:spin 1s linear infinite; vertical-align:middle;"></i> กำลังประมวลผลและอัปโหลด...';
             lucide.createIcons();
 
             try {
+                // ย่อขนาดรูปภาพก่อนอัปโหลด (Max 1000px)
+                const optimizedFile = await resizeImage(file, 1000);
+
                 const formData = new FormData();
-                formData.append("image", file);
+                formData.append("image", optimizedFile);
 
                 const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
                     method: "POST",
@@ -2266,7 +2371,8 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    urlInput.value = data.data.url;
+                    // ใช้ display_url เพื่อความรวดเร็วในการโหลดแทนรูปต้นฉบับ
+                    urlInput.value = data.data.display_url || data.data.url;
                     statusEl.style.color = 'var(--success)';
                     statusEl.innerHTML = '<i data-lucide="check" style="width:14px; vertical-align:middle;"></i> อัปโหลดสำเร็จ!';
                     lucide.createIcons();
@@ -2281,6 +2387,37 @@
             input.value = '';
         }
 
+        // Helper: ย่อขนาดรูปภาพโดยใช้ Canvas
+        function resizeImage(file, maxWidth) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > maxWidth) {
+                            height = (maxWidth / width) * height;
+                            width = maxWidth;
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        canvas.toBlob((blob) => {
+                            resolve(new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() }));
+                        }, 'image/jpeg', 0.85); // ปรับคุณภาพ 85%
+                    };
+                };
+            });
+        }
+
         // ================= IMAGE UPLOAD (ImgBB) =================
         const IMGBB_API_KEY = "ae114e5553d1da79fc3194f341476b29";
 
@@ -2293,12 +2430,15 @@
 
             statusEl.style.display = 'block';
             statusEl.style.color = 'var(--text-muted)';
-            statusEl.innerHTML = '<i data-lucide="loader-2" style="width:14px; display:inline-block; animation:spin 1s linear infinite; vertical-align:middle;"></i> กำลังอัปโหลด...';
+            statusEl.innerHTML = '<i data-lucide="loader-2" style="width:14px; display:inline-block; animation:spin 1s linear infinite; vertical-align:middle;"></i> กำลังประมวลผลและอัปโหลด...';
             lucide.createIcons();
 
             try {
+                // ย่อขนาดรูปภาพก่อนอัปโหลด (Max 1200px สำหรับแบนเนอร์)
+                const optimizedFile = await resizeImage(file, 1200);
+
                 const formData = new FormData();
-                formData.append("image", file);
+                formData.append("image", optimizedFile);
 
                 const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
                     method: "POST",
@@ -2308,16 +2448,17 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    urlInput.value = data.data.url;
+                    const optimizedUrl = data.data.display_url || data.data.url;
+                    urlInput.value = optimizedUrl;
                     const previewImg = document.getElementById('banner-preview-img');
                     const previewCont = document.getElementById('banner-preview-container');
-                    previewImg.src = data.data.url;
+                    previewImg.src = optimizedUrl;
                     previewCont.style.display = 'block';
 
                     statusEl.style.color = 'var(--success)';
                     statusEl.innerHTML = '<i data-lucide="check" style="width:14px; vertical-align:middle;"></i> อัปโหลดสำเร็จ!';
                     lucide.createIcons();
-                    showToast("อัปโหลดรูปภาพสำเร็จ ลิงก์ถูกกรอกให้แล้ว");
+                    showToast("อัปโหลดและปรับขนาดแบนเนอร์สำเร็จ");
                 } else {
                     throw new Error(data.error.message);
                 }
