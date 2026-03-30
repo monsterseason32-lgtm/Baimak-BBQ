@@ -314,6 +314,71 @@
             margin-bottom: 0;
         }
 
+        /* Image Preview Box */
+        .image-preview-wrapper {
+            width: 100%;
+            height: 180px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px dashed var(--surface-border);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .image-preview-wrapper:hover {
+            border-color: var(--primary);
+            background: rgba(255, 107, 0, 0.05);
+        }
+
+        .image-preview-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: none;
+        }
+
+        .image-preview-wrapper .placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-muted);
+            gap: 8px;
+        }
+
+        .image-preview-wrapper.has-image img {
+            display: block;
+        }
+
+        .image-preview-wrapper.has-image .placeholder {
+            display: none;
+        }
+
+        .upload-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.85rem;
+            backdrop-filter: blur(2px);
+            z-index: 5;
+        }
+
+        .upload-overlay i {
+            margin-bottom: 8px;
+        }
+
         .order-footer {
             display: flex;
             justify-content: space-between;
@@ -1547,33 +1612,35 @@
                         data-lucide="x"></i></button>
             </div>
             <input type="hidden" id="banner-id">
-
-            <div id="banner-preview-container" style="margin-bottom: 20px; text-align: center; display: none;">
-                <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px;">ตัวอย่างภาพ:</p>
-                <img id="banner-preview-img" src=""
-                    style="width: 100%; max-height: 160px; object-fit: cover; border-radius: 12px; border: 1px solid var(--surface-border); box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
+            <div class="form-group">
+                <label>รูปภาพแบนเนอร์</label>
+                <div class="image-preview-wrapper" id="banner-preview-box"
+                    onclick="document.getElementById('banner-file-input').click()" style="height: 160px;">
+                    <div class="placeholder">
+                        <i data-lucide="image-plus" style="width: 32px; height: 32px;"></i>
+                        <span>คลิกเพื่อเลือกรูปภาพแบนเนอร์</span>
+                    </div>
+                    <img id="banner-preview-img" src="" alt="Preview">
+                    <div class="upload-overlay" id="banner-upload-overlay">
+                        <i data-lucide="loader-2" class="spin" style="width: 24px;"></i>
+                        <span id="banner-upload-text">กำลังอัปโหลด...</span>
+                    </div>
+                </div>
+                <input type="hidden" id="banner-img">
+                <input type="file" id="banner-file-input" style="display: none;" accept="image/*"
+                    onchange="handleFileUpload(this)">
+                <div id="upload-status"
+                    style="font-size: 0.8rem; margin-top: 6px; text-align: center; color: var(--text-muted);">ขนาดแนะนำ:
+                    1200x600px (ระบบจะช่วยปรับขนาดให้)</div>
             </div>
 
             <div class="form-group">
-                <label>หัวข้อโปรโมชั่น (รองรับ HTML เช่น &lt;span class="text-primary"&gt;)</label>
+                <label>หัวข้อโปรโมชั่น</label>
                 <input type="text" id="banner-title" class="form-control" placeholder="เช่น เซ็ตหม่าล่า โคตรคุ้ม!">
             </div>
             <div class="form-group">
                 <label>รายละเอียด</label>
                 <textarea id="banner-desc" class="form-control" placeholder="พิมพ์รายละเอียดโปรโมชั่น..."></textarea>
-            </div>
-            <div class="form-group">
-                <label>URL รูปภาพ (แนะนำขนาด 16:9)</label>
-                <div style="display: flex; gap: 8px;">
-                    <input type="url" id="banner-img" class="form-control" placeholder="https://..." style="flex: 1;">
-                    <button class="btn-outline" onclick="document.getElementById('file-input').click()"
-                        style="padding: 0 14px; height: 46px; display: flex; align-items: center; gap: 6px;">
-                        <i data-lucide="image" style="width: 18px;"></i> เลือกรูป
-                    </button>
-                    <input type="file" id="file-input" style="display: none;" accept="image/*"
-                        onchange="handleFileUpload(this)">
-                </div>
-                <div id="upload-status" style="font-size: 0.8rem; margin-top: 6px; display: none;"></div>
             </div>
             <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                 <div>
@@ -1631,20 +1698,29 @@
                 </div>
             </div>
             <div class="form-group">
-                <label>URL รูปภาพเมนู</label>
-                <div style="display: flex; gap: 8px;">
-                    <input type="url" id="menu-img" class="form-control" placeholder="https://..." style="flex: 1;">
-                    <button class="btn-outline" onclick="document.getElementById('menu-file-input').click()"
-                        style="padding: 0 14px; height: 46px; display: flex; align-items: center; gap: 6px;">
-                        <i data-lucide="image" style="width: 18px;"></i> เลือกรูป
-                    </button>
-                    <input type="file" id="menu-file-input" style="display: none;" accept="image/*"
-                        onchange="handleMenuFileUpload(this)">
+                <label>รูปภาพเมนู</label>
+                <div class="image-preview-wrapper" id="menu-preview-box"
+                    onclick="document.getElementById('menu-file-input').click()">
+                    <div class="placeholder">
+                        <i data-lucide="image-plus" style="width: 32px; height: 32px;"></i>
+                        <span>คลิกเพื่อเลือกรูปภาพ</span>
+                    </div>
+                    <img id="menu-preview-img" src="" alt="Preview">
+                    <div class="upload-overlay" id="menu-upload-overlay">
+                        <i data-lucide="loader-2" class="spin" style="width: 24px;"></i>
+                        <span id="menu-upload-text">กำลังอัปโหลด...</span>
+                    </div>
                 </div>
-                <div id="menu-upload-status" style="font-size: 0.8rem; margin-top: 6px; display: none;"></div>
+                <!-- Hidden URL Input for Data -->
+                <input type="hidden" id="menu-img">
+                <input type="file" id="menu-file-input" style="display: none;" accept="image/*"
+                    onchange="handleMenuFileUpload(this)">
+                <div id="menu-upload-status"
+                    style="font-size: 0.8rem; margin-top: 6px; text-align: center; color: var(--text-muted);">
+                    เลือกไฟล์รูปภาพที่ต้องการ (ระบบจะย่อขนาดให้อัตโนมัติ)</div>
             </div>
             <div class="form-group"
-                style="background: rgba(255,255,255,0.02); padding: 16px; border-radius: 8px; border: 1px solid var(--surface-border); display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                style="background: rgba(255,255,255,0.02); padding: 16px; border-radius: 8px; border: 1px solid var(--surface-border);">
                 <div
                     style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">
                     <div>
@@ -1654,18 +1730,6 @@
                     </div>
                     <label class="switch">
                         <input type="checkbox" id="menu-hasSpiciness" checked>
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div
-                    style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,107,0,0.05); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,107,0,0.1);">
-                    <div>
-                        <label
-                            style="margin-bottom: 2px; color: var(--primary-light); font-weight: 600; font-size: 0.9rem;">แสดงผลเมนู</label>
-                        <div style="font-size: 0.7rem; color: var(--text-muted);">แสดงให้ลูกค้าเห็นในแอป</div>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" id="menu-isVisible" checked>
                         <span class="slider"></span>
                     </label>
                 </div>
@@ -2164,6 +2228,8 @@
         function openBannerModal(id = null) {
             const modal = document.getElementById('banner-modal');
             const titleEl = document.getElementById('modal-title');
+            const previewBox = document.getElementById('banner-preview-box');
+            const previewImg = document.getElementById('banner-preview-img');
 
             // Reset form
             document.getElementById('banner-id').value = '';
@@ -2172,6 +2238,9 @@
             document.getElementById('banner-img').value = '';
             document.getElementById('banner-btn').value = '';
             document.getElementById('banner-action').value = 'search';
+
+            previewBox.classList.remove('has-image');
+            previewImg.src = '';
 
             if (id) {
                 titleEl.innerText = "แก้ไขแบนเนอร์";
@@ -2185,13 +2254,12 @@
                     document.getElementById('banner-action').value = b.action;
 
                     if (b.img) {
-                        document.getElementById('banner-preview-img').src = b.img;
-                        document.getElementById('banner-preview-container').style.display = 'block';
+                        previewImg.src = b.img;
+                        previewBox.classList.add('has-image');
                     }
                 }
             } else {
                 titleEl.innerText = "เพิ่มแบนเนอร์ใหม่";
-                document.getElementById('banner-preview-container').style.display = 'none';
             }
 
             modal.classList.add('show');
@@ -2259,13 +2327,19 @@
         function openMenuModal(id = null) {
             const modal = document.getElementById('menu-modal');
             const titleEl = document.getElementById('menu-modal-title');
+            const previewBox = document.getElementById('menu-preview-box');
+            const previewImg = document.getElementById('menu-preview-img');
 
+            // Reset
             document.getElementById('menu-id').value = '';
             document.getElementById('menu-name').value = '';
             document.getElementById('menu-price').value = '';
-            document.getElementById('menu-category').value = 'เนื้อสัตว์';
             document.getElementById('menu-img').value = '';
+            document.getElementById('menu-category').value = 'เนื้อสัตว์';
             document.getElementById('menu-hasSpiciness').checked = true;
+
+            previewBox.classList.remove('has-image');
+            previewImg.src = '';
 
             if (id) {
                 titleEl.innerText = "แก้ไขเมนูอาหาร";
@@ -2276,8 +2350,12 @@
                     document.getElementById('menu-price').value = m.price;
                     document.getElementById('menu-category').value = m.category;
                     document.getElementById('menu-img').value = m.img;
-                    document.getElementById('menu-hasSpiciness').checked = m.hasSpiciness;
-                    document.getElementById('menu-isVisible').checked = m.isVisible !== false;
+                    document.getElementById('menu-hasSpiciness').checked = m.hasSpiciness !== false;
+
+                    if (m.img) {
+                        previewImg.src = m.img;
+                        previewBox.classList.add('has-image');
+                    }
                 }
             } else {
                 titleEl.innerText = "เพิ่มเมนูใหม่";
@@ -2292,6 +2370,8 @@
 
         async function saveMenu() {
             const id = document.getElementById('menu-id').value;
+            const existingMenu = menus.find(m => m.id === id);
+
             const newMenu = {
                 id: id || 'm' + Date.now(),
                 name: document.getElementById('menu-name').value || 'ไม่มีชื่อเมนู',
@@ -2299,7 +2379,7 @@
                 category: document.getElementById('menu-category').value,
                 img: document.getElementById('menu-img').value || 'https://via.placeholder.com/300?text=No+Image',
                 hasSpiciness: document.getElementById('menu-hasSpiciness').checked,
-                isVisible: document.getElementById('menu-isVisible').checked
+                isVisible: existingMenu ? existingMenu.isVisible : true // Preserve or default to visible
             };
 
             try {
@@ -2349,18 +2429,20 @@
             const file = input.files[0];
             if (!file) return;
 
-            const statusEl = document.getElementById('menu-upload-status');
+            const overlay = document.getElementById('menu-upload-overlay');
+            const previewImg = document.getElementById('menu-preview-img');
+            const previewBox = document.getElementById('menu-preview-box');
             const urlInput = document.getElementById('menu-img');
 
-            statusEl.style.display = 'block';
-            statusEl.style.color = 'var(--text-muted)';
-            statusEl.innerHTML = '<i data-lucide="loader-2" style="width:14px; display:inline-block; animation:spin 1s linear infinite; vertical-align:middle;"></i> กำลังประมวลผลและอัปโหลด...';
+            // แสดง Preview ทันทีในเครื่อง (Local)
+            previewImg.src = URL.createObjectURL(file);
+            previewBox.classList.add('has-image');
+
+            overlay.style.display = 'flex';
             lucide.createIcons();
 
             try {
-                // ย่อขนาดรูปภาพก่อนอัปโหลด (Max 1000px)
                 const optimizedFile = await resizeImage(file, 1000);
-
                 const formData = new FormData();
                 formData.append("image", optimizedFile);
 
@@ -2371,18 +2453,16 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    // ใช้ display_url เพื่อความรวดเร็วในการโหลดแทนรูปต้นฉบับ
                     urlInput.value = data.data.display_url || data.data.url;
-                    statusEl.style.color = 'var(--success)';
-                    statusEl.innerHTML = '<i data-lucide="check" style="width:14px; vertical-align:middle;"></i> อัปโหลดสำเร็จ!';
-                    lucide.createIcons();
+                    showToast('อัปโหลดรูปภาพเมนูสำเร็จ ✅');
                 } else {
                     throw new Error(data.error.message);
                 }
             } catch (error) {
-                console.error("Upload failed:", error);
-                statusEl.style.color = '#F44336';
-                statusEl.innerText = '❌ ผิดพลาด: ' + error.message;
+                console.error("Menu Upload failed:", error);
+                showToast('❌ ผิดพลาด: ' + error.message);
+            } finally {
+                overlay.style.display = 'none';
             }
             input.value = '';
         }
@@ -2425,18 +2505,20 @@
             const file = input.files[0];
             if (!file) return;
 
-            const statusEl = document.getElementById('upload-status');
+            const overlay = document.getElementById('banner-upload-overlay');
+            const previewImg = document.getElementById('banner-preview-img');
+            const previewBox = document.getElementById('banner-preview-box');
             const urlInput = document.getElementById('banner-img');
 
-            statusEl.style.display = 'block';
-            statusEl.style.color = 'var(--text-muted)';
-            statusEl.innerHTML = '<i data-lucide="loader-2" style="width:14px; display:inline-block; animation:spin 1s linear infinite; vertical-align:middle;"></i> กำลังประมวลผลและอัปโหลด...';
+            // แสดง Preview ทันทีในเครื่อง (Local)
+            previewImg.src = URL.createObjectURL(file);
+            previewBox.classList.add('has-image');
+
+            overlay.style.display = 'flex';
             lucide.createIcons();
 
             try {
-                // ย่อขนาดรูปภาพก่อนอัปโหลด (Max 1200px สำหรับแบนเนอร์)
                 const optimizedFile = await resizeImage(file, 1200);
-
                 const formData = new FormData();
                 formData.append("image", optimizedFile);
 
@@ -2444,31 +2526,21 @@
                     method: "POST",
                     body: formData
                 });
-
                 const data = await response.json();
 
                 if (data.success) {
                     const optimizedUrl = data.data.display_url || data.data.url;
                     urlInput.value = optimizedUrl;
-                    const previewImg = document.getElementById('banner-preview-img');
-                    const previewCont = document.getElementById('banner-preview-container');
-                    previewImg.src = optimizedUrl;
-                    previewCont.style.display = 'block';
-
-                    statusEl.style.color = 'var(--success)';
-                    statusEl.innerHTML = '<i data-lucide="check" style="width:14px; vertical-align:middle;"></i> อัปโหลดสำเร็จ!';
-                    lucide.createIcons();
-                    showToast("อัปโหลดและปรับขนาดแบนเนอร์สำเร็จ");
+                    showToast('อัปโหลดรูปภาพแบนเนอร์สำเร็จ ✅');
                 } else {
                     throw new Error(data.error.message);
                 }
             } catch (error) {
-                console.error("Upload failed:", error);
-                statusEl.style.color = '#F44336';
-                statusEl.innerText = '❌ ผิดพลาด: ' + error.message;
-                showToast("อัปโหลดรูปภาพล้มเหลว");
+                console.error("Banner Upload failed:", error);
+                showToast('❌ ผิดพลาด: ' + error.message);
+            } finally {
+                overlay.style.display = 'none';
             }
-
             input.value = '';
         }
 
