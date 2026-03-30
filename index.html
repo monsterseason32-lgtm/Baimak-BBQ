@@ -1180,8 +1180,9 @@
                 if (Array.isArray(data)) {
                     return data.map(m => ({
                         ...m,
-                        hasSpiciness: m.hasSpiciness !== false // Default to true
-                    }));
+                        hasSpiciness: m.hasSpiciness !== false, // Default to true
+                        isVisible: m.isVisible !== false // Default to true
+                    })).filter(m => m.isVisible !== false);
                 }
                 return [];
             } catch (error) { return []; }
@@ -1376,7 +1377,13 @@
             const container = document.getElementById('category-container');
             const getIcon = (cat) => ({ 'ทั้งหมด': 'layout-dashboard', 'เนื้อสัตว์': 'beef', 'ลูกชิ้น': 'circle-dot', 'ผัก': 'leaf', 'เส้น': 'git-commit' })[cat] || 'utensils';
 
-            container.innerHTML = AppState.categories.map(cat => `
+            // ซ่อนหมวดหมู่ที่ไม่มีเมนูอยู่ (ยกเว้น 'ทั้งหมด')
+            const usedCategories = AppState.menu.map(i => i.category);
+            const visibleCategories = AppState.categories.filter(cat =>
+                cat === 'ทั้งหมด' || usedCategories.includes(cat)
+            );
+
+            container.innerHTML = visibleCategories.map(cat => `
                 <div class="category-pill ${cat === AppState.activeCategory ? 'active' : 'glass'}" 
                      onclick="filterCategory('${cat}')" style="display: flex; align-items: center; gap: 8px;">
                     <i data-lucide="${getIcon(cat)}" style="width: 16px; height: 16px;"></i> ${cat}
