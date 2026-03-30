@@ -1103,6 +1103,10 @@
     <script>
         // ================= CONFIG & ARCHITECTURE MOCK =================
         const API_URL = "https://script.google.com/macros/s/AKfycbxYnt6AODwWQM2AupdcBiF1_05aZYgibMfRJ7ZvsLeyytN_rrvxbBl0DHKEUo9p7PnAcQ/exec";
+        const ADMIN_IDS = [
+            "Uebe28230ac7292dc4d7e729a83da110e",
+            "U8344212719a6a2a91fb597be9d7314cc"
+        ];
 
         // ================= STATE MANAGEMENT =================
         const AppState = {
@@ -1112,7 +1116,8 @@
             categories: ['ทั้งหมด', 'เนื้อสัตว์', 'ลูกชิ้น', 'ผัก', 'เส้น'],
             activeCategory: 'ทั้งหมด',
             cart: [],
-            currentOrder: null
+            currentOrder: null,
+            isAdmin: false
         };
 
         // ================= MOCK DATA (DEPRECATED) =================
@@ -1136,6 +1141,8 @@
                     picUrl: "https://ui-avatars.com/api/?name=Admin&background=FFB300&color=fff",
                     userId: "ADMIN_LOCAL_TEST"
                 };
+                AppState.isAdmin = true;
+                showAdminButton();
                 updateUserProfileUI();
                 return;
             }
@@ -1156,6 +1163,12 @@
                     userId: profile.userId
                 };
 
+                // Check Admin Permission
+                if (ADMIN_IDS.includes(profile.userId)) {
+                    AppState.isAdmin = true;
+                    showAdminButton();
+                }
+
                 saveUserProfile(AppState.user);
                 updateUserProfileUI();
 
@@ -1170,6 +1183,19 @@
         function updateUserProfileUI() {
             document.getElementById('user-name').innerText = "สวัสดี, " + AppState.user.name;
             document.getElementById('user-avatar').src = AppState.user.picUrl;
+        }
+
+        function showAdminButton() {
+            if (!AppState.isAdmin) return;
+            // Create Floating Admin Button
+            const btn = document.createElement('div');
+            btn.innerHTML = `
+                <div onclick="window.location.href='admin.html'" style="position: fixed; bottom: 85px; right: 20px; z-index: 999; background: var(--primary); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 4px 15px var(--primary-glow); border: 2px solid rgba(255,255,255,0.2); animation: slideUpFade 0.5s ease-out;">
+                    <i data-lucide="shield-check" style="width: 24px; height: 24px;"></i>
+                </div>
+            `;
+            document.body.appendChild(btn);
+            lucide.createIcons();
         }
 
         async function fetchMenuData() {
