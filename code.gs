@@ -38,7 +38,12 @@ function initDatabase() {
       Logger.log('Sheet already exists: ' + name);
     }
   });
-  return "Database Initialized Successfully!";
+  
+  // Verbose check
+  const allSheets = ss.getSheets().map(s => `"${s.getName()}"`);
+  Logger.log("Existing Sheets in Spreadsheet: " + allSheets.join(", "));
+  
+  return "Database Initialized! Sheets detected: " + allSheets.join(", ");
 }
 
 
@@ -55,11 +60,22 @@ function getSheet(sheetName) {
     }
   }
   
-  let sheet = ss.getSheetByName(sheetName);
+  let sheet = ss.getSheetByName(sheetName.trim());
+  if (!sheet) {
+    // ลองหาแบบ Case-insensitive
+    const all = ss.getSheets();
+    sheet = all.find(s => s.getName().trim().toLowerCase() === sheetName.trim().toLowerCase());
+  }
+
   if (!sheet) {
     // หากไม่มี ให้พยายามสร้าง (ต้องรัน initDatabase ก่อน หรือมีสิทธิ์ Editor)
     initDatabase();
-    sheet = ss.getSheetByName(sheetName);
+    sheet = ss.getSheetByName(sheetName.trim());
+  }
+  
+  if (!sheet) {
+    const existing = ss.getSheets().map(s => `"${s.getName()}"`).join(", ");
+    throw new Error(`ไม่พบชีต "${sheetName}" ใน Spreadsheet (ID: ${SPREADSHEET_ID}). ชีตที่มีอยู่คือ: ${existing}. กรุณาตรวจสอบชื่อชีตว่าสะกดถูกต้องหรือไม่`);
   }
   return sheet;
 }
