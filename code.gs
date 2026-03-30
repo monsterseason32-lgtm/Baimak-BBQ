@@ -36,37 +36,6 @@ function initDatabase() {
   return "Database Initialized Successfully!";
 }
 
-// ฟังก์ชันสำหรับนำเข้าข้อมูลตัวอย่าง (Seed Data)
-function seedDatabase() {
-  const menuSheet = getSheet('Menu');
-  const promoSheet = getSheet('Promotions');
-  
-  // ล้างข้อมูลเก่า (ไม่ลบหัวตาราง)
-  if (menuSheet.getLastRow() > 1) menuSheet.getRange(2, 1, menuSheet.getLastRow()-1, 5).clearContent();
-  if (promoSheet.getLastRow() > 1) promoSheet.getRange(2, 1, promoSheet.getLastRow()-1, 7).clearContent();
-
-  const mockMenu = [
-    ['m1', 'หมูสามชั้นสไลด์', 15, 'เนื้อสัตว์', 'https://images.unsplash.com/photo-1628268909376-e8c44bb3153f?auto=format&fit=crop&w=300&q=80', true],
-    ['m2', 'เนื้อโคขุน', 20, 'เนื้อสัตว์', 'https://images.unsplash.com/photo-1603360946369-dc9bb6258143?auto=format&fit=crop&w=300&q=80', true],
-    ['m3', 'เบคอนพันเห็ดเข็มทอง', 15, 'เนื้อสัตว์', 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=300&q=80', true],
-    ['b1', 'ไส้กรอกหนังกรอบ', 10, 'ลูกชิ้น', 'https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?auto=format&fit=crop&w=300&q=80', true],
-    ['b2', 'เต้าหู้ชีส', 15, 'ลูกชิ้น', 'https://images.unsplash.com/photo-1582878826629-29b7ad1cb431?auto=format&fit=crop&w=300&q=80', true],
-    ['v1', 'เห็ดออรินจิ', 10, 'ผัก', 'https://images.unsplash.com/photo-1509358271058-acd22cc93898?auto=format&fit=crop&w=300&q=80', true],
-    ['v2', 'บล็อคโคลี่', 10, 'ผัก', 'https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?auto=format&fit=crop&w=300&q=80', true],
-    ['n1', 'เส้นมันหนึบ', 15, 'เส้น', 'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=300&q=80', true]
-  ];
-
-  const mockPromos = [
-    ['p1', '<span class="text-primary">เซ็ตหม่าล่า</span> โคตรคุ้ม!', 'อิ่มจุกๆ ลดพิเศษ 20% เฉพาะสั่งผ่านแอพ', 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80', 'สั่งเลยตอนนี้', 'search', true],
-    ['p2', 'ใหม่! <span class="text-gold">ชีสเยิ้มมม</span>', 'สายชีสห้ามพลาด เต้าหู้ชีสสุดฟิน', 'https://images.unsplash.com/photo-1582878826629-29b7ad1cb431?auto=format&fit=crop&w=600&q=80', 'ดูเมนูเลย', 'ลูกชิ้น', true],
-    ['p3', 'สายผัก รักสุขภาพ', 'ผักสด สะอาด คัดสรรมาเพื่อคุณ', 'https://images.unsplash.com/photo-1509358271058-acd22cc93898?auto=format&fit=crop&w=600&q=80', 'สายตี้ผัก', 'ผัก', true]
-  ];
-
-  menuSheet.getRange(2, 1, mockMenu.length, 5).setValues(mockMenu);
-  promoSheet.getRange(2, 1, mockPromos.length, 7).setValues(mockPromos);
-
-  return "Database Seeded Successfully!";
-}
 
 // ฟังก์ชันสำหรับดึง Sheet
 function getSheet(sheetName) {
