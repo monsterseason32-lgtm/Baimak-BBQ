@@ -10,6 +10,9 @@
     <!-- ใช้ Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <!-- Leaflet Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         :root {
             /* โทนสีส้มใหม่ */
@@ -1012,6 +1015,245 @@
         .toast.show {
             transform: translateX(-50%) translateY(0);
         }
+
+        /* ================= NEW: CHECKOUT PAGE STYLES ================= */
+        .checkout-section {
+            margin-bottom: 24px;
+        }
+
+        .checkout-section h3 {
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .option-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .option-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--surface-border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option-card i {
+            color: var(--text-muted);
+            transition: color 0.3s ease;
+        }
+
+        .option-card span {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            transition: color 0.3s ease;
+        }
+
+        .option-card .check-circle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 2px solid var(--surface-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .option-card.active {
+            background: rgba(255, 107, 0, 0.08);
+            border-color: var(--primary);
+            box-shadow: 0 4px 15px rgba(255, 107, 0, 0.15);
+        }
+
+        .option-card.active i,
+        .option-card.active span {
+            color: var(--primary);
+        }
+
+        .option-card.active .check-circle {
+            border-color: var(--primary);
+            background: var(--primary);
+        }
+
+        .option-card.active .check-circle::after {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-top: 16px;
+            display: none;
+            /* Hidden by default */
+            animation: slideUpFade 0.4s ease forwards;
+        }
+
+        .form-group.show {
+            display: block;
+        }
+
+        .form-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--surface-border);
+            border-radius: var(--radius-sm);
+            padding: 14px 16px;
+            color: white;
+            font-family: inherit;
+            font-size: 0.95rem;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.06);
+            box-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        textarea.form-input {
+            resize: none;
+            height: 80px;
+        }
+
+        /* QR Code Container */
+        .qr-container {
+            display: none;
+            background: white;
+            padding: 20px;
+            border-radius: var(--radius-lg);
+            text-align: center;
+            margin-top: 16px;
+            animation: slideUpFade 0.4s ease forwards;
+        }
+
+        .qr-container.show {
+            display: block;
+        }
+
+        .qr-container img {
+            width: 200px;
+            height: 200px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+
+        .qr-container p {
+            color: #333;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        /* Map Styles */
+        #map {
+            height: 200px;
+            width: 100%;
+            border-radius: var(--radius-md);
+            margin-bottom: 12px;
+            border: 1px solid var(--surface-border);
+            z-index: 1;
+        }
+
+        .btn-location {
+            background: rgba(255, 107, 0, 0.1);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 10px;
+            border-radius: var(--radius-sm);
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-location:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Change Form */
+        #change-form {
+            display: none;
+            margin-top: 16px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--surface-border);
+        }
+
+        #change-form.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .change-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .change-option {
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--surface-border);
+            border-radius: var(--radius-sm);
+            text-align: center;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .change-option.active {
+            background: rgba(255, 107, 0, 0.15);
+            border-color: var(--primary);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .change-option.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .cash-summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px dashed var(--surface-border);
+        }
     </style>
 </head>
 
@@ -1112,8 +1354,123 @@
                     <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 2px;">ราคารวมทั้งหมด</p>
                     <h2 class="text-primary" style="font-size: 1.5rem;">฿<span id="cart-total">0</span></h2>
                 </div>
-                <button class="btn-primary" onclick="submitOrder()">
-                    ยืนยันออเดอร์ <i data-lucide="arrow-right" style="width: 18px;"></i>
+                <button class="btn-primary" onclick="goToCheckout()">
+                    ดำเนินการต่อ <i data-lucide="arrow-right" style="width: 18px;"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= PAGE 2.5: CHECKOUT (NEW) ================= -->
+        <div id="page-checkout" class="page">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px;">
+                <button onclick="switchPage('cart')"
+                    style="background: rgba(255,255,255,0.05); border: 1px solid var(--surface-border); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; color: white; cursor: pointer;">
+                    <i data-lucide="chevron-left" style="width: 20px;"></i>
+                </button>
+                <h1 style="margin: 0;">ชำระ<span class="text-primary">เงิน</span></h1>
+            </div>
+
+            <!-- 1. การจัดส่ง -->
+            <div class="checkout-section">
+                <h3><i data-lucide="map-pin" style="width: 20px; color: var(--primary);"></i> รูปแบบการรับอาหาร</h3>
+                <div class="option-grid">
+                    <div class="option-card active" id="opt-pickup" onclick="selectDelivery('pickup')">
+                        <div class="check-circle"></div>
+                        <i data-lucide="store" style="width: 28px; height: 28px;"></i>
+                        <span>รับที่ร้าน (มารับเอง)</span>
+                    </div>
+                    <div class="option-card" id="opt-delivery" onclick="selectDelivery('delivery')">
+                        <div class="check-circle"></div>
+                        <i data-lucide="bike" style="width: 28px; height: 28px;"></i>
+                        <span>จัดส่งถึงที่ (Delivery)</span>
+                    </div>
+                </div>
+
+                <!-- ฟอร์มที่อยู่จัดส่ง (ซ่อนไว้เริ่มต้น) -->
+                <div class="form-group" id="address-form">
+                    <button class="btn-location" onclick="useCurrentLocation()">
+                        <i data-lucide="locate-fixed" style="width: 18px;"></i> ใช้ตำแหน่งปัจจุบันของฉัน
+                    </button>
+                    <div id="map"></div>
+                    <p class="text-muted" style="font-size: 0.75rem; margin-bottom: 12px; text-align: center;">
+                        <i data-lucide="info" style="width: 12px; vertical-align: middle;"></i>
+                        ปรับหมุดบนแผนที่เพื่อความแม่นยำ
+                    </p>
+                    <input type="tel" id="checkout-phone" class="form-input" placeholder="เบอร์โทรศัพท์ติดต่อ"
+                        maxlength="10">
+                    <textarea id="checkout-address" class="form-input"
+                        placeholder="รายละเอียดที่อยู่เพิ่มเติม (บ้านเลขที่, จดจำจุดสังเกต)"></textarea>
+                </div>
+            </div>
+
+            <!-- 2. การชำระเงิน -->
+            <div class="checkout-section">
+                <h3><i data-lucide="wallet" style="width: 20px; color: var(--primary);"></i> วิธีการชำระเงิน</h3>
+                <div class="option-grid">
+                    <div class="option-card active" id="opt-qr" onclick="selectPayment('qr')">
+                        <div class="check-circle"></div>
+                        <i data-lucide="qr-code" style="width: 28px; height: 28px;"></i>
+                        <span>สแกน QR Code</span>
+                    </div>
+                    <div class="option-card" id="opt-cash" onclick="selectPayment('cash')">
+                        <div class="check-circle"></div>
+                        <i data-lucide="banknote" style="width: 28px; height: 28px;"></i>
+                        <span>เงินสด (Cash)</span>
+                    </div>
+                </div>
+
+                <!-- ฟอร์มเลือกเงินทอน (ซ่อนไว้เริ่มต้น) -->
+                <div id="change-form">
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">ระบุจำนวนเงินที่จะจ่าย
+                        (เพื่อให้คนขับเตรียมเงินทอน)</p>
+                    <div class="change-grid">
+                        <div class="change-option" onclick="addCash(20)">฿20</div>
+                        <div class="change-option" onclick="addCash(50)">฿50</div>
+                        <div class="change-option" onclick="addCash(100)">฿100</div>
+                        <div class="change-option" onclick="addCash(500)">฿500</div>
+                        <div class="change-option" onclick="addCash(1000)">฿1,000</div>
+                        <div class="change-option" onclick="addCash('exact')">จ่ายพอดี</div>
+                    </div>
+
+                    <div id="cash-summary-box" style="display:none;" class="cash-summary">
+                        <div style="font-size: 0.9rem; color: white;">
+                            ยอดเงินที่เลือก: <span id="cash-total-val"
+                                style="color: var(--primary); font-weight: 700;">฿0</span>
+                        </div>
+                        <button onclick="resetCash()"
+                            style="background:none; border:none; color:var(--text-muted); font-size:0.8rem; cursor:pointer; text-decoration:underline;">
+                            ล้างทั้งหมด
+                        </button>
+                    </div>
+                </div>
+
+                <!-- แสดง QR Code (แสดงเริ่มต้น) -->
+                <div class="qr-container show" id="qr-display">
+                    <!-- รูปภาพ PromptPay -->
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/QR_code_for_mobile_English_Wikipedia.svg/1200px-QR_code_for_mobile_English_Wikipedia.svg.png"
+                        alt="Thai QR Payment" id="qr-image">
+                    <p>สแกนผ่านแอปธนาคารเพื่อชำระเงิน</p>
+                    <p style="color: var(--primary); font-size: 1.1rem; font-weight: 600; margin-top: 8px;">ยอดโอน:
+                        ฿<span id="checkout-qr-total">0</span></p>
+
+                    <button onclick="downloadQR()"
+                        style="margin-top: 16px; background: #eee; border: 1px solid #ddd; padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; color: #333; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; margin-left: auto; margin-right: auto; transition: all 0.3s;">
+                        <i data-lucide="download" style="width: 16px;"></i> บันทึกภาพ QR Code
+                    </button>
+                </div>
+            </div>
+
+            <!-- Space for bottom bar -->
+            <div style="height: 100px;"></div>
+
+            <!-- Checkout Action Bar -->
+            <div class="glass checkout-bar" style="bottom: 20px;">
+                <div>
+                    <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 2px;">ยอดรวม</p>
+                    <h2 class="text-primary" style="font-size: 1.5rem;">฿<span id="checkout-total">0</span></h2>
+                </div>
+                <button class="btn-primary" onclick="confirmOrder()">
+                    ยืนยันการสั่งซื้อ <i data-lucide="check" style="width: 18px;"></i>
                 </button>
             </div>
         </div>
@@ -1166,7 +1523,7 @@
         </div>
 
         <!-- ================= BOTTOM NAVIGATION ================= -->
-        <div class="glass bottom-nav">
+        <div class="glass bottom-nav" id="main-bottom-nav">
             <div class="nav-item active" onclick="switchPage('menu')" id="nav-menu">
                 <i data-lucide="layout-grid"></i>
                 <span>เมนู</span>
@@ -1255,15 +1612,22 @@
         // ================= STATE MANAGEMENT =================
         const AppState = {
             user: { name: "กำลังโหลด...", picUrl: "" },
-            menu: [],
-            promotions: [],
-            categories: ['ทั้งหมด', 'เนื้อสัตว์', 'ลูกชิ้น', 'ผัก', 'เส้น'],
-            activeCategory: 'ทั้งหมด',
-            cart: [],
-            currentOrder: null,
-            isAdmin: false,
-            notifications: []
+            menu: [], promotions: [],
+            categories: ['ทั้งหมด', 'เนื้อสัตว์', 'ลูกชิ้น', 'ผัก', 'เส้น'], activeCategory: 'ทั้งหมด',
+            cart: [], currentOrder: null, isAdmin: false, notifications: [],
+            // NEW: Checkout State
+            checkout: {
+                delivery: 'pickup', // 'pickup' | 'delivery'
+                phone: '',
+                address: '',
+                payment: 'qr',      // 'qr' | 'cash'
+                changeFrom: null,
+                lat: null,
+                lng: null
+            }
         };
+
+        let map, marker;
 
         // ================= MOCK DATA (DEPRECATED) =================
         const MockPromotions = [];
@@ -1777,22 +2141,253 @@
             }
         }
 
-        async function submitOrder() {
+        // ================= NEW: CHECKOUT LOGIC =================
+        function goToCheckout() {
             if (AppState.cart.length === 0) return;
+            switchPage('checkout');
 
+            // Set total price
+            const total = AppState.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            document.getElementById('checkout-total').innerText = total;
+            document.getElementById('checkout-qr-total').innerText = total;
+
+            // Generate Dynamic PromptPay QR
+            const payload = generatePromptPayPayload(total);
+            const qrImg = document.querySelector('#qr-display img');
+            if (qrImg) {
+                qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(payload)}`;
+            }
+        }
+
+        function generatePromptPayPayload(amount) {
+            // Base provided by User: 00020101021153037645802TH29370016A00000067701011101130066807366220
+            let payload = "00020101021153037645802TH29370016A00000067701011101130066807366220";
+
+            // Tag 54: Amount
+            const amountStr = amount.toFixed(2);
+            payload += "54" + amountStr.length.toString().padStart(2, '0') + amountStr;
+
+            // Tag 63: CRC
+            payload += "6304";
+            payload += calculateCRC16(payload);
+
+            return payload;
+        }
+
+        function calculateCRC16(data) {
+            let crc = 0xFFFF;
+            for (let i = 0; i < data.length; i++) {
+                let x = ((crc >> 8) ^ data.charCodeAt(i)) & 0xFF;
+                x ^= x >> 4;
+                crc = ((crc << 8) ^ (x << 12) ^ (x << 5) ^ x) & 0xFFFF;
+            }
+            return crc.toString(16).toUpperCase().padStart(4, '0');
+        }
+
+        async function downloadQR() {
+            const qrImg = document.getElementById('qr-image');
+            if (!qrImg || !qrImg.src || qrImg.src.includes('wikimedia')) {
+                showToast("ยังไม่มี QR Code สำหรับชำระเงิน");
+                return;
+            }
+
+            try {
+                const response = await fetch(qrImg.src);
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = `PromptPay-BBQ-${Date.now()}.png`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                showToast("บันทึกภาพ QR Code เรียบร้อย 📸");
+            } catch (err) {
+                console.error("Download Error:", err);
+                showToast("ไม่สามารถบันทึกได้ กรุณาแคปหน้าจอแทน");
+            }
+        }
+
+        function selectDelivery(type) {
+            AppState.checkout.delivery = type;
+            document.getElementById('opt-pickup').classList.remove('active');
+            document.getElementById('opt-delivery').classList.remove('active');
+            document.getElementById('opt-' + type).classList.add('active');
+
+            const addrForm = document.getElementById('address-form');
+            if (type === 'delivery') {
+                addrForm.classList.add('show');
+                // Initialize map after animation
+                setTimeout(initMap, 400);
+            } else {
+                addrForm.classList.remove('show');
+            }
+        }
+
+        function initMap() {
+            if (map) {
+                map.invalidateSize();
+                return;
+            }
+            // Default to Bangkok or center of Thailand
+            const defaultPos = [13.7563, 100.5018];
+            map = L.map('map').setView(defaultPos, 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            marker = L.marker(defaultPos, { draggable: true }).addTo(map);
+
+            marker.on('dragend', function (e) {
+                const pos = marker.getLatLng();
+                AppState.checkout.lat = pos.lat;
+                AppState.checkout.lng = pos.lng;
+            });
+
+            map.on('click', function (e) {
+                marker.setLatLng(e.latlng);
+                AppState.checkout.lat = e.latlng.lat;
+                AppState.checkout.lng = e.latlng.lng;
+            });
+        }
+
+        function useCurrentLocation() {
+            if (!navigator.geolocation) {
+                showToast("เบราว์เซอร์ไม่รองรับ GPS");
+                return;
+            }
+            showToast("กำลังค้นหาตำแหน่งของคุณ...");
+            navigator.geolocation.getCurrentPosition((position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                const pos = [lat, lng];
+                map.setView(pos, 16);
+                marker.setLatLng(pos);
+                AppState.checkout.lat = lat;
+                AppState.checkout.lng = lng;
+                showToast("พบตำแหน่งแล้ว!");
+            }, (err) => {
+                showToast("ไม่สามารถระบุตำแหน่งได้");
+            });
+        }
+
+        function selectPayment(type) {
+            AppState.checkout.payment = type;
+            document.getElementById('opt-qr').classList.remove('active');
+            document.getElementById('opt-cash').classList.remove('active');
+            document.getElementById('opt-' + type).classList.add('active');
+
+            const qrDisplay = document.getElementById('qr-display');
+            const changeForm = document.getElementById('change-form');
+
+            if (type === 'qr') {
+                qrDisplay.classList.add('show');
+                changeForm.classList.remove('show');
+            } else {
+                qrDisplay.classList.remove('show');
+                changeForm.classList.add('show');
+                resetCash(); // Reset cash when switching back to cash
+            }
+        }
+
+        function addCash(value) {
+            const orderTotal = parseInt(document.getElementById('checkout-total').innerText) || 0;
+
+            if (value === 'exact') {
+                AppState.checkout.changeFrom = 'exact';
+                updateCashUI();
+                return;
+            }
+
+            if (AppState.checkout.changeFrom === 'exact') AppState.checkout.changeFrom = 0;
+
+            // Accumulate
+            AppState.checkout.changeFrom = (parseInt(AppState.checkout.changeFrom) || 0) + value;
+            updateCashUI();
+        }
+
+        function resetCash() {
+            AppState.checkout.changeFrom = 0;
+            updateCashUI();
+        }
+
+        function updateCashUI() {
+            const current = AppState.checkout.changeFrom;
+            const orderTotal = parseInt(document.getElementById('checkout-total').innerText) || 0;
+            const cashValDisplay = document.getElementById('cash-total-val');
+            const summaryBox = document.getElementById('cash-summary-box');
+
+            if (current === 'exact' || current > 0) {
+                summaryBox.style.display = 'flex';
+                cashValDisplay.innerText = current === 'exact' ? 'จ่ายพอดี' : `฿${current.toLocaleString()}`;
+            } else {
+                summaryBox.style.display = 'none';
+            }
+
+            // Lock logic
+            const isLocked = current === 'exact' || (typeof current === 'number' && current >= orderTotal);
+            document.querySelectorAll('.change-option').forEach(opt => {
+                if (isLocked) {
+                    opt.classList.add('disabled');
+                    // Mark active
+                    if (current === 'exact' && opt.innerText.includes('จ่ายพอดี')) opt.classList.add('active');
+                } else {
+                    opt.classList.remove('disabled');
+                    opt.classList.remove('active');
+                }
+            });
+        }
+
+        async function confirmOrder() {
+            // Validation
+            if (AppState.checkout.delivery === 'delivery') {
+                const phone = document.getElementById('checkout-phone').value;
+                const address = document.getElementById('checkout-address').value;
+                if (!phone || !address) {
+                    showToast("กรุณากรอกเบอร์โทรและที่อยู่ให้ครบถ้วน");
+                    return;
+                }
+                AppState.checkout.phone = phone;
+                AppState.checkout.address = address;
+            }
+
+            // Create enhanced items array that carries checkout meta info
+            const itemsWithMeta = [...AppState.cart];
+
+            // Format address with coordinates if available
+            let finalAddress = document.getElementById('checkout-address').value;
+            if (AppState.checkout.lat && AppState.checkout.lng) {
+                const mapLink = `https://www.google.com/maps?q=${AppState.checkout.lat},${AppState.checkout.lng}`;
+                finalAddress += `\n📍 พิกัด: ${mapLink}`;
+            }
+
+            itemsWithMeta.push({
+                isMeta: true,
+                delivery: AppState.checkout.delivery,
+                payment: AppState.checkout.payment,
+                changeFrom: AppState.checkout.changeFrom,
+                phone: AppState.checkout.phone,
+                address: finalAddress,
+                lat: AppState.checkout.lat,
+                lng: AppState.checkout.lng
+            });
+
+            const orderData = {
+                userId: AppState.user.userId,
+                customerName: AppState.user.name,
+                items: itemsWithMeta,
+                total: document.getElementById('checkout-total').innerText,
+                timestamp: new Date().toISOString()
+            };
+
+            // Switch to Tracking UI immediately
             switchPage('tracking');
             document.getElementById('main-status-title').innerText = "กำลังบันทึกออเดอร์...";
             document.getElementById('main-status-desc').innerText = "กรุณารอสักครู่ ระบบกำลังส่งข้อมูลไปยังร้าน";
             document.getElementById('main-status-icon').innerHTML = `<i data-lucide="loader-2" class="spin" style="width: 44px; height: 44px;"></i>`;
             lucide.createIcons();
-
-            const orderData = {
-                userId: AppState.user.userId,
-                customerName: AppState.user.name,
-                items: AppState.cart,
-                total: document.getElementById('cart-total').innerText,
-                timestamp: new Date().toISOString()
-            };
 
             try {
                 const res = await submitOrderToBackend(orderData);
@@ -1807,6 +2402,26 @@
                 showToast("ไม่สามารถส่งออเดอร์ได้ กรุณาลองใหม่อีกครั้ง");
                 switchPage('cart');
             }
+        }
+
+        async function submitOrderToBackend(orderData) {
+            try {
+                const response = await fetch(`${API_URL}?action=createOrder`, {
+                    method: 'POST',
+                    body: JSON.stringify(orderData)
+                });
+                const res = await response.json();
+                if (!res.success) throw new Error(res.message);
+                return res;
+            } catch (error) {
+                throw error;
+            }
+        }
+
+        // --- OLD submitOrder (DEPRECATED by goToCheckout + confirmOrder) ---
+        async function submitOrder() {
+            // This is now replaced by the two-step checkout flow.
+            goToCheckout();
         }
 
         // ================= TRACKING =================
@@ -1871,7 +2486,16 @@
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
 
             document.getElementById(`page-${pageId}`).classList.add('active');
-            document.getElementById(`nav-${pageId}`).classList.add('active');
+
+            // Manage Bottom Nav visibility
+            const bottomNav = document.getElementById('main-bottom-nav');
+            if (pageId === 'checkout') {
+                if (bottomNav) bottomNav.style.display = 'none'; // Hide Bottom Nav in Checkout
+            } else {
+                if (bottomNav) bottomNav.style.display = 'flex';
+                const navBtn = document.getElementById(`nav-${pageId}`);
+                if (navBtn) navBtn.classList.add('active');
+            }
 
             window.scrollTo({ top: 0, behavior: 'smooth' });
             if (pageId === 'cart') renderCartPage();
