@@ -332,3 +332,30 @@ function getSheetData(sheetName) {
   values.shift(); // Remove headers
   return values;
 }
+
+// ==========================================
+// 7. ฟังก์ชันสำหรับการทดสอบ (Manual Testing)
+// ==========================================
+
+/**
+ * ใช้สำหรับทดสอบรันใน Apps Script Editor
+ * (หากรัน doGet หรือ doPost โดยตรงจะ Error เพราะไม่มีค่า e)
+ */
+function testApp() {
+  Logger.log("--- เริ่มการทดสอบระบบ ---");
+  
+  // 1. ทดสอบดึงข้อมูลเมนู
+  const menu = getMenuData();
+  Logger.log("จำนวนเมนูที่พบ: " + menu.length);
+  
+  // 2. ทดสอบดึงคำสั่งซื้อ
+  const orders = getOrdersData();
+  Logger.log("จำนวนออเดอร์ที่พบ: " + orders.length);
+  
+  // 3. ทดสอบดึงโปรโมชั่น
+  const promos = getPromotionsData();
+  Logger.log("จำนวนโปรโมชั่นที่พบ: " + promos.length);
+  
+  Logger.log("--- จบการทดสอบ: ทุกอย่างทำงานปกติ ---");
+  return "Test Completed! Check Logs (Ctrl+Enter)";
+}
