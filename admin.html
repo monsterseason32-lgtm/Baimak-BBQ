@@ -1347,53 +1347,10 @@
             }
         }
 
-        // จำลองข้อมูลที่ดึงมาจาก Google Sheets
-        let orders = [
-            {
-                id: 'ORD-1001', queue: 'Q01', status: 'pending', customerName: 'คุณเอ สุทธิรักษ์',
-                time: '13:05', total: 120,
-                items: [
-                    { name: 'หมูสามชั้นสไลด์', qty: 2 },
-                    { name: 'เบคอนพันเห็ด', qty: 3 },
-                    { name: 'ไส้กรอกหนังกรอบ', qty: 1 }
-                ]
-            },
-            {
-                id: 'ORD-1002', queue: 'Q02', status: 'pending', customerName: 'Nong Bam',
-                time: '13:08', total: 45,
-                items: [
-                    { name: 'เห็ดออรินจิ', qty: 1 },
-                    { name: 'เต้าหู้ชีส', qty: 2 }
-                ]
-            },
-            {
-                id: 'ORD-1000', queue: 'Q00', status: 'cooking', customerName: 'คุณต้น',
-                time: '12:55', total: 80,
-                items: [
-                    { name: 'เนื้อโคขุน', qty: 4 }
-                ]
-            },
-            {
-                id: 'ORD-0999', queue: 'Q99', status: 'ready', customerName: 'Ploy',
-                time: '12:40', total: 150,
-                items: [
-                    { name: 'หมูสามชั้นสไลด์', qty: 5 },
-                    { name: 'เส้นมันหนึบ', qty: 2 }
-                ]
-            }
-        ];
-
-        let banners = [
-            { id: 'p1', title: '<span class="text-primary">เซ็ตหม่าล่า</span> โคตรคุ้ม!', desc: 'อิ่มจุกๆ ลดพิเศษ 20% เฉพาะสั่งผ่านแอพ', img: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80', btnText: 'สั่งเลยตอนนี้', action: 'search', active: true },
-            { id: 'p2', title: 'ใหม่! <span class="text-gold">ชีสเยิ้มมม</span>', desc: 'สายชีสห้ามพลาด เต้าหู้ชีสสุดฟิน', img: 'https://images.unsplash.com/photo-1582878826629-29b7ad1cb431?auto=format&fit=crop&w=600&q=80', btnText: 'ดูเมนูเลย', action: 'ลูกชิ้น', active: true },
-            { id: 'p3', title: 'สายผัก รักสุขภาพ', desc: 'ผักสด สะอาด คัดสรรมาเพื่อคุณ', img: 'https://images.unsplash.com/photo-1509358271058-acd22cc93898?auto=format&fit=crop&w=600&q=80', btnText: 'สายตี้ผัก', action: 'ผัก', active: true }
-        ];
-
-        let menus = [
-            { id: 'm1', name: 'หมูสามชั้นสไลด์', price: 15, category: 'เนื้อสัตว์', img: 'https://images.unsplash.com/photo-1628268909376-e8c44bb3153f?auto=format&fit=crop&w=300&q=80', hasSpiciness: true },
-            { id: 'm2', name: 'เนื้อโคขุน', price: 20, category: 'เนื้อสัตว์', img: 'https://images.unsplash.com/photo-1603360946369-dc9bb6258143?auto=format&fit=crop&w=300&q=80', hasSpiciness: true },
-            { id: 'v1', name: 'เห็ดออรินจิ', price: 10, category: 'ผัก', img: 'https://images.unsplash.com/photo-1509358271058-acd22cc93898?auto=format&fit=crop&w=300&q=80', hasSpiciness: true }
-        ];
+        // ข้อมูลหลักของระบบ
+        let orders = [];
+        let banners = [];
+        let menus = [];
 
         // ================= RENDER ENGINE =================
 
@@ -1541,7 +1498,7 @@
                         }
                     } catch (err) {
                         console.error("Reorder Error:", err);
-                        showToast("เปลี่ยนลำดับสำเร็จ (จำลองเฉพาะบนหน้าจอ)");
+                        showToast("เปลี่ยนลำดับสำเร็จ (บันทึกเฉพาะหน้าจอชั่วคราว)");
                     }
                 }
             });
@@ -1813,7 +1770,7 @@
                 else showToast('เพิ่มเมนูใหม่เรียบร้อย');
             } catch (error) {
                 console.error("Save Menu Error:", error);
-                showToast("จำลองบันทึกเมนูสำเร็จ (การเชื่อมต่อ API ขัดข้อง)");
+                showToast("ไม่สามารถเชื่อมต่อ API ได้ กรุณาลองใหม่อีกครั้ง");
             }
             closeMenuModal();
         }
@@ -1833,7 +1790,7 @@
                     showToast('ลบเมนูเรียบร้อยแล้ว');
                 } catch (error) {
                     console.error("Delete Menu Error:", error);
-                    showToast("จำลองลบเมนูสำเร็จ");
+                    showToast("ไม่สามารถลบเมนูได้");
                 }
             }
         }
@@ -1953,25 +1910,6 @@
             }, 3000);
         }
 
-        function simulateNewOrder() {
-            setTimeout(() => {
-                const newOrder = {
-                    id: 'ORD-' + Math.floor(1000 + Math.random() * 9000),
-                    queue: 'Q' + Math.floor(10 + Math.random() * 89),
-                    status: 'pending',
-                    customerName: 'ลูกค้าใหม่ (LINE)',
-                    time: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
-                    total: 60,
-                    items: [
-                        { name: 'เต้าหู้ชีส', qty: 2 },
-                        { name: 'ไส้กรอก', qty: 2 }
-                    ]
-                };
-                orders.unshift(newOrder);
-                renderBoard();
-                showToast("🔔 มีออเดอร์ใหม่เข้ามารอรับ!");
-            }, 15000);
-        }
 
         window.onload = () => {
             lucide.createIcons();
