@@ -63,6 +63,16 @@
             border: 1px solid var(--surface-border);
         }
 
+        .status-pill {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+
         /* Sidebar */
         .sidebar {
             width: 260px;
@@ -2078,20 +2088,62 @@
             </div>
         `).join('');
 
+            // Delivery & Payment Badges
+            const deliveryIcon = order.delivery === 'delivery' ? 'bike' : 'store';
+            const deliveryText = order.delivery === 'delivery' ? 'จัดส่ง (Delivery)' : 'รับที่ร้าน';
+            const paymentText = order.payment === 'qr' ? 'โอนเงิน (QR)' : 'เงินสด';
+            const paymentClass = order.payment === 'qr' ? 'status-pill' : 'status-pill'; // Can customize colors
+
             return `
             <div class="order-card" id="card-${order.id}" style="animation-delay: ${delay}s">
                 <div class="order-header">
                     <div class="queue-no">${order.queue}</div>
-                    <button class="btn-message" onclick="openMessageModal('${order.userId}', '${order.customerName}')">
-                        <i data-lucide="message-square" style="width: 14px;"></i> ทักแชท
-                    </button>
+                    <div style="display: flex; gap: 4px;">
+                        <span class="status-pill" style="background: rgba(255,107,0,0.15); color: var(--primary);">
+                            <i data-lucide="${deliveryIcon}" style="width: 12px; height: 12px; margin-right: 4px;"></i> ${deliveryText}
+                        </span>
+                        <span class="status-pill" style="background: rgba(255,255,255,0.08); color: white;">
+                             ${paymentText}
+                        </span>
+                        ${order.payment === 'cash' && order.changeFrom ? `
+                        <span class="status-pill" style="background: rgba(76, 175, 80, 0.15); color: #8BC34A; border: 1px solid rgba(76, 175, 80, 0.3);">
+                            <i data-lucide="coins" style="width: 12px; height: 12px; margin-right: 4px;"></i> 
+                            ${order.changeFrom === 'exact' ? 'จ่ายพอดี' : `ทอนจาก ฿${order.changeFrom}`}
+                        </span>
+                        ` : ''}
+                    </div>
                     <div class="order-time"><i data-lucide="clock" style="width: 14px;"></i> ${order.time}</div>
                 </div>
-                <div class="customer-info">
-                    <div class="customer-name">${order.customerName}</div>
-                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">รหัส: ${order.id}</div>
+                
+                <div class="customer-info" style="display:flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <div class="customer-name">${order.customerName}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">ID: ${order.id}</div>
+                    </div>
+                    <button class="btn-message" onclick="openMessageModal('${order.userId}', '${order.customerName}')">
+                        <i data-lucide="message-square" style="width: 14px;"></i> แชท
+                    </button>
                 </div>
-                <div class="order-items">
+
+                ${order.delivery === 'delivery' ? `
+                <div style="margin-top: 8px; padding: 10px; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid var(--surface-border);">
+                    <div style="font-size: 0.75rem; color: var(--primary); font-weight:600; margin-bottom: 2px; display:flex; align-items:center; gap:4px;">
+                        <i data-lucide="map-pin" style="width:12px;"></i> ที่อยู่จัดส่ง:
+                    </div>
+                    <div style="font-size: 0.85rem; color: white; line-height: 1.4;">${order.address}</div>
+                    <div style="font-size: 0.85rem; color: var(--gold); margin-top: 4px; font-weight:500;">
+                        <i data-lucide="phone" style="width:12px; margin-right:2px;"></i> ${order.phone}
+                    </div>
+                    ${order.lat && order.lng ? `
+                    <a href="https://www.google.com/maps?q=${order.lat},${order.lng}" target="_blank" 
+                       style="text-decoration:none; margin-top:10px; background:rgba(255,107,0,0.15); border:1px solid var(--primary); color:var(--primary); font-size:0.75rem; padding:8px; border-radius:6px; width:100%; display:flex; align-items:center; justify-content:center; gap:6px; transition: all 0.3s;">
+                        <i data-lucide="map" style="width:14px;"></i> ดูพิกัดบน Google Maps
+                    </a>
+                    ` : ''}
+                </div>
+                ` : ''}
+
+                <div class="order-items" style="margin-top: 12px;">
                     ${itemsHtml}
                 </div>
                 <div class="order-footer">
