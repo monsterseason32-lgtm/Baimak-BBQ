@@ -490,6 +490,28 @@
             border-color: rgba(255, 255, 255, 0.15);
         }
 
+        .banner-card.hidden {
+            opacity: 0.6;
+            filter: grayscale(0.3);
+            border-style: dashed;
+        }
+
+        .status-badge {
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .status-hidden {
+            background: rgba(244, 67, 54, 0.1);
+            color: #F44336;
+            border: 1px solid rgba(244, 67, 54, 0.2);
+        }
+
         /* สไตล์สำหรับตอนกำลังลาก (Drag) */
         .banner-card.sortable-ghost {
             opacity: 0.4;
@@ -1310,16 +1332,28 @@
                 <div id="menu-upload-status" style="font-size: 0.8rem; margin-top: 6px; display: none;"></div>
             </div>
             <div class="form-group"
-                style="background: rgba(255,255,255,0.02); padding: 16px; border-radius: 8px; border: 1px solid var(--surface-border);">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
+                style="background: rgba(255,255,255,0.02); padding: 16px; border-radius: 8px; border: 1px solid var(--surface-border); display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">
                     <div>
                         <label
-                            style="margin-bottom: 4px; color: var(--text-main); font-weight: 500;">ระบบเลือกระดับความเผ็ด</label>
-                        <div style="font-size: 0.8rem; color: var(--text-muted);">ให้ลูกค้าเลือก
-                            เผ็ดมาก/กลาง/น้อย/ไม่พริก ได้ตอนสั่ง</div>
+                            style="margin-bottom: 2px; color: var(--text-main); font-weight: 500; font-size: 0.9rem;">เลือกระดับความเผ็ด</label>
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">เปิดให้ลูกค้าเลือกความเผ็ด</div>
                     </div>
                     <label class="switch">
                         <input type="checkbox" id="menu-hasSpiciness" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,107,0,0.05); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,107,0,0.1);">
+                    <div>
+                        <label
+                            style="margin-bottom: 2px; color: var(--primary-light); font-weight: 600; font-size: 0.9rem;">แสดงผลเมนู</label>
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">แสดงให้ลูกค้าเห็นในแอป</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="menu-isVisible" checked>
                         <span class="slider"></span>
                     </label>
                 </div>
@@ -1368,7 +1402,8 @@
                 if (data) {
                     menus = data.map(m => ({
                         ...m,
-                        hasSpiciness: m.hasSpiciness !== false // Default to true
+                        hasSpiciness: m.hasSpiciness !== false, // Default to true
+                        isVisible: m.isVisible !== false // Default to true
                     }));
                 }
                 renderMenus();
@@ -1508,12 +1543,21 @@
             }
 
             container.innerHTML = filteredMenus.map(m => `
-            <div class="banner-card" style="flex-direction: column; overflow: hidden; align-items: stretch;">
+            <div class="banner-card ${m.isVisible === false ? 'hidden' : ''}" style="flex-direction: column; overflow: hidden; align-items: stretch;">
                 <div style="display: flex; padding: 12px; gap: 12px;">
                     <img src="${m.img}" style="width: 70px; height: 70px; object-fit: cover; border-radius: var(--radius-sm);">
                     <div style="flex: 1; min-width: 0;">
-                        <div style="font-weight: 600; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${m.name}</div>
-                        <div style="font-size: 0.85rem; color: var(--text-muted);">หมวดหมู่: ${m.category}</div>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div style="font-weight: 600; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${m.name}</div>
+                            <label class="switch" title="เปิด/ปิดการแสดงผล" style="flex-shrink: 0; transform: scale(0.8); transform-origin: top right;">
+                                <input type="checkbox" ${m.isVisible !== false ? 'checked' : ''} onchange="toggleMenuStatus('${m.id}', this.checked)">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center;">
+                            <span>หมวดหมู่: ${m.category}</span>
+                            ${m.isVisible === false ? '<span class="status-badge status-hidden" style="padding: 1px 6px; font-size: 0.65rem;"><i data-lucide="eye-off" style="width:10px;"></i> ซ่อนอยู่</span>' : ''}
+                        </div>
                         <div style="font-size: 1.1rem; color: var(--primary-light); font-weight: 600;">฿${m.price}</div>
                     </div>
                 </div>
@@ -1676,6 +1720,27 @@
             }
         }
 
+        async function toggleMenuStatus(id, isVisible) {
+            try {
+                const index = menus.findIndex(m => m.id === id);
+                if (index > -1) {
+                    menus[index].isVisible = isVisible;
+                    renderMenus();
+
+                    await fetch(API_URL + "?action=toggleMenu", {
+                        method: 'POST',
+                        body: JSON.stringify({ id: id, isVisible: isVisible })
+                    });
+
+                    if (isVisible) showToast(`เปิดการแสดงผลเมนู "${menus[index].name}" ✅`);
+                    else showToast(`ซ่อนเมนู "${menus[index].name}" แล้ว`);
+                }
+            } catch (error) {
+                console.error("Toggle Menu Error:", error);
+                showToast("ไม่สามารถอัปเดตสถานะเมนูได้");
+            }
+        }
+
         // ================= BANNER CRUD OPERATIONS =================
 
         function openBannerModal(id = null) {
@@ -1794,6 +1859,7 @@
                     document.getElementById('menu-category').value = m.category;
                     document.getElementById('menu-img').value = m.img;
                     document.getElementById('menu-hasSpiciness').checked = m.hasSpiciness;
+                    document.getElementById('menu-isVisible').checked = m.isVisible !== false;
                 }
             } else {
                 titleEl.innerText = "เพิ่มเมนูใหม่";
@@ -1814,7 +1880,8 @@
                 price: parseFloat(document.getElementById('menu-price').value) || 0,
                 category: document.getElementById('menu-category').value,
                 img: document.getElementById('menu-img').value || 'https://via.placeholder.com/300?text=No+Image',
-                hasSpiciness: document.getElementById('menu-hasSpiciness').checked
+                hasSpiciness: document.getElementById('menu-hasSpiciness').checked,
+                isVisible: document.getElementById('menu-isVisible').checked
             };
 
             try {
