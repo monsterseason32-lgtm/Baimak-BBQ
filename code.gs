@@ -2,6 +2,10 @@
 // 1. การตั้งค่าเริ่มต้น (Configuration)
 // ==========================================
 const SPREADSHEET_ID = '1cF3A1Gncp-_TXMI-dhSIj4t2gIX4eXDYDFSjEEsZO3m5t4X2DUjaSVm6'; 
+const ADMIN_IDS = [
+  "Uebe28230ac7292dc4d7e729a83da110e", 
+  "U8344212719a6a2a91fb597be9d7314cc"
+];
 
 // ฟังก์ชันสำหรับตั้งค่าฐานข้อมูลครั้งแรก (ให้กดยืนยันสิทธิ์และรันฟังก์ชันนี้ 1 ครั้งใน Apps Script Editor)
 function initDatabase() {
