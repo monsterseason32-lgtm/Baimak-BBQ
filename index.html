@@ -266,10 +266,11 @@
             border-radius: var(--radius-lg);
             overflow: hidden;
             margin-bottom: 28px;
-            box-shadow: 0 12px 30px rgba(255, 107, 0, 0.15);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
             touch-action: pan-y;
-            height: 200px;
+            height: 240px;
             background: #111;
+            border: 1px solid var(--surface-border);
         }
 
         .hero-slides {
@@ -287,7 +288,8 @@
             flex-direction: column;
             justify-content: center;
             align-items: flex-start;
-            padding: 30px 24px;
+            padding: 24px 20px 48px;
+            /* Added more bottom padding for dots */
             overflow: hidden;
         }
 
@@ -313,34 +315,40 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(105deg, rgba(15, 15, 18, 0.95) 0%, rgba(15, 15, 18, 0.6) 45%, rgba(0, 0, 0, 0) 100%);
+            background: linear-gradient(105deg, rgba(15, 15, 18, 0.95) 0%, rgba(15, 15, 18, 0.75) 45%, rgba(0, 0, 0, 0.2) 100%);
             z-index: 1;
         }
 
         .hero-content {
             position: relative;
             z-index: 2;
-            width: 85%;
+            width: 90%;
         }
 
         .hero-content h2 {
-            font-size: 1.5rem;
-            margin-bottom: 8px;
+            font-size: 1.6rem;
+            margin-bottom: 6px;
             text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
             transform: translateY(20px);
             opacity: 0;
             transition: all 0.6s ease 0.2s;
             line-height: 1.2;
+            color: white;
         }
 
         .hero-content p {
             font-size: 0.85rem;
             opacity: 0;
-            margin-bottom: 18px;
-            color: #E0E0E0;
+            margin-bottom: 20px;
+            color: #ccc;
             text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
             transform: translateY(20px);
             transition: all 0.6s ease 0.3s;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
         .hero-btn {
@@ -372,26 +380,25 @@
             transform: translateY(0);
         }
 
-        /* Modern Progress Dots */
+        /* Modern Progress Dots - Moved to Right for balance */
         .hero-dots {
             position: absolute;
-            bottom: 14px;
-            left: 24px;
-            right: 24px;
+            bottom: 20px;
+            right: 20px;
             display: flex;
-            justify-content: flex-start;
+            justify-content: flex-end;
             gap: 6px;
             z-index: 3;
+            width: fit-content;
         }
 
         .hero-dot-wrapper {
-            flex: 1;
+            width: 30px;
             height: 4px;
             background: rgba(255, 255, 255, 0.2);
             border-radius: 4px;
             overflow: hidden;
             cursor: pointer;
-            max-width: 40px;
         }
 
         .hero-dot-progress {
@@ -1285,7 +1292,7 @@
         <!-- ================= PAGE 1: MENU ================= -->
         <div id="page-menu" class="page active">
             <div class="header-profile">
-                <div class="user-info">
+                <div class="user-info" onclick="openProfileModal()" style="cursor: pointer;">
                     <img id="user-avatar" src="https://ui-avatars.com/api/?name=User&background=FF6B00&color=fff"
                         alt="User" class="avatar">
                     <div>
@@ -1584,6 +1591,57 @@
         </div>
     </div>
 
+    <!-- Profile Modal -->
+    <div class="modal-overlay" id="profile-modal"
+        style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(15px); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px;">
+        <div class="glass"
+            style="width: 100%; max-width: 400px; border-radius: var(--radius-lg); padding: 28px; position: relative; animation: slideUpFade 0.4s ease-out;">
+            <button onclick="closeProfileModal()"
+                style="position: absolute; top: 16px; right: 16px; background: none; border: none; color: #666; cursor: pointer;">
+                <i data-lucide="x" style="width: 24px;"></i>
+            </button>
+
+            <div style="text-align: center; margin-bottom: 24px;">
+                <div style="position: relative; width: 80px; height: 80px; margin: 0 auto 16px;">
+                    <img id="profile-modal-avatar" src=""
+                        style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--primary); object-fit: cover;">
+                    <div
+                        style="position: absolute; bottom: 0; right: 0; background: var(--primary); width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <i data-lucide="pencil" style="width: 12px; color: white;"></i>
+                    </div>
+                </div>
+                <h2 style="font-size: 1.4rem;">ข้อมูลส่วนตัว</h2>
+                <p class="text-muted" style="font-size: 0.85rem;">ระบุข้อมูลเพื่อความสะดวกในการส่งอาหาร</p>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <div>
+                    <label
+                        style="font-size: 0.8rem; color: var(--primary); font-weight: 600; margin-bottom: 6px; display: block;">ชื่อที่ใช้สั่งซื้อ</label>
+                    <input type="text" id="profile-name" class="form-input" style="margin-bottom: 0;"
+                        placeholder="ระบุชื่อของคุณ">
+                </div>
+                <div>
+                    <label
+                        style="font-size: 0.8rem; color: var(--primary); font-weight: 600; margin-bottom: 6px; display: block;">เบอร์โทรศัพท์</label>
+                    <input type="tel" id="profile-phone" class="form-input" style="margin-bottom: 0;"
+                        placeholder="0XXXXXXXXX" maxlength="10">
+                </div>
+                <div>
+                    <label
+                        style="font-size: 0.8rem; color: var(--primary); font-weight: 600; margin-bottom: 6px; display: block;">ที่อยู่จัดส่งประจำ</label>
+                    <textarea id="profile-address" class="form-input" style="height: 100px; margin-bottom: 0;"
+                        placeholder="บ้านเลขที่, ชื่อหมู่บ้าน, จดจำจุดสังเกต"></textarea>
+                </div>
+
+                <button class="btn-primary" onclick="saveProfile()"
+                    style="width: 100%; margin-top: 10px; justify-content: center; height: 50px; font-weight: 600;">
+                    บันทึกข้อมูล <i data-lucide="save" style="width: 18px;"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Notification Drawer -->
     <div id="notification-drawer" class="notif-drawer">
         <div class="notif-header">
@@ -1624,7 +1682,8 @@
                 changeFrom: null,
                 lat: null,
                 lng: null
-            }
+            },
+            salesStats: { bestSeller: null, recommended: null, newItems: [] }
         };
 
         let map, marker;
@@ -1657,6 +1716,9 @@
             }
 
             try {
+                // Initialize hidden tracking
+                document.getElementById('nav-tracking').style.display = 'none';
+
                 await liff.init({ liffId: "2009635252-NSmFIvAB" });
                 if (!liff.isLoggedIn()) { liff.login(); return; }
 
@@ -1709,15 +1771,19 @@
 
         async function fetchMenuData() {
             try {
-                const response = await fetch(`${API_URL}?action=getMenu`, { method: 'POST', body: JSON.stringify({}) });
+                // Add timestamp to prevent cache issues
+                const response = await fetch(`${API_URL}?action=getMenu&t=${Date.now()}`, { method: 'POST', body: JSON.stringify({}) });
                 const res = await response.json();
                 const data = Array.isArray(res) ? res : (res && res.data ? res.data : null);
                 if (Array.isArray(data)) {
-                    return data.map(m => ({
-                        ...m,
-                        hasSpiciness: m.hasSpiciness !== false, // Default to true
-                        isVisible: m.isVisible !== false // Default to true
-                    })).filter(m => m.isVisible !== false);
+                    return data.map(m => {
+                        // Strict check for "hidden" indicators, everything else is visible by default
+                        const isHidden = m.isVisible === false || m.isVisible === 'false' || m.isVisible === 'FALSE';
+                        const isVisible = !isHidden;
+
+                        const hasSpiciness = m.hasSpiciness !== false && m.hasSpiciness !== 'false' && m.hasSpiciness !== 'FALSE';
+                        return { ...m, isVisible, hasSpiciness };
+                    }).filter(m => m.isVisible);
                 }
                 return [];
             } catch (error) { return []; }
@@ -1725,7 +1791,7 @@
 
         async function fetchPromotionsData() {
             try {
-                const response = await fetch(`${API_URL}?action=getPromotions`, { method: 'POST', body: JSON.stringify({}) });
+                const response = await fetch(`${API_URL}?action=getPromotions&t=${Date.now()}`, { method: 'POST', body: JSON.stringify({}) });
                 const res = await response.json();
                 const data = Array.isArray(res) ? res : (res && res.data ? res.data : null);
                 return Array.isArray(data) ? data : [];
@@ -1741,8 +1807,41 @@
             } catch (error) { throw error; }
         }
 
+        async function fetchSalesStats() {
+            try {
+                const response = await fetch(`${API_URL}?action=getSalesStats`, { method: 'POST', body: JSON.stringify({}) });
+                const res = await response.json();
+                return res.success ? res : { bestSeller: null, recommended: null, newItems: [] };
+            } catch (error) { return { bestSeller: null, recommended: null, newItems: [] }; }
+        }
+
         async function saveUserProfile(userData) {
-            try { fetch(`${API_URL}?action=saveUser`, { method: 'POST', body: JSON.stringify(userData) }); } catch (e) { }
+            try {
+                const response = await fetch(`${API_URL}?action=saveUser`, { method: 'POST', body: JSON.stringify(userData) });
+                return await response.json();
+            } catch (e) { return { success: false }; }
+        }
+
+        async function fetchUserProfile() {
+            if (!AppState.user || !AppState.user.userId) return null;
+            try {
+                const response = await fetch(`${API_URL}?action=getUserProfile`, {
+                    method: 'POST',
+                    body: JSON.stringify({ userId: AppState.user.userId })
+                });
+                return await response.json();
+            } catch (e) { return null; }
+        }
+
+        async function fetchUserOrders() {
+            if (!AppState.user || !AppState.user.userId) return [];
+            try {
+                const response = await fetch(`${API_URL}?action=getUserOrders`, {
+                    method: 'POST',
+                    body: JSON.stringify({ userId: AppState.user.userId })
+                });
+                return await response.json();
+            } catch (e) { return []; }
         }
 
         // ================= UI RENDERING & LOGIC =================
@@ -1750,9 +1849,42 @@
             lucide.createIcons();
             await initializeLiff();
 
-            const [menuData, promosData] = await Promise.all([fetchMenuData(), fetchPromotionsData()]);
+            const [menuData, promosData, salesStats] = await Promise.all([fetchMenuData(), fetchPromotionsData(), fetchSalesStats()]);
             AppState.menu = menuData;
             AppState.promotions = promosData;
+            AppState.salesStats = salesStats;
+
+            // Fetch Profile and Auto-fill
+            const profile = await fetchUserProfile();
+            if (profile) {
+                AppState.user.name = profile.name || AppState.user.name;
+                AppState.checkout.phone = profile.phone || "";
+                AppState.checkout.address = profile.address || "";
+                AppState.checkout.lat = profile.lat || null;
+                AppState.checkout.lng = profile.lng || null;
+
+                // Update UI Avatar & Name
+                document.getElementById('user-name').innerText = `สวัสดี, ${AppState.user.name.split(' ')[0]}`;
+                document.getElementById('profile-name').value = AppState.user.name;
+                document.getElementById('profile-phone').value = AppState.checkout.phone;
+                document.getElementById('profile-address').value = AppState.checkout.address;
+
+                // Auto-fill checkout fields
+                document.getElementById('checkout-phone').value = AppState.checkout.phone;
+                document.getElementById('checkout-address').value = AppState.checkout.address;
+            }
+
+            // Fetch active orders to restore Tracking state
+            const userOrders = await fetchUserOrders();
+            if (userOrders && userOrders.length > 0) {
+                const latest = userOrders[0];
+                if (latest.status !== 'completed' && latest.status !== 'cancelled') {
+                    AppState.currentOrder = latest.status;
+                    document.getElementById('queue-number').innerText = latest.queue;
+                    updateOrderStatus(latest.status, false); // No toast on init
+                }
+            }
+            updateNavTrackingVisibility();
 
             renderCategories();
             renderMenu();
@@ -1778,33 +1910,136 @@
         let currentSlide = 0, totalSlides = 0, progressAnimation, touchStartX = 0, touchEndX = 0;
         const slideDuration = 4000;
 
+        function generateAutoPromotions() {
+            if (!AppState.menu || AppState.menu.length === 0) return [];
+
+            const stats = AppState.salesStats || { bestSeller: null, recommended: null, newItems: [] };
+            const menu = AppState.menu.filter(i => i.isVisible !== false);
+            if (menu.length === 0) return [];
+
+            const autos = [];
+
+            // Helper for appetizing descriptions
+            const getAppetizingText = (item) => {
+                const phrases = [
+                    `ลิ้มรสความอร่อยของ ${item.name} ในราคาเพียง ฿${item.price}`,
+                    `${item.name} พร้อมเสิร์ฟความฟิน ย่างร้อนๆ ทุกออเดอร์ 🔥`,
+                    `สัมผัสความนุ่มและความพรีเมียมของ ${item.name} ที่คุณมองหา`,
+                    `หอมกลิ่นย่างถ่านไปกับ ${item.name} ทีเด็ดประจำหมวด ${item.category} ✨`,
+                    `${item.name} ชิ้นโตเต็มคำ ราคาคุ้มค่าเพียง ฿${item.price} เท่านั้น`
+                ];
+                return phrases[Math.floor(Math.random() * phrases.length)];
+            };
+
+            // 1. Best Seller Analysis
+            if (stats.bestSeller) {
+                const item = menu.find(i => i.id === stats.bestSeller);
+                if (item) {
+                    autos.push({
+                        title: item.name,
+                        price: item.price,
+                        badge: "ขายดียอดฮิต 🏆",
+                        desc: `เมนูยอดนิยมที่ใครได้ชิมเป็นต้องสั่งซ้ำ! ราคาคุ้มค่าเพียง ฿${item.price}`,
+                        img: item.img,
+                        btnText: "สั่งเลย",
+                        action: item.category
+                    });
+                }
+            }
+
+            // 2. Recommended
+            if (stats.recommended) {
+                const item = menu.find(i => i.id === stats.recommended);
+                if (item && !autos.find(a => a.id === item.id)) {
+                    autos.push({
+                        title: item.name,
+                        price: item.price,
+                        badge: "เชฟแนะนำ ✨",
+                        desc: `เชฟท้าให้ลอง! ${item.name} รสชาติพรีเมียมที่คุณจะไม่ลืม`,
+                        img: item.img,
+                        btnText: "ดูเมนูนี้",
+                        action: item.category
+                    });
+                }
+            }
+
+            // 3. Random items to fill up to 5-6 slides
+            const maxSlides = 6;
+            const shuffled = [...menu]
+                .filter(i => !autos.find(a => a.id === i.id))
+                .sort(() => 0.5 - Math.random());
+
+            shuffled.slice(0, maxSlides - autos.length).forEach(item => {
+                autos.push({
+                    title: item.name,
+                    price: item.price,
+                    badge: "แนะนำให้ลอง 🔥",
+                    desc: getAppetizingText(item),
+                    img: item.img,
+                    btnText: "ลิ้มลองเลย",
+                    action: item.category
+                });
+            });
+
+            return autos;
+        }
+
         function renderHeroBanner() {
             const slidesContainer = document.getElementById('hero-slides');
             const dotsContainer = document.getElementById('hero-dots');
 
-            if (!AppState.promotions || AppState.promotions.length === 0) {
+            // 1. Filter only ACTIVE manual promotions
+            let manualPromos = (AppState.promotions || []).filter(p => p.active === true || p.active === 'TRUE');
+
+            // 2. Generate auto promos from current menu
+            let autoPromos = generateAutoPromotions();
+
+            // 3. Combine them (Manual first, then Auto)
+            let promos = [...manualPromos, ...autoPromos];
+
+            // Limit total slides for better performance
+            promos = promos.slice(0, 8);
+
+            if (promos.length === 0) {
                 document.getElementById('hero-carousel').style.display = 'none';
                 return;
+            } else {
+                document.getElementById('hero-carousel').style.display = 'block';
             }
 
-            totalSlides = AppState.promotions.length;
-            slidesContainer.innerHTML = AppState.promotions.map((promo, idx) => `
+            totalSlides = promos.length;
+            slidesContainer.innerHTML = promos.map((promo, idx) => {
+                // If it's a manual promo without price, try to find item price if action is a category
+                const displayPrice = promo.price || "";
+
+                return `
                 <div class="hero-slide ${idx === 0 ? 'active' : ''}" id="slide-${idx}">
                     <div class="hero-bg" style="background-image: url('${promo.img}')"></div>
                     <div class="hero-overlay"></div>
                     <div class="hero-content">
+                        <div style="background: var(--primary); color: white; padding: 4px 12px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; width: fit-content; margin-bottom: 10px; box-shadow: 0 4px 10px var(--primary-glow); transform: skewX(-5deg); letter-spacing: 1px;">${promo.badge || 'PROMOTION'}</div>
                         <h2>${promo.title}</h2>
-                        <p>${promo.desc}</p>
-                        <button class="hero-btn" onclick="handlePromoAction('${promo.action}')">${promo.btnText}</button>
+                        ${displayPrice ? `
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                            <span style="font-size: 1.4rem; font-weight: 700; color: var(--primary-light);">฿${displayPrice}</span>
+                            <span style="width: 1px; height: 15px; background: rgba(255,255,255,0.3);"></span>
+                            <span class="text-muted" style="font-size: 0.8rem;">( เริ่มต้น )</span>
+                        </div>` : ''}
+                        <p style="margin-bottom: 20px; line-height: 1.4; color: #E0E0E0;">${promo.desc}</p>
+                        <button class="hero-btn" onclick="handlePromoAction('${promo.action}')">${promo.btnText || 'ดูเพิ่มเติม'}</button>
                     </div>
-                </div>
-            `).join('');
+                </div>`;
+            }).join('');
 
-            dotsContainer.innerHTML = AppState.promotions.map((_, idx) => `
+            dotsContainer.innerHTML = promos.map((_, idx) => `
                 <div class="hero-dot-wrapper" onclick="goToSlide(${idx})">
                     <div class="hero-dot-progress" id="dot-progress-${idx}"></div>
                 </div>
             `).join('');
+
+            // Restart carousel state
+            currentSlide = 0;
+            if (slidesContainer) slidesContainer.style.transform = `translateX(0)`;
 
             initCarousel();
         }
@@ -1949,9 +2184,12 @@
 
         function renderMenu(searchTerm = '') {
             const container = document.getElementById('menu-container');
-            if (!Array.isArray(AppState.menu)) AppState.menu = MockDatabase;
+            if (!Array.isArray(AppState.menu)) AppState.menu = [];
 
-            let filtered = AppState.activeCategory === 'ทั้งหมด' ? AppState.menu : AppState.menu.filter(item => item.category === AppState.activeCategory);
+            // Redundant check for isVisible for safety
+            let baseMenu = AppState.menu.filter(i => i.isVisible !== false && i.isVisible !== 'FALSE');
+
+            let filtered = AppState.activeCategory === 'ทั้งหมด' ? baseMenu : baseMenu.filter(item => item.category === AppState.activeCategory);
             if (searchTerm) filtered = filtered.filter(item => item.name.toLowerCase().includes(searchTerm));
 
             if (filtered.length === 0) {
@@ -1961,8 +2199,23 @@
             }
 
             container.innerHTML = filtered.map((item, index) => {
-                const isPopular = item.category === 'เนื้อสัตว์' || item.price >= 15;
-                const badgeHtml = isPopular ? `<div class="menu-badge"><i data-lucide="star" style="width: 12px; fill: var(--gold);"></i> ขายดี</div>` : '';
+                let badgeHtml = '';
+                const stats = AppState.salesStats;
+
+                if (item.id === stats.bestSeller) {
+                    badgeHtml = `<div class="menu-badge" style="background: rgba(255, 179, 0, 0.15); color: #FFB300;">
+                                    <i data-lucide="award" style="width: 12px; fill: #FFB300;"></i> ขายดี
+                                 </div>`;
+                } else if (item.id === stats.recommended) {
+                    badgeHtml = `<div class="menu-badge" style="background: rgba(0, 150, 255, 0.15); color: #0096FF;">
+                                    <i data-lucide="thumbs-up" style="width: 12px; fill: #0096FF;"></i> แนะนำ
+                                 </div>`;
+                } else if (stats.newItems && stats.newItems.includes(item.id)) {
+                    badgeHtml = `<div class="menu-badge" style="background: rgba(34, 197, 94, 0.15); color: #22c55e;">
+                                    <i data-lucide="sparkles" style="width: 12px; fill: #22c55e;"></i> ใหม่
+                                 </div>`;
+                }
+
                 return `
                 <div class="menu-card" style="animation-delay: ${index * 0.05}s;">
                     ${badgeHtml}
@@ -2425,8 +2678,10 @@
         }
 
         // ================= TRACKING =================
-        function updateOrderStatus(status) {
+        function updateOrderStatus(status, showNotification = true) {
             AppState.currentOrder = status;
+            updateNavTrackingVisibility();
+
             ['step-1', 'step-2', 'step-3'].forEach(s => {
                 document.getElementById(s).classList.remove('active', 'completed');
                 document.getElementById(s).querySelector('.step-dot').innerHTML = '';
@@ -2475,9 +2730,24 @@
                 titleC.style.color = "#4CAF50";
                 descC.innerText = "อาหารเสร็จแล้ว มารับที่หน้าร้านได้เลยครับ";
             }
+            else if (status === 'completed' || status === 'cancelled') {
+                // Return to menu if current page is tracking
+                if (document.getElementById('page-tracking').classList.contains('active')) {
+                    switchPage('menu');
+                }
+            }
 
             lucide.createIcons();
-            showToast("สถานะออเดอร์อัปเดตแล้ว");
+            if (showNotification) showToast("สถานะออเดอร์อัปเดตแล้ว");
+        }
+
+        function updateNavTrackingVisibility() {
+            const navTracking = document.getElementById('nav-tracking');
+            const isActive = AppState.currentOrder &&
+                AppState.currentOrder !== 'completed' &&
+                AppState.currentOrder !== 'cancelled';
+
+            navTracking.style.display = isActive ? 'flex' : 'none';
         }
 
         // ================= UTILITIES =================
@@ -2499,6 +2769,56 @@
 
             window.scrollTo({ top: 0, behavior: 'smooth' });
             if (pageId === 'cart') renderCartPage();
+        }
+
+        // ================= PROFILE =================
+        function openProfileModal() {
+            document.getElementById('profile-modal-avatar').src = AppState.user.picUrl || 'https://ui-avatars.com/api/?name=' + AppState.user.name;
+            document.getElementById('profile-modal').style.display = 'flex';
+            lucide.createIcons();
+        }
+
+        function closeProfileModal() {
+            document.getElementById('profile-modal').style.display = 'none';
+        }
+
+        async function saveProfile() {
+            const name = document.getElementById('profile-name').value;
+            const phone = document.getElementById('profile-phone').value;
+            const address = document.getElementById('profile-address').value;
+
+            if (!name) {
+                showToast("กรุณาระบุชื่อของคุณ");
+                return;
+            }
+
+            try {
+                showToast("กำลังบันทึกข้อมูล...");
+                const updatedData = {
+                    userId: AppState.user.userId,
+                    name: name,
+                    phone: phone,
+                    address: address,
+                    lat: AppState.checkout.lat,
+                    lng: AppState.checkout.lng
+                };
+
+                const res = await saveUserProfile(updatedData);
+                if (res.success) {
+                    AppState.user.name = name;
+                    AppState.checkout.phone = phone;
+                    AppState.checkout.address = address;
+
+                    document.getElementById('user-name').innerText = `สวัสดี, ${name.split(' ')[0]}`;
+                    document.getElementById('checkout-phone').value = phone;
+                    document.getElementById('checkout-address').value = address;
+
+                    showToast("บันทึกข้อมูลเรียบร้อยแล้ว ✅");
+                    closeProfileModal();
+                }
+            } catch (err) {
+                showToast("บันทึกไม่สำเร็จ กรุณาลองใหม่");
+            }
         }
 
         let toastTimeout;
@@ -2526,27 +2846,32 @@
         }
 
         async function fetchNotifications() {
-            if (!AppState.user || !AppState.user.userId) return;
+            // Quietly skip if no internet or no user
+            if (!navigator.onLine || !AppState.user || !AppState.user.userId) return;
+
             try {
-                const response = await fetch(`${API_URL}?action=getNotifications`, {
+                const response = await fetch(`${API_URL}?action=getNotifications&t=${Date.now()}`, {
                     method: 'POST',
                     body: JSON.stringify({ userId: AppState.user.userId })
                 });
+
+                if (!response.ok) return; // Silent skip for server errors
                 const data = await response.json();
 
                 if (Array.isArray(data)) {
                     // Check if there are NEW unread notifications
                     const hasNew = data.some(n => !n.isRead && !AppState.notifications.find(old => old.id === n.id));
-
                     AppState.notifications = data;
                     updateNotificationBadge();
 
                     if (hasNew) {
                         shakeBell();
-                        // Optional: Show a mini-toast or sound if needed
                     }
                 }
-            } catch (error) { console.error("Fetch Notif Error:", error); }
+            } catch (error) {
+                // Only log non-network errors to keep console clean
+                if (navigator.onLine) console.debug("Notif Sync Paused:", error.message);
+            }
         }
 
         function updateNotificationBadge() {
