@@ -1840,7 +1840,7 @@
 
         async function fetchMenus() {
             try {
-                const response = await fetch(`${API_URL}?action=getMenu`, { method: 'POST', body: JSON.stringify({}) });
+                const response = await fetch(`${API_URL}?action=getMenu&t=${Date.now()}`, { method: 'POST', body: JSON.stringify({}) });
                 const res = await response.json();
                 const data = Array.isArray(res) ? res : (res && res.data ? res.data : null);
                 if (data) {
@@ -1859,7 +1859,7 @@
 
         async function fetchBanners() {
             try {
-                const response = await fetch(API_URL + "?action=getPromotions", {
+                const response = await fetch(`${API_URL}?action=getPromotions&t=${Date.now()}`, {
                     method: 'POST',
                     body: JSON.stringify({})
                 });
@@ -2208,70 +2208,74 @@
                 console.error("Toggle Banner Error:", error);
                 showToast("ไม่สามารถอัปเดตสถานะแบนเนอร์ได้");
             }
-            async function toggleMenuStatus(id, isVisible) {
-                try {
-                    const index = menus.findIndex(m => m.id === id);
-                    if (index > -1) {
-                        menus[index].isVisible = isVisible;
-                        renderMenus();
+        }
 
-                        await fetch(API_URL + "?action=toggleMenu", {
-                            method: 'POST',
-                            body: JSON.stringify({ id: id, isVisible: isVisible })
-                        });
+        async function toggleMenuStatus(id, isVisible) {
+            try {
+                const index = menus.findIndex(m => m.id === id);
+                if (index > -1) {
+                    menus[index].isVisible = isVisible;
+                    renderMenus(); // Update UI immediately
 
-                        if (isVisible) showToast(`เปิดการแสดงผลเมนู "${menus[index].name}" ✅`);
-                        else showToast(`ซ่อนเมนู "${menus[index].name}" แล้ว`);
-                    }
-                } catch (error) {
-                    console.error("Toggle Menu Error:", error);
-                    showToast("ไม่สามารถอัปเดตสถานะเมนูได้");
-                }
-            }
-
-            // ================= MESSAGING =================
-            function openMessageModal(userId, name) {
-                document.getElementById('msg-user-id').value = userId;
-                document.getElementById('msg-title').value = "แจ้งเตือนจากร้านใบหมาก";
-                document.getElementById('msg-text').value = "";
-                document.getElementById('message-modal').classList.add('show');
-            }
-
-            function closeMessageModal() {
-                document.getElementById('message-modal').classList.remove('show');
-            }
-
-            async function sendManualMessage() {
-                const userId = document.getElementById('msg-user-id').value;
-                const title = document.getElementById('msg-title').value;
-                const message = document.getElementById('msg-text').value;
-
-                if (!message) {
-                    showToast("กรุณาพิมพ์ข้อความก่อนส่ง");
-                    return;
-                }
-
-                try {
-                    showToast("กำลังส่งข้อความ...");
-                    const response = await fetch(API_URL + "?action=sendNotification", {
+                    const response = await fetch(`${API_URL}?action=toggleMenu`, {
                         method: 'POST',
-                        body: JSON.stringify({
-                            userId: userId,
-                            title: title,
-                            message: message,
-                            type: 'admin'
-                        })
+                        body: JSON.stringify({ id: id, isVisible: isVisible })
                     });
                     const res = await response.json();
-                    if (res.success) {
-                        showToast("ส่งข้อความสำเร็จแล้ว ✅");
-                        closeMessageModal();
-                    } else {
-                        throw new Error(res.message);
-                    }
-                } catch (err) {
-                    showToast("ส่งข้อความไม่สำเร็จ กรุณาลองใหม่");
+                    if (!res.success) throw new Error(res.message);
+
+                    if (isVisible) showToast(`เปิดการแสดงผลเมนู "${menus[index].name}" ✅`);
+                    else showToast(`ซ่อนเมนู "${menus[index].name}" แล้ว`);
                 }
+            } catch (error) {
+                console.error("Toggle Menu Error:", error);
+                showToast("ไม่สามารถอัปเดตสถานะเมนูได้ กรุณาลองใหม่");
+                fetchMenus(); // Revert state from server
+            }
+        }
+
+        // ================= MESSAGING =================
+        function openMessageModal(userId, name) {
+            document.getElementById('msg-user-id').value = userId;
+            document.getElementById('msg-title').value = "แจ้งเตือนจากร้านใบหมาก";
+            document.getElementById('msg-text').value = "";
+            document.getElementById('message-modal').classList.add('show');
+        }
+
+        function closeMessageModal() {
+            document.getElementById('message-modal').classList.remove('show');
+        }
+
+        async function sendManualMessage() {
+            const userId = document.getElementById('msg-user-id').value;
+            const title = document.getElementById('msg-title').value;
+            const message = document.getElementById('msg-text').value;
+
+            if (!message) {
+                showToast("กรุณาพิมพ์ข้อความก่อนส่ง");
+                return;
+            }
+
+            try {
+                showToast("กำลังส่งข้อความ...");
+                const response = await fetch(API_URL + "?action=sendNotification", {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        userId: userId,
+                        title: title,
+                        message: message,
+                        type: 'admin'
+                    })
+                });
+                const res = await response.json();
+                if (res.success) {
+                    showToast("ส่งข้อความสำเร็จแล้ว ✅");
+                    closeMessageModal();
+                } else {
+                    throw new Error(res.message);
+                }
+            } catch (err) {
+                showToast("ส่งข้อความไม่สำเร็จ กรุณาลองใหม่");
             }
         }
 
