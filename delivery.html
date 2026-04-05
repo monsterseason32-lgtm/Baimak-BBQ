@@ -263,6 +263,7 @@
             try {
                 const response = await fetch(API_URL + "?action=getOrders", {
                     method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
                     body: JSON.stringify({})
                 });
                 const res = await response.json();
@@ -315,7 +316,7 @@
                     <div class="address-box">
                         <div class="address-text">
                             <i data-lucide="map-pin" style="width: 14px; color: var(--primary); vertical-align: middle;"></i>
-                            ${j.address}
+                            ${(j.address || "").split('📍')[0].trim()}
                         </div>
                         ${j.lat && j.lng ? `
                             <a href="https://www.google.com/maps/dir/?api=1&destination=${j.lat},${j.lng}" target="_blank" class="map-link">
@@ -343,16 +344,63 @@
             lucide.createIcons();
         }
 
+        // ================= TRACKING LOGIC =================
+        let watchId = null;
+        let trackingOrderId = null;
+
+        function startRiderTracking(orderId) {
+            if (!navigator.geolocation) return;
+
+            // Stop previous if any
+            stopRiderTracking();
+
+            trackingOrderId = orderId;
+            watchId = navigator.geolocation.watchPosition(
+                (pos) => {
+                    const { latitude, longitude } = pos.coords;
+                    sendLocationToBackend(orderId, latitude, longitude);
+                },
+                (err) => console.error("Tracking Error:", err),
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+            console.log("Started tracking for:", orderId);
+        }
+
+        function stopRiderTracking() {
+            if (watchId !== null) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+            }
+            trackingOrderId = null;
+        }
+
+        async function sendLocationToBackend(orderId, lat, lng) {
+            try {
+                await fetch(API_URL + "?action=updateRiderLocation", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({ orderId, lat, lng })
+                });
+            } catch (e) { }
+        }
+
         async function updateJobStatus(orderId, newStatus) {
             try {
                 showToast("กำลังอัปเดต...");
                 const response = await fetch(API_URL + "?action=updateStatus", {
                     method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
                     body: JSON.stringify({ orderId: orderId, status: newStatus })
                 });
                 const res = await response.json();
                 if (res.success) {
-                    showToast(newStatus === 'shipping' ? "เริ่มจัดส่งแล้ว! ลุยเลย 🔥" : "ภารกิจเสร็จสิ้น! ขอบคุณครับ ✅");
+                    if (newStatus === 'shipping') {
+                        showToast("เริ่มจัดส่งแล้ว! ลุยเลย 🔥");
+                        startRiderTracking(orderId);
+                    } else if (newStatus === 'completed') {
+                        showToast("ภารกิจเสร็จสิ้น! ขอบคุณครับ ✅");
+                        stopRiderTracking();
+                    }
                     fetchJobs();
                 } else {
                     throw new Error(res.message);
