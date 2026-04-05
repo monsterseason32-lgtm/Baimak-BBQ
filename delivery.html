@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ฝ่ายจัดส่ง - ใบหมาก BBQ หม่าล่า</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <style>
+        :root {
+            --primary: #FF6B00;
+            --primary-dark: #E65100;
+            --bg-dark: #0f0f12;
+            --bg-panel: #16161a;
+            --text-main: #FFFFFF;
+            --text-muted: #9E9E9E;
+            --surface: rgba(255, 255, 255, 0.04);
+            --surface-border: rgba(255, 255, 255, 0.08);
+            --radius-lg: 20px;
+            --radius-md: 14px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Prompt', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 20px;
+            padding-bottom: 40px;
+        }
+
+        .glass {
+            background: var(--surface);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--surface-border);
+            border-radius: var(--radius-lg);
+        }
+
+        header {
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .refresh-btn {
+            background: var(--surface);
+            border: 1px solid var(--surface-border);
+            color: white;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .job-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .job-card {
+            padding: 20px;
+            animation: slideUp 0.4s ease forwards;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            border-bottom: 1px dashed var(--surface-border);
+            padding-bottom: 12px;
+        }
+
+        .queue-no {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .status-pill {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-ready {
+            background: rgba(33, 150, 243, 0.2);
+            color: #2196F3;
+        }
+
+        .status-shipping {
+            background: rgba(255, 107, 0, 0.2);
+            color: var(--primary);
+        }
+
+        .customer-info {
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .customer-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #333;
+        }
+
+        .address-box {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 14px;
+            border-radius: var(--radius-md);
+            margin-bottom: 16px;
+            border: 1px solid var(--surface-border);
+        }
+
+        .address-text {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+
+        .map-link {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #2196F3;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 107, 0, 0.2);
+        }
+
+        .btn-success {
+            background: #4CAF50;
+            color: white;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2);
+        }
+
+        .btn-phone {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            border: 1px solid var(--surface-border);
+        }
+
+        #empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000;
+            font-size: 0.9rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div>
+            <h1>ฝ่ายจัดส่ง (Rider)</h1>
+            <p style="color: var(--text-muted); font-size: 0.8rem;">อัปเดตงานล่าสุด <span id="last-update">--:--</span>
+            </p>
+        </div>
+        <button class="refresh-btn" onclick="fetchJobs()">
+            <i data-lucide="refresh-cw" id="refresh-icon"></i>
+        </button>
+    </header>
+
+    <div id="job-list" class="job-list">
+        <!-- Render via JS -->
+    </div>
+
+    <div id="empty-state" style="display: none;">
+        <i data-lucide="package-search" style="width: 64px; height: 64px; margin-bottom: 16px; opacity: 0.3;"></i>
+        <p>ยังไม่มีงานจัดส่งในขณะนี้</p>
+    </div>
+
+    <div id="toast" class="toast">ข้อความ</div>
+
+    <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycbxYnt6AODwWQM2AupdcBiF1_05aZYgibMfRJ7ZvsLeyytN_rrvxbBl0DHKEUo9p7PnAcQ/exec";
+        let jobs = [];
+
+        async function fetchJobs() {
+            const icon = document.getElementById('refresh-icon');
+            icon.classList.add('spin');
+
+            try {
+                const response = await fetch(API_URL + "?action=getOrders", {
+                    method: 'POST',
+                    body: JSON.stringify({})
+                });
+                const res = await response.json();
+                const allOrders = Array.isArray(res) ? res : (res && res.data ? res.data : []);
+
+                // กรองเฉพาะงานเดลิเวอรี่ที่ พร้อมส่ง (ready) หรือ กำลังส่ง (shipping)
+                jobs = allOrders.filter(o =>
+                    o.delivery === 'delivery' &&
+                    (o.status === 'ready' || o.status === 'shipping')
+                );
+
+                renderJobs();
+                document.getElementById('last-update').innerText = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+            } catch (error) {
+                console.error(error);
+                showToast("ไม่สามารถโหลดงานได้");
+            } finally {
+                setTimeout(() => icon.classList.remove('spin'), 500);
+            }
+        }
+
+        function renderJobs() {
+            const container = document.getElementById('job-list');
+            const empty = document.getElementById('empty-state');
+
+            if (jobs.length === 0) {
+                container.innerHTML = '';
+                empty.style.display = 'block';
+                return;
+            }
+
+            empty.style.display = 'none';
+            container.innerHTML = jobs.map(j => `
+                <div class="job-card glass">
+                    <div class="card-header">
+                        <div class="queue-no">#${j.queue}</div>
+                        <div class="status-pill ${j.status === 'ready' ? 'status-ready' : 'status-shipping'}">
+                            ${j.status === 'ready' ? 'รอไรเดอร์รับงาน' : 'กำลังจัดส่ง'}
+                        </div>
+                    </div>
+                    
+                    <div class="customer-info">
+                        <img src="https://ui-avatars.com/api/?name=${j.customerName}&background=FF6B00&color=fff" class="customer-avatar">
+                        <div>
+                            <div style="font-weight: 600;">${j.customerName}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">ออเดอร์: ${j.id}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="address-box">
+                        <div class="address-text">
+                            <i data-lucide="map-pin" style="width: 14px; color: var(--primary); vertical-align: middle;"></i>
+                            ${j.address}
+                        </div>
+                        ${j.lat && j.lng ? `
+                            <a href="https://www.google.com/maps/dir/?api=1&destination=${j.lat},${j.lng}" target="_blank" class="map-link">
+                                <i data-lucide="navigation"></i> นำทางใน Google Maps
+                            </a>
+                        ` : ''}
+                    </div>
+                    
+                    <div class="actions">
+                        <a href="tel:${j.phone}" class="btn btn-phone" style="flex: 0 0 50px; padding: 0;">
+                            <i data-lucide="phone"></i>
+                        </a>
+                        ${j.status === 'ready' ? `
+                            <button class="btn btn-primary" onclick="updateJobStatus('${j.id}', 'shipping')">
+                                <i data-lucide="bike"></i> เริ่มจัดส่ง (Start)
+                            </button>
+                        ` : `
+                            <button class="btn btn-success" onclick="updateJobStatus('${j.id}', 'completed')">
+                                <i data-lucide="check"></i> ส่งถึงมือลูกค้าแล้ว
+                            </button>
+                        `}
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        async function updateJobStatus(orderId, newStatus) {
+            try {
+                showToast("กำลังอัปเดต...");
+                const response = await fetch(API_URL + "?action=updateStatus", {
+                    method: 'POST',
+                    body: JSON.stringify({ orderId: orderId, status: newStatus })
+                });
+                const res = await response.json();
+                if (res.success) {
+                    showToast(newStatus === 'shipping' ? "เริ่มจัดส่งแล้ว! ลุยเลย 🔥" : "ภารกิจเสร็จสิ้น! ขอบคุณครับ ✅");
+                    fetchJobs();
+                } else {
+                    throw new Error(res.message);
+                }
+            } catch (error) {
+                showToast("เกิดข้อผิดพลาด");
+            }
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // Initialize Lucide spin animation
+        const style = document.createElement('style');
+        style.innerHTML = '@keyframes spin { 100% { transform: rotate(360deg); } } .spin { animation: spin 1s linear infinite; }';
+        document.head.appendChild(style);
+
+        window.onload = () => {
+            lucide.createIcons();
+            fetchJobs();
+        };
+
+        // Auto-refresh every 30 seconds
+        setInterval(fetchJobs, 30000);
+    </script>
+</body>
+
+</html>
