@@ -1986,6 +1986,7 @@
             try {
                 const response = await fetch(API_URL + "?action=getOrders", {
                     method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
                     body: JSON.stringify({})
                 });
                 const res = await response.json();
@@ -2047,7 +2048,11 @@
 
         async function fetchMenus() {
             try {
-                const response = await fetch(`${API_URL}?action=getMenu&t=${Date.now()}`, { method: 'POST', body: JSON.stringify({}) });
+                const response = await fetch(`${API_URL}?action=getMenu&t=${Date.now()}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({})
+                });
                 const res = await response.json();
                 const data = Array.isArray(res) ? res : (res && res.data ? res.data : null);
                 if (data) {
@@ -2068,6 +2073,7 @@
             try {
                 const response = await fetch(`${API_URL}?action=getPromotions&t=${Date.now()}`, {
                     method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
                     body: JSON.stringify({})
                 });
                 const data = await response.json();
@@ -2363,14 +2369,14 @@
                     <div style="font-size: 0.75rem; color: var(--primary); font-weight:600; margin-bottom: 2px; display:flex; align-items:center; gap:4px;">
                         <i data-lucide="map-pin" style="width:12px;"></i> ที่อยู่จัดส่ง:
                     </div>
-                    <div style="font-size: 0.85rem; color: white; line-height: 1.4;">${order.address}</div>
+                    <div style="font-size: 0.85rem; color: white; line-height: 1.4;">${(order.address || "").split('📍')[0].trim()}</div>
                     <div style="font-size: 0.85rem; color: var(--gold); margin-top: 4px; font-weight:500;">
                         <i data-lucide="phone" style="width:12px; margin-right:2px;"></i> ${order.phone}
                     </div>
                     ${order.lat && order.lng ? `
-                    <a href="https://www.openstreetmap.org/?mlat=${order.lat}&mlon=${order.lng}#map=17/${order.lat}/${order.lng}" target="_blank" 
+                    <a href="https://www.google.com/maps/search/?api=1&query=${order.lat},${order.lng}" target="_blank" 
                        style="text-decoration:none; margin-top:10px; background:rgba(255,107,0,0.15); border:1px solid var(--primary); color:var(--primary); font-size:0.75rem; padding:8px; border-radius:6px; width:100%; display:flex; align-items:center; justify-content:center; gap:6px; transition: all 0.3s;">
-                        <i data-lucide="map" style="width:14px;"></i> ดูพิกัดบน OpenStreetMap
+                        <i data-lucide="map" style="width:14px;"></i> ดูพิกัดบน Google Maps
                     </a>
                     ` : ''}
                 </div>
