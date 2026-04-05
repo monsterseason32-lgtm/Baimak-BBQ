@@ -153,12 +153,12 @@
         }
 
         .topbar {
-            height: 85px;
+            height: 60px;
             border-bottom: 1px solid var(--surface-border);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 32px;
+            padding: 0 24px;
             background-color: var(--bg-panel);
         }
 
@@ -170,12 +170,12 @@
         .stat-badge {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 8px 18px;
+            gap: 8px;
+            padding: 6px 14px;
             border-radius: 30px;
             background: var(--surface);
             border: 1px solid var(--surface-border);
-            font-size: 0.95rem;
+            font-size: 0.85rem;
         }
 
         .stat-badge strong {
@@ -185,11 +185,11 @@
         /* Board Area */
         .board-container {
             flex: 1;
-            padding: 32px;
+            padding: 16px 24px;
             overflow-x: auto;
             overflow-y: hidden;
             display: flex;
-            gap: 24px;
+            gap: 20px;
         }
 
         .column {
@@ -597,6 +597,81 @@
             opacity: 0.6;
             filter: grayscale(0.3);
             border-style: dashed;
+        }
+
+        /* --- Custom Slip Preview Modal --- */
+        .slip-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.92);
+            z-index: 20000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            backdrop-filter: blur(8px);
+        }
+
+        .slip-overlay.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .slip-modal-container {
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
+            transform: scale(0.9);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .slip-overlay.show .slip-modal-container {
+            transform: scale(1);
+        }
+
+        .slip-preview-img {
+            max-width: 100%;
+            max-height: 85vh;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border: 4px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .close-slip-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .reject-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--surface-border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .reject-option:hover {
+            background: rgba(244, 67, 54, 0.05);
+            border-color: rgba(244, 67, 54, 0.3);
+        }
+
+        .reject-option input {
+            accent-color: #F44336;
+            width: 18px;
+            height: 18px;
+        }
+
+        .modal-overlay.active {
+            display: flex !important;
+            opacity: 1;
         }
 
         .status-badge {
@@ -1344,6 +1419,10 @@
                 <i data-lucide="bar-chart-2" style="width: 20px;"></i>
                 ยอดขาย / รายงาน
             </a>
+            <a class="nav-link" onclick="window.open('delivery.html', '_blank')">
+                <i data-lucide="bike" style="width: 20px;"></i>
+                หน้าพนักงานขนส่ง (Rider)
+            </a>
             <a class="nav-link">
                 <i data-lucide="settings" style="width: 20px;"></i>
                 ตั้งค่าร้าน
@@ -1367,8 +1446,9 @@
             <header class="topbar">
                 <div class="topbar-header">
                     <div>
-                        <h1 style="font-size: 1.45rem;">หน้าครัว (Kitchen Display)</h1>
-                        <p class="text-muted" style="font-size: 0.85rem;">ออเดอร์จะอัปเดตอัตโนมัติจาก Google Sheets</p>
+                        <h1 style="font-size: 1.15rem; line-height: 1.1;">หน้าครัว (Kitchen Display)</h1>
+                        <p class="text-muted" style="font-size: 0.75rem; margin: 0;">ออเดอร์อัปเดตอัตโนมัติจาก Google
+                            Sheets</p>
                     </div>
                     <button class="menu-toggle" onclick="toggleSidebar()">
                         <i data-lucide="menu" style="width: 28px; height: 28px;"></i>
@@ -1386,6 +1466,12 @@
                         <i data-lucide="flame" style="width: 18px; color: var(--primary);"></i>
                         <span>กำลังย่าง: <strong id="stat-cooking">0</strong></span>
                     </div>
+                    <!-- Sound Toggle -->
+                    <button id="btn-sound-toggle" onclick="toggleSound()" class="stat-badge"
+                        style="cursor:pointer; background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid var(--surface-border);">
+                        <i data-lucide="volume-x" style="width: 18px;"></i>
+                        <span id="sound-status-text">ปิดเสียง</span>
+                    </button>
                 </div>
             </header>
 
@@ -1417,11 +1503,11 @@
                     </div>
                 </div>
 
-                <!-- Column 3: พร้อมเสิร์ฟ -->
+                <!-- Column 3: พร้อมเสิร์ฟ/รอรับ -->
                 <div class="column col-ready">
                     <div class="column-header">
                         <span style="display: flex; align-items: center; gap: 8px;">
-                            <i data-lucide="bell-ring" style="width: 20px; color: var(--info);"></i> พร้อมเสิร์ฟ
+                            <i data-lucide="bell-ring" style="width: 20px; color: var(--info);"></i> พร้อมเสิร์ฟ/รอรับ
                         </span>
                         <span class="col-count" id="count-ready">0</span>
                     </div>
@@ -1430,7 +1516,20 @@
                     </div>
                 </div>
 
-                <!-- Column 4: เสร็จสิ้น -->
+                <!-- Column 4: กำลังจัดส่ง -->
+                <div class="column col-shipping">
+                    <div class="column-header">
+                        <span style="display: flex; align-items: center; gap: 8px;">
+                            <i data-lucide="bike" style="width: 20px; color: var(--primary);"></i> กำลังจัดส่ง
+                        </span>
+                        <span class="col-count" id="count-shipping">0</span>
+                    </div>
+                    <div class="column-body" id="col-shipping">
+                        <!-- Cards render here -->
+                    </div>
+                </div>
+
+                <!-- Column 5: เสร็จสิ้น -->
                 <div class="column col-completed">
                     <div class="column-header">
                         <span style="display: flex; align-items: center; gap: 8px;">
@@ -1759,6 +1858,65 @@
         <div id="toast-msg">อัปเดตสถานะสำเร็จ</div>
     </div>
 
+    <!-- Slip Preview Modal (New) -->
+    <div id="slip-modal-overlay" class="slip-overlay" onclick="closeSlipModal()">
+        <div class="slip-modal-container" onclick="event.stopPropagation()">
+            <button class="close-slip-btn" onclick="closeSlipModal()">&times;</button>
+            <img id="slip-modal-img" class="slip-preview-img" src="">
+            <div style="text-align: center; margin-top: 20px; color: white;">
+                <p style="font-weight: 500; font-size: 1rem;">สลิปหลักฐานการชำระเงิน</p>
+                <div style="margin-top: 10px;">
+                    <a id="slip-modal-link" href="#" target="_blank"
+                        style="color: var(--primary-light); text-decoration: none; font-size: 0.85rem; border: 1px solid var(--primary); padding: 6px 16px; border-radius: 20px;">
+                        <i data-lucide="external-link" style="width: 14px; vertical-align: middle;"></i> เปิดไฟล์ต้นฉบับ
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio for Notifications -->
+    <audio id="notif-sound" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Reject Slip Modal -->
+    <div class="modal-overlay" id="reject-modal">
+        <div class="modal-content glass" style="max-width: 400px; padding: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="font-size: 1.25rem; color: #F44336; display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="alert-circle"></i> ปฏิเสธสลิป
+                </h2>
+                <button onclick="closeRejectModal()"
+                    style="background:none; border:none; color:var(--text-muted); cursor:pointer;">
+                    <i data-lucide="x" style="width: 20px;"></i>
+                </button>
+            </div>
+            <input type="hidden" id="reject-order-id">
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px;">
+                กรุณาเลือกเหตุผลที่ปฏิเสธสลิปนี้:</p>
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px;">
+                <label class="reject-option"><input type="radio" name="reject-reason" value="สลิปปลอม / ตกแต่งภาพ"
+                        checked> สลิปปลอม / ตกแต่งภาพ</label>
+                <label class="reject-option"><input type="radio" name="reject-reason" value="ยอดเงินไม่ถูกต้อง">
+                    ยอดเงินไม่ถูกต้อง</label>
+                <label class="reject-option"><input type="radio" name="reject-reason" value="ไม่พบยอดเงินเข้าบัญชี">
+                    ไม่พบยอดเงินเข้าบัญชี</label>
+                <label class="reject-option"><input type="radio" name="reject-reason" value="สลิปเก่า / ใช้ซ้ำ">
+                    สลิปเก่า / ใช้ซ้ำ</label>
+                <label class="reject-option"><input type="radio" name="reject-reason"
+                        value="ภาพภาพไม่ชัดเจน / ไม่ใช่สลิป"> ภาพไม่ชัดเจน / ไม่ใช่สลิป</label>
+            </div>
+            <div style="display: flex; gap: 12px;">
+                <button class="btn-outline" style="flex: 1;" onclick="closeRejectModal()">ยกเลิก</button>
+                <button class="btn-add" style="flex: 2; background: #F44336; justify-content: center;"
+                    onclick="confirmRejectSlip()">
+                    ยืนยันการปฏิเสธ
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Message Modal -->
     <div class="modal-overlay" id="message-modal">
         <div class="modal-content glass" style="max-width: 400px; padding: 24px;">
@@ -1815,7 +1973,15 @@
             "U8344212719a6a2a91fb597be9d7314cc"
         ];
 
-        // ================= DATABASE OPERATIONS =================
+        // ข้อมูลหลักของระบบ
+        let orders = [];
+        let banners = [];
+        let menus = [];
+        let salesChartInstance = null;
+        let isSoundEnabled = false;
+        let lastOrderIds = new Set();
+        let firstLoad = true;
+
         async function fetchOrders() {
             try {
                 const response = await fetch(API_URL + "?action=getOrders", {
@@ -1824,17 +1990,58 @@
                 });
                 const res = await response.json();
                 const data = Array.isArray(res) ? res : (res && res.data ? res.data : []);
-                orders = Array.isArray(data) ? data : [];
+                const fetchedOrders = Array.isArray(data) ? data : [];
+
+                // ตรวจสอบออเดอร์ใหม่สำหรับเล่นเสียง
+                if (!firstLoad && isSoundEnabled) {
+                    const currentIds = fetchedOrders.map(o => o.id);
+                    const newOrders = fetchedOrders.filter(o => !lastOrderIds.has(o.id) && (o.status === 'pending' || o.status === 'paid'));
+
+                    if (newOrders.length > 0) {
+                        playNotifSound();
+                        showToast(`🔔 มีออเดอร์ใหม่ ${newOrders.length} รายการ!`);
+                    }
+                }
+
+                orders = fetchedOrders;
+                lastOrderIds = new Set(orders.map(o => o.id));
+                firstLoad = false;
+
                 renderBoard();
 
-                // ถ้าเปิดหน้า Reports อยู่ ให้รันรายงานใหม่ด้วย
                 if (document.getElementById('view-reports').classList.contains('active')) {
                     generateReports();
                 }
             } catch (error) {
                 console.error("Fetch Orders Error:", error);
-                orders = [];
                 renderBoard();
+            }
+        }
+
+        function toggleSound() {
+            isSoundEnabled = !isSoundEnabled;
+            const btn = document.getElementById('btn-sound-toggle');
+            const text = document.getElementById('sound-status-text');
+
+            if (isSoundEnabled) {
+                btn.style.color = "var(--success)";
+                btn.style.borderColor = "var(--success)";
+                btn.innerHTML = '<i data-lucide="volume-2" style="width: 18px;"></i> <span id="sound-status-text">เปิดเสียงแล้ว</span>';
+                // Play a brief test sound to unlock audio on browser
+                playNotifSound();
+            } else {
+                btn.style.color = "var(--text-muted)";
+                btn.style.borderColor = "var(--surface-border)";
+                btn.innerHTML = '<i data-lucide="volume-x" style="width: 18px;"></i> <span id="sound-status-text">ปิดเสียง</span>';
+            }
+            lucide.createIcons();
+        }
+
+        function playNotifSound() {
+            const audio = document.getElementById('notif-sound');
+            if (audio) {
+                audio.currentTime = 0;
+                audio.play().catch(e => console.warn("Audio play blocked:", e));
             }
         }
 
@@ -1846,13 +2053,13 @@
                 if (data) {
                     menus = data.map(m => ({
                         ...m,
-                        hasSpiciness: m.hasSpiciness !== false, // Default to true
-                        isVisible: m.isVisible !== false // Default to true
+                        hasSpiciness: m.hasSpiciness !== false,
+                        isVisible: m.isVisible !== false
                     }));
                 }
                 renderMenus();
             } catch (error) {
-                console.warn("Fetch Menus failed, using mock data", error);
+                console.warn("Fetch Menus failed", error);
                 renderMenus();
             }
         }
@@ -1871,12 +2078,6 @@
             }
         }
 
-        // ข้อมูลหลักของระบบ
-        let orders = [];
-        let banners = [];
-        let menus = [];
-        let salesChartInstance = null; // ตัวแปรเก็บกราฟ
-
         // ================= RENDER ENGINE =================
 
         function renderBoard() {
@@ -1891,6 +2092,7 @@
                 'pending': document.getElementById('col-pending'),
                 'cooking': document.getElementById('col-cooking'),
                 'ready': document.getElementById('col-ready'),
+                'shipping': document.getElementById('col-shipping'),
                 'completed': document.getElementById('col-completed')
             };
 
@@ -1899,15 +2101,19 @@
                 if (col) col.innerHTML = '';
             });
 
-            const counts = { pending: 0, cooking: 0, ready: 0, completed: 0 };
+            const counts = { pending: 0, cooking: 0, ready: 0, shipping: 0, completed: 0 };
 
             orders.forEach((order, index) => {
+                let displayStatus = order.status;
+                if (displayStatus === 'paid') displayStatus = 'pending'; // ออเดอร์ที่จ่ายแล้วให้มาปรากฏที่ช่อง 'รอดำเนินการ'
+
                 counts[order.status]++;
                 // Add staggered animation delay
                 const delay = (index % 5) * 0.05;
                 const cardHtml = createOrderCard(order, delay);
-                if (cols[order.status]) {
-                    cols[order.status].insertAdjacentHTML('beforeend', cardHtml);
+
+                if (cols[displayStatus]) {
+                    cols[displayStatus].insertAdjacentHTML('beforeend', cardHtml);
                 }
             });
 
@@ -1915,6 +2121,7 @@
             document.getElementById('count-pending').innerText = counts.pending;
             document.getElementById('count-cooking').innerText = counts.cooking;
             document.getElementById('count-ready').innerText = counts.ready;
+            document.getElementById('count-shipping').innerText = counts.shipping;
             document.getElementById('count-completed').innerText = counts.completed;
 
             // Update top stats
@@ -2003,7 +2210,15 @@
                             <span>หมวดหมู่: ${m.category}</span>
                             ${m.isVisible === false ? '<span class="status-badge status-hidden" style="padding: 1px 6px; font-size: 0.65rem;"><i data-lucide="eye-off" style="width:10px;"></i> ซ่อนอยู่</span>' : ''}
                         </div>
-                        <div style="font-size: 1.1rem; color: var(--primary-light); font-weight: 600;">฿${m.price}</div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+                            <div style="font-size: 1.1rem; color: var(--primary-light); font-weight: 600;">฿${m.price}</div>
+                            <div style="display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.03); padding: 4px 8px; border-radius: 8px; border: 1px solid var(--surface-border);">
+                                <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500;">สต็อก:</span>
+                                <input type="number" value="${m.stock || 0}" 
+                                    onchange="updateStockValue('${m.id}', this.value)" 
+                                    style="width: 50px; background: transparent; border: none; border-bottom: 1px solid var(--primary); color: white; text-align: center; font-size: 0.95rem; font-weight: 600; outline: none; padding: 0;">
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div style="background: rgba(255,255,255,0.02); padding: 10px 12px; border-top: 1px solid var(--surface-border); display: flex; justify-content: space-between; align-items: center;">
@@ -2061,19 +2276,30 @@
         function createOrderCard(order, delay) {
             let actionButtons = '';
 
-            if (order.status === 'pending') {
+            if (order.status === 'pending' || order.status === 'paid' || order.status === 'slip_rejected') {
                 actionButtons = `
                 <button class="action-btn btn-cancel" onclick="updateStatus('${order.id}', 'cancelled')" title="ยกเลิกออเดอร์"><i data-lucide="x"></i></button>
-                <button class="action-btn btn-accept" onclick="updateStatus('${order.id}', 'cooking')"><i data-lucide="flame"></i> รับออเดอร์/ย่าง</button>
+                <button class="action-btn btn-accept" onclick="updateStatus('${order.id}', 'cooking')"><i data-lucide="flame"></i> รับออเดอร์</button>
+                ${order.status === 'paid' ? `<button class="action-btn" onclick="openRejectModal('${order.id}')" style="background: rgba(244, 67, 54, 0.1); color: #F44336; border: 1px solid rgba(244, 67, 54, 0.3);"><i data-lucide="shield-x"></i> ปฏิเสธสลิป</button>` : ''}
             `;
             } else if (order.status === 'cooking') {
                 actionButtons = `
                 <button class="action-btn btn-ready" onclick="updateStatus('${order.id}', 'ready')" style="width: 100%; justify-content: center;"><i data-lucide="bell-ring"></i> ย่างเสร็จแล้ว (พร้อมเสิร์ฟ)</button>
             `;
             } else if (order.status === 'ready') {
+                if (order.delivery === 'delivery') {
+                    actionButtons = `
+                        <button class="action-btn btn-primary" onclick="updateStatus('${order.id}', 'shipping')" style="width: 100%; justify-content: center;"><i data-lucide="bike"></i> ส่งอาหารเอง (Self-Ship)</button>
+                    `;
+                } else {
+                    actionButtons = `
+                        <button class="action-btn btn-complete" onclick="updateStatus('${order.id}', 'completed')" style="width: 100%; justify-content: center;"><i data-lucide="check"></i> ลูกค้ารับอาหารแล้ว</button>
+                    `;
+                }
+            } else if (order.status === 'shipping') {
                 actionButtons = `
-                <button class="action-btn btn-complete" onclick="updateStatus('${order.id}', 'completed')" style="width: 100%; justify-content: center;"><i data-lucide="check"></i> ลูกค้ารับอาหารแล้ว</button>
-            `;
+                    <button class="action-btn btn-complete" onclick="updateStatus('${order.id}', 'completed')" style="width: 100%; justify-content: center;"><i data-lucide="check"></i> ส่งถึงมือลูกค้าแล้ว</button>
+                `;
             } else if (order.status === 'completed') {
                 actionButtons = `<span style="color: var(--success); font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 6px;"><i data-lucide="check-circle-2" style="width: 16px;"></i> ปิดจ๊อบ</span>`;
             }
@@ -2099,12 +2325,19 @@
                 <div class="order-header">
                     <div class="queue-no">${order.queue}</div>
                     <div style="display: flex; gap: 4px;">
-                        <span class="status-pill" style="background: rgba(255,107,0,0.15); color: var(--primary);">
-                            <i data-lucide="${deliveryIcon}" style="width: 12px; height: 12px; margin-right: 4px;"></i> ${deliveryText}
-                        </span>
                         <span class="status-pill" style="background: rgba(255,255,255,0.08); color: white;">
                              ${paymentText}
                         </span>
+                        ${order.status === 'paid' ? `
+                        <span class="status-pill" style="background: rgba(76, 175, 80, 0.2); color: #4CAF50; border: 1px solid rgba(76, 175, 80, 0.3); font-weight: 700;">
+                            <i data-lucide="check-circle" style="width: 12px; height: 12px; margin-right: 4px;"></i> PAID (ตรวจสอบสลิป)
+                        </span>
+                        ` : ''}
+                        ${order.status === 'slip_rejected' ? `
+                        <span class="status-pill" style="background: rgba(244, 67, 54, 0.2); color: #F44336; border: 1px solid rgba(244, 67, 54, 0.3); font-weight: 700;">
+                            <i data-lucide="alert-triangle" style="width: 12px; height: 12px; margin-right: 4px;"></i> SLIP REJECTED
+                        </span>
+                        ` : ''}
                         ${order.payment === 'cash' && order.changeFrom ? `
                         <span class="status-pill" style="background: rgba(76, 175, 80, 0.15); color: #8BC34A; border: 1px solid rgba(76, 175, 80, 0.3);">
                             <i data-lucide="coins" style="width: 12px; height: 12px; margin-right: 4px;"></i> 
@@ -2143,6 +2376,17 @@
                 </div>
                 ` : ''}
 
+                ${order.slipUrl ? `
+                <div style="margin-top: 10px; cursor: pointer;" onclick="openSlipModal('${order.slipUrl}')">
+                    <div style="font-size: 0.75rem; color: #4CAF50; font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 4px;">
+                        <i data-lucide="image" style="width: 12px;"></i> สลิปการชำระเงิน (แตะเพื่อขยาย):
+                    </div>
+                    <img src="${getDriveThumbnail(order.slipUrl)}" 
+                         style="width: 100%; height: 180px; object-fit: cover; border-radius: 12px; border: 1.5px solid rgba(76, 175, 80, 0.4); box-shadow: 0 4px 12px rgba(0,0,0,0.2);"
+                         onerror="this.parentElement.innerHTML='<div style=\'padding:20px; background:rgba(255,255,255,0.05); border-radius:8px; text-align:center; color:#4CAF50; font-size:0.85rem; border: 1px dashed #4CAF50;\'><i data-lucide=\'external-link\'></i> พาร์ทเนอร์สลิป (คลิกเพื่อดู)</div>'">
+                </div>
+                ` : ''}
+
                 <div class="order-items" style="margin-top: 12px;">
                     ${itemsHtml}
                 </div>
@@ -2154,6 +2398,78 @@
                 </div>
             </div>
         `;
+        }
+
+        function getDriveThumbnail(url) {
+            if (!url || typeof url !== 'string') return '';
+            const match = url.match(/[-\w]{25,}/); // Extract File ID
+            if (match && match[0]) {
+                return `https://drive.google.com/thumbnail?id=${match[0]}&sz=w500`;
+            }
+            return url;
+        }
+
+        function openSlipModal(url) {
+            const overlay = document.getElementById('slip-modal-overlay');
+            const img = document.getElementById('slip-modal-img');
+            const link = document.getElementById('slip-modal-link');
+
+            // ใช้ thumbnail ขนาดใหญ่ (sz=w1000) สำหรับ Modal
+            img.src = getDriveThumbnail(url).replace('sz=w500', 'sz=w1000');
+            link.href = url;
+
+            overlay.classList.add('show');
+            lucide.createIcons({ root: overlay });
+        }
+
+        function closeSlipModal() {
+            document.getElementById('slip-modal-overlay').classList.remove('show');
+        }
+
+        function openRejectModal(orderId) {
+            document.getElementById('reject-order-id').value = orderId;
+            document.getElementById('reject-modal').classList.add('active');
+            lucide.createIcons({ root: document.getElementById('reject-modal') });
+        }
+
+        function closeRejectModal() {
+            document.getElementById('reject-modal').classList.remove('active');
+        }
+
+        async function confirmRejectSlip() {
+            const orderId = document.getElementById('reject-order-id').value;
+            const reasons = document.getElementsByName('reject-reason');
+            let selectedReason = "";
+            for (const r of reasons) {
+                if (r.checked) {
+                    selectedReason = r.value;
+                    break;
+                }
+            }
+
+            closeRejectModal();
+            showToast("กำลังส่งการแจ้งเตือน...");
+
+            try {
+                const response = await fetch(API_URL + "?action=updateStatus", {
+                    method: 'POST',
+                    body: JSON.stringify({ orderId: orderId, status: 'slip_rejected', reason: selectedReason })
+                });
+                const res = await response.json();
+                if (res.success) {
+                    // อัปเดต Local Status
+                    const idx = orders.findIndex(o => o.id === orderId);
+                    if (idx > -1) {
+                        orders[idx].status = 'slip_rejected';
+                        orders[idx].rejectReason = selectedReason;
+                        renderBoard();
+                    }
+                    showToast("ปฏิเสธสลิปเรียบร้อยแล้ว แจ้งเตือนลูกค้าแล้ว ❌");
+                } else throw new Error(res.message);
+            } catch (err) {
+                console.error(err);
+                showToast("เกิดข้อผิดพลาดในการปฏิเสธสลิป");
+            }
         }
 
         // ================= ACTIONS =================
@@ -2231,6 +2547,30 @@
                 console.error("Toggle Menu Error:", error);
                 showToast("ไม่สามารถอัปเดตสถานะเมนูได้ กรุณาลองใหม่");
                 fetchMenus(); // Revert state from server
+            }
+        }
+
+        async function updateStockValue(id, value) {
+            try {
+                const index = menus.findIndex(m => m.id === id);
+                if (index > -1) {
+                    const newStock = parseInt(value) || 0;
+                    menus[index].stock = newStock;
+
+                    showToast(`กำลังบันทึกสต็อก ${menus[index].name}...`);
+
+                    const response = await fetch(`${API_URL}?action=updateStock`, {
+                        method: 'POST',
+                        body: JSON.stringify({ id: id, stock: newStock })
+                    });
+                    const res = await response.json();
+                    if (!res.success) throw new Error(res.message);
+
+                    showToast(`บันทึกสต็อก ${menus[index].name} เป็น ${newStock} แล้ว ✅`);
+                }
+            } catch (error) {
+                console.error("Update Stock Error:", error);
+                showToast("ไม่สามารถอัปเดตสต็อกได้ กรุณาลองใหม่");
             }
         }
 
@@ -2435,7 +2775,8 @@
                 category: document.getElementById('menu-category').value,
                 img: document.getElementById('menu-img').value || 'https://placehold.co/300?text=No+Image',
                 hasSpiciness: document.getElementById('menu-hasSpiciness').checked,
-                isVisible: existingMenu ? existingMenu.isVisible : true // Preserve or default to visible
+                isVisible: existingMenu ? existingMenu.isVisible : true, // Preserve or default to visible
+                stock: existingMenu ? existingMenu.stock : 0
             };
 
             try {
