@@ -1503,6 +1503,15 @@
                         <i data-lucide="volume-x" style="width: 18px;"></i>
                         <span id="sound-status-text">ปิดเสียง</span>
                     </button>
+                    <!-- Shop Status Toggle -->
+                    <div class="stat-badge" style="gap: 10px; padding: 6px 12px;">
+                        <span id="shop-status-text" style="font-size: 0.85rem; font-weight: 500;">ร้านเปิดอยู่</span>
+                        <label class="switch" title="เปิด/ปิดร้านชั่วคราว" style="transform: scale(0.85);">
+                            <input type="checkbox" id="shop-status-toggle" checked
+                                onchange="toggleShopStatus(this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
                 </div>
             </header>
 
@@ -2260,6 +2269,9 @@
 
                 renderBoard();
 
+                // Fetch settings/shop status periodically with orders
+                fetchSettings();
+
                 if (document.getElementById('view-reports').classList.contains('active')) {
                     generateReports();
                 }
@@ -2331,6 +2343,71 @@
                 renderBanners();
             } catch (error) {
                 console.error("Fetch Banners Error:", error);
+            }
+        }
+
+        async function fetchSettings() {
+            try {
+                const response = await fetch(API_URL + "?action=getSettings", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({})
+                });
+                const res = await response.json();
+                if (res.success && res.settings) {
+                    // Update Shop Status UI
+                    const shopStatus = res.settings.shop_status || 'open';
+                    const toggle = document.getElementById('shop-status-toggle');
+                    const text = document.getElementById('shop-status-text');
+
+                    if (toggle && text) {
+                        toggle.checked = shopStatus === 'open';
+                        text.innerText = shopStatus === 'open' ? 'ร้านเปิดอยู่' : 'ปิดร้านชั่วคราว';
+                        text.style.color = shopStatus === 'open' ? 'var(--success)' : '#F44336';
+                    }
+
+                    // Update Settings View if active
+                    if (document.getElementById('view-settings').classList.contains('active')) {
+                        document.getElementById('setting-delivery-fee').value = res.settings.delivery_fee_per_km || '';
+                        document.getElementById('setting-delivery-free-km').value = res.settings.delivery_free_km || '';
+                        document.getElementById('setting-delivery-free-min').value = res.settings.delivery_free_min_spend || '';
+                        document.getElementById('setting-delivery-max-km').value = res.settings.delivery_max_km || '';
+                        document.getElementById('setting-trip-threshold').value = res.settings.trip_threshold_multiplier || '';
+                        document.getElementById('setting-delivery-speed').value = res.settings.delivery_speed_kmh || '';
+                        document.getElementById('setting-prep-time').value = res.settings.order_prep_time_mins || '';
+                    }
+                }
+            } catch (error) {
+                console.error("Fetch Settings Error:", error);
+            }
+        }
+
+        async function toggleShopStatus(isOpen) {
+            const status = isOpen ? 'open' : 'closed';
+            const text = document.getElementById('shop-status-text');
+            text.innerText = isOpen ? 'กำลังบันทึก...' : 'กำลังบันทึก...';
+
+            try {
+                const response = await fetch(API_URL + "?action=saveSettings", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({
+                        settings: { shop_status: status }
+                    })
+                });
+                const res = await response.json();
+                if (res.success) {
+                    text.innerText = isOpen ? 'ร้านเปิดอยู่' : 'ปิดร้านชั่วคราว';
+                    text.style.color = isOpen ? 'var(--success)' : '#F44336';
+                    showToast(isOpen ? "เปิดร้านเรียบร้อยแล้ว ✅" : "ปิดร้านชั่วคราวเรียบร้อยแล้ว ❌");
+                } else {
+                    throw new Error(res.message);
+                }
+            } catch (error) {
+                showToast("เกิดข้อผิดพลาด: " + error.message);
+                // Revert toggle
+                document.getElementById('shop-status-toggle').checked = !isOpen;
+                text.innerText = !isOpen ? 'ร้านเปิดอยู่' : 'ปิดร้านชั่วคราว';
             }
         }
 
