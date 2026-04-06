@@ -1664,8 +1664,8 @@
                         alt="User" class="avatar">
                     <div>
                         <h3 id="user-name">สวัสดี, ลูกค้า</h3>
-                        <p class="text-primary" style="font-size: 0.8rem; font-weight: 500;">พร้อมลุยหม่าล่าหรือยัง? 🔥
-                        </p>
+                        <p id="user-subgreeting" class="text-primary" style="font-size: 0.8rem; font-weight: 500;">
+                            พร้อมลุยหม่าล่าหรือยัง? 🔥</p>
                     </div>
                 </div>
                 <div id="bell-btn" onclick="toggleNotifDrawer()"
@@ -2480,8 +2480,39 @@
         }
 
         function updateUserProfileUI() {
-            document.getElementById('user-name').innerText = "สวัสดี, " + AppState.user.name;
-            document.getElementById('user-avatar').src = AppState.user.picUrl;
+            const name = AppState.user ? AppState.user.name : "ลูกค้า";
+            const shortName = name.split(' ')[0] || "ลูกค้า";
+            const hour = new Date().getHours();
+
+            let title = "";
+            let sub = "";
+
+            if (hour >= 5 && hour < 11) {
+                title = `อรุณสวัสดิ์ครับคุณ${shortName} ☀️`;
+                sub = "มื้อเช้าเตรียมตัวลุยหม่าล่าไว้รึยังครับ? 🔥";
+            } else if (hour >= 11 && hour < 15) {
+                title = `สวัสดีตอนเที่ยงครับคุณ${shortName} 🥢`;
+                sub = "เที่ยงนี้จัดหม่าล่าแซ่บๆ สักชุดมั้ยครับ?";
+            } else if (hour >= 15 && hour < 18) {
+                title = `สวัสดีตอนบ่ายครับคุณ${shortName} 🥤`;
+                sub = "บ่ายแบบนี้ หม่าล่าร้อนๆ ช่วยรีเฟรชได้นะครับ!";
+            } else if (hour >= 18 && hour < 21) {
+                title = `สวัสดีตอนค่ำครับคุณ${shortName} 🔥`;
+                sub = "เย็นนี้... มาจัดหม่าล่าชุดใหญ่ไฟกะพริบกันครับ!";
+            } else {
+                title = `ดึกแล้วนะครับคุณ${shortName} 🌙`;
+                sub = "หิวรอบดึกหรือเปล่า? หม่าล่าสักไม้ช่วยได้นะครับ!";
+            }
+
+            const titleEl = document.getElementById('user-name');
+            const subEl = document.getElementById('user-subgreeting');
+
+            if (titleEl) titleEl.innerText = title;
+            if (subEl) subEl.innerText = sub;
+
+            if (AppState.user && AppState.user.picUrl) {
+                document.getElementById('user-avatar').src = AppState.user.picUrl;
+            }
         }
 
         function showAdminButton() {
@@ -2844,10 +2875,7 @@
                 AppState.checkout.lng = profile.lng || null;
 
                 // Update UI Avatar & Name
-                document.getElementById('user-name').innerText = `สวัสดี, ${AppState.user.name.split(' ')[0]}`;
-                document.getElementById('profile-name').value = AppState.user.name;
-                document.getElementById('profile-phone').value = AppState.checkout.phone;
-                document.getElementById('profile-address').value = AppState.checkout.address;
+                updateUserProfileUI();
 
                 // Auto-fill checkout fields
                 document.getElementById('checkout-phone').value = AppState.checkout.phone;
@@ -4792,7 +4820,7 @@
                     AppState.checkout.phone = phone;
                     AppState.checkout.address = address;
 
-                    document.getElementById('user-name').innerText = `สวัสดี, ${name.split(' ')[0]}`;
+                    updateUserProfileUI();
                     document.getElementById('checkout-phone').value = phone;
                     document.getElementById('checkout-address').value = address;
 
