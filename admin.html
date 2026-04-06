@@ -1454,9 +1454,9 @@
                 <i data-lucide="bike" style="width: 20px;"></i>
                 หน้าพนักงานขนส่ง (Rider)
             </a>
-            <a class="nav-link">
+            <a class="nav-link" onclick="switchView('settings')" id="nav-settings">
                 <i data-lucide="settings" style="width: 20px;"></i>
-                ตั้งค่าร้าน
+                ตั้งค่าร้านค้า / ค่าจัดส่ง
             </a>
         </nav>
 
@@ -1764,6 +1764,108 @@
                             <div style="text-align: center; color: var(--text-muted); padding: 20px;">
                                 กำลังวิเคราะห์ข้อมูล...</div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= VIEW: SETTINGS ================= -->
+        <div id="view-settings" class="view-section">
+            <header class="topbar">
+                <div class="topbar-header">
+                    <div>
+                        <h1 style="font-size: 1.45rem;">ตั้งค่าระบบ / ค่าจัดส่ง</h1>
+                        <p class="text-muted" style="font-size: 0.85rem;">
+                            กำหนดพารามิเตอร์ของระบบ เช่น ค่าส่งเบื้องต้น กิโลเมตรที่ส่งฟรี
+                            และเงื่อนไขส่งฟรีเมื่อซื้อครบราคาที่กำหนด</p>
+                    </div>
+                    <button class="menu-toggle" onclick="toggleSidebar()">
+                        <i data-lucide="menu" style="width: 28px; height: 28px;"></i>
+                    </button>
+                </div>
+            </header>
+
+            <div class="banner-content-area" style="max-width: 600px;">
+                <div class="glass"
+                    style="padding: 24px; border-radius: var(--radius-lg); border: 1px solid var(--surface-border);">
+                    <h3
+                        style="margin-bottom: 20px; display: flex; align-items: center; gap: 8px; font-weight: 600; color: var(--primary);">
+                        <i data-lucide="truck"></i> ตั้งค่าการจัดส่ง (Delivery Settings)
+                    </h3>
+
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label
+                            style="display: block; margin-bottom: 8px; font-size: 0.9rem; color: var(--text-muted);">ค่าส่งต่อกิโลเมตร
+                            (บาท)</label>
+                        <input type="number" id="setting-delivery-fee" class="form-control" placeholder="เช่น 5"
+                            style="width: 100%; padding: 12px; border-radius: 8px; background: rgba(255,255,255,0.03); border: 1px solid var(--surface-border); color: white;">
+                        <p class="text-muted" style="font-size: 0.75rem; margin-top: 6px; opacity: 0.7;">เรียกเก็บ กม.
+                            ละกี่บาทหลังจากระยะทางที่กำหนดให้ส่งฟรีแล้ว</p>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label
+                            style="display: block; margin-bottom: 8px; font-size: 0.9rem; color: var(--text-muted);">ระยะทางที่ส่งฟรี
+                            (กม. แรก)</label>
+                        <input type="number" id="setting-delivery-free-km" class="form-control" placeholder="เช่น 1"
+                            style="width: 100%; padding: 12px; border-radius: 8px; background: rgba(255,255,255,0.03); border: 1px solid var(--surface-border); color: white;">
+                        <p class="text-muted" style="font-size: 0.75rem; margin-top: 6px; opacity: 0.7;">
+                            กี่กิโลเมตรแรกที่จะไม่คิดค่าบริการจัดส่ง (ค่าเริ่มต้นคือ 1 กม.)</p>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label
+                            style="display: block; margin-bottom: 8px; font-size: 0.9rem; color: var(--text-muted);">สั่งซื้อครบเท่าไหร่ส่งฟรี
+                            (บาท)</label>
+                        <input type="number" id="setting-delivery-free-min" class="form-control" placeholder="เช่น 200"
+                            style="width: 100%; padding: 12px; border-radius: 8px; background: rgba(255,255,255,0.03); border: 1px solid var(--surface-border); color: white;">
+                        <p class="text-muted" style="font-size: 0.75rem; margin-top: 6px; opacity: 0.7;">
+                            หากยอดสั่งซื้อหักส่วนลดแล้วถึงยอดนี้ จะส่งฟรีทันที (ไม่ต้องเสียค่าส่งกม. ถัดไป)</p>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 24px;">
+                        (กม.)</label>
+                        <input type="number" id="setting-delivery-max-km" class="form-control" placeholder="เช่น 20"
+                            style="width: 100%; padding: 12px; border-radius: 8px; background: rgba(255,255,255,0.03); border: 1px solid var(--surface-border); color: white;">
+                        <p class="text-muted" style="font-size: 0.75rem; margin-top: 6px; opacity: 0.7;">
+                            จำกัดระยะทางที่รับออเดอร์ หากลูกค้าอยู่ไกลเกินระบบจะแจ้งคำเตือน</p>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 24px;">
+                        <label
+                            style="display: block; margin-bottom: 8px; font-size: 0.9rem; color: var(--primary); font-weight: 600;">✨
+                            ระบบแชร์ค่าส่ง: เป้าหมายยอดขายต่อกิโลเมตร (บาท/กม.)</label>
+                        <input type="number" id="setting-trip-threshold" class="form-control" placeholder="เช่น 20"
+                            style="width: 100%; padding: 12px; border-radius: 8px; background: rgba(255,107,0,0.05); border: 1px solid rgba(255,107,0,0.2); color: white;">
+                        <p class="text-muted" style="font-size: 0.75rem; margin-top: 6px; opacity: 0.8;">
+                            ยอดสั่งซื้อรวม (ออเดอร์ในคิว + ออเดอร์ใหม่) ที่ต้องมีต่อ 1 กม.
+                            เพื่อให้คุ้มค่าน้ำมันและส่งฟรี<br>
+                            (เช่น ตั้งไว้ 20 บาท : ถ้าลูกค้าอยู่ไกล 10 กม. ต้องมียอดรวมในคิว 200 บาท
+                            ระบบจะแชร์ค่าส่งให้ถูกลง)</p>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+                        <div class="form-group">
+                            <label
+                                style="display: block; margin-bottom: 8px; font-size: 0.9rem; color: var(--text-muted);">ความเร็วขับขี่
+                                (กม./ชม.)</label>
+                            <input type="number" id="setting-delivery-speed" class="form-control" placeholder="เช่น 80"
+                                style="width: 100%; padding: 12px; border-radius: 8px; background: rgba(255,255,255,0.03); border: 1px solid var(--surface-border); color: white;">
+                        </div>
+                        <div class="form-group">
+                            <label
+                                style="display: block; margin-bottom: 8px; font-size: 0.9rem; color: var(--text-muted);">เวลาเตรียมอาหาร
+                                (นาที)</label>
+                            <input type="number" id="setting-prep-time" class="form-control" placeholder="เช่น 15"
+                                style="width: 100%; padding: 12px; border-radius: 8px; background: rgba(255,255,255,0.03); border: 1px solid var(--surface-border); color: white;">
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 32px;">
+                        <button class="btn-primary" onclick="saveSettings()"
+                            style="width: 100%; justify-content: center; height: 52px; font-size: 1rem; border-radius: 12px; background: var(--primary); color: white; border: none; cursor: pointer; display: flex; align-items: center; gap: 10px; font-weight: 600; box-shadow: 0 4px 15px var(--primary-glow);">
+                            <i data-lucide="save" style="width: 20px;"></i> บันทึกการตั้งค่าทั้งหมด
+                        </button>
                     </div>
                 </div>
             </div>
@@ -3347,9 +3449,8 @@
             const sidebar = document.querySelector('.sidebar');
             if (sidebar.classList.contains('open')) toggleSidebar();
 
-            if (viewName === 'banners') renderBanners();
-            if (viewName === 'reports') generateReports();
             if (viewName === 'promos') fetchPromoCodes();
+            if (viewName === 'settings') fetchSettings();
         }
 
         let toastTimeout;
@@ -3656,6 +3757,71 @@
             } catch (err) {
                 console.error("Delete Promo Error:", err);
                 showToast("❌ การเชื่อมต่อผิดพลาด");
+            }
+        }
+
+        // ================= SETTINGS LOGIC =================
+        let appSettings = {};
+
+        async function fetchSettings() {
+            try {
+                const response = await fetch(`${API_URL}?action=getSettings`, {
+                    method: 'POST',
+                    body: JSON.stringify({})
+                });
+                const res = await response.json();
+                if (res.success) {
+                    appSettings = res.settings;
+                    document.getElementById('setting-delivery-fee').value = appSettings.delivery_fee_per_km || 5;
+                    document.getElementById('setting-delivery-free-km').value = appSettings.delivery_free_km || 1;
+                    document.getElementById('setting-delivery-free-min').value = appSettings.delivery_free_min_spend || 200;
+                    document.getElementById('setting-delivery-max-km').value = appSettings.delivery_max_km || 20;
+                    document.getElementById('setting-trip-threshold').value = appSettings.trip_threshold_multiplier || 20;
+                    document.getElementById('setting-delivery-speed').value = appSettings.delivery_speed_kmh || 80;
+                    document.getElementById('setting-prep-time').value = appSettings.order_prep_time_mins || 15;
+                }
+            } catch (err) {
+                console.error("Fetch Settings Error:", err);
+            }
+        }
+
+        async function saveSettings() {
+            const fee = parseFloat(document.getElementById('setting-delivery-fee').value);
+            const freeKm = parseFloat(document.getElementById('setting-delivery-free-km').value);
+            const freeMin = parseFloat(document.getElementById('setting-delivery-free-min').value);
+            const maxKm = parseFloat(document.getElementById('setting-delivery-max-km').value);
+            const threshold = parseFloat(document.getElementById('setting-trip-threshold').value);
+
+            if (isNaN(fee) || isNaN(freeKm) || isNaN(freeMin) || isNaN(maxKm) || isNaN(threshold)) {
+                alert("กรุณากรอกข้อมูลตัวเลขให้ถูกต้อง");
+                return;
+            }
+
+            try {
+                showToast("กำลังบันทึกการตั้งค่า...");
+                const response = await fetch(`${API_URL}?action=saveSettings`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        settings: {
+                            delivery_fee_per_km: fee,
+                            delivery_free_km: freeKm,
+                            delivery_free_min_spend: freeMin,
+                            delivery_max_km: maxKm,
+                            trip_threshold_multiplier: threshold,
+                            delivery_speed_kmh: parseFloat(document.getElementById('setting-delivery-speed').value) || 80,
+                            order_prep_time_mins: parseFloat(document.getElementById('setting-prep-time').value) || 15
+                        }
+                    })
+                });
+                const res = await response.json();
+                if (res.success) {
+                    showToast("บันทึกการตั้งค่าเรียบร้อยแล้ว ✅");
+                } else {
+                    showToast("❌ บันทึกไม่สำเร็จ: " + res.message);
+                }
+            } catch (err) {
+                console.error("Save Settings Error:", err);
+                showToast("❌ เกิดข้อผิดพลาดในการเชื่อมต่อ");
             }
         }
 
