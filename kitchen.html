@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Kitchen Display - Baimak BBQ</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700&family=Outfit:wght@400;600;800&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary: #FF6B00;
+            --primary-light: #FF9E5E;
+            --primary-glow: rgba(255, 107, 0, 0.4);
+            --bg: #0A0A0C;
+            --surface: #16161A;
+            --surface-secondary: #1F1F24;
+            --surface-border: rgba(255, 255, 255, 0.08);
+            --text: #FFFFFF;
+            --text-muted: #94A3B8;
+            --success: #10B981;
+            --caution: #F59E0B;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Prompt', 'Outfit', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding: 16px;
+            background: var(--surface);
+            border-radius: 20px;
+            border: 1px solid var(--surface-border);
+        }
+
+        .logo-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-box h1 {
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-box span {
+            color: var(--primary);
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 16px;
+        }
+
+        .stat-badge {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--surface-border);
+            padding: 8px 16px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .stat-badge b {
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        .kds-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .kds-card {
+            background: var(--surface);
+            border-radius: 24px;
+            padding: 20px;
+            border: 1px solid var(--surface-border);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .item-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: white;
+            line-height: 1.2;
+        }
+
+        .item-total {
+            background: var(--primary);
+            color: white;
+            font-size: 2rem;
+            font-weight: 800;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 18px;
+            box-shadow: 0 8px 20px var(--primary-glow);
+        }
+
+        .spiciness-list {
+            margin-top: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .spice-row {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 8px 12px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .spice-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-muted);
+        }
+
+        .spice-count {
+            font-weight: 700;
+            color: white;
+        }
+
+        .order-bubbles {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px dashed var(--surface-border);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .order-bubble {
+            font-size: 0.7rem;
+            padding: 4px 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            color: var(--text-muted);
+        }
+
+        .refresh-btn {
+            background: var(--primary);
+            border: none;
+            color: white;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .refresh-btn:active {
+            transform: scale(0.9);
+        }
+
+        .spin {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 100px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            display: block;
+            margin: 0 auto 16px;
+            opacity: 0.2;
+        }
+
+        /* Responsive UI */
+        @media (max-width: 600px) {
+            header {
+                flex-direction: column;
+                gap: 16px;
+                align-items: stretch;
+            }
+
+            .stats-row {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="logo-box">
+            <div style="background: var(--primary); padding:8px; border-radius:12px;">
+                <i data-lucide="chef-hat" style="color: white; width:24px;"></i>
+            </div>
+            <h1>Baimak<span> KDS</span></h1>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-badge">
+                <i data-lucide="shopping-cart"></i> ออเดอร์จัดทำ: <b id="total-active-orders">0</b>
+            </div>
+            <div class="stat-badge">
+                <i data-lucide="flame"></i> ทั้งหมด: <b id="total-active-sticks">0</b> ไม้
+            </div>
+            <button class="refresh-btn" onclick="fetchKDS()">
+                <i data-lucide="refresh-cw" id="refresh-icon"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="kds-grid" id="kds-container">
+        <!-- Cards will be rendered here -->
+    </div>
+
+    <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycbxYnt6AODwWQM2AupdcBiF1_05aZYgibMfRJ7ZvsLeyytN_rrvxbBl0DHKEUo9p7PnAcQ/exec";
+
+        async function fetchKDS() {
+            const icon = document.getElementById('refresh-icon');
+            icon.classList.add('spin');
+
+            try {
+                const response = await fetch(API_URL + "?action=getOrders", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({})
+                });
+                const res = await response.json();
+                const orders = Array.isArray(res) ? res : (res && res.data ? res.data : []);
+
+                // กรองเฉพาะสถานะจ่ายแล้ว (paid) และ กำลังปรุง (cooking)
+                const cookingOrders = orders.filter(o => o.status === 'paid' || o.status === 'cooking');
+
+                aggregateItems(cookingOrders);
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setTimeout(() => icon.classList.remove('spin'), 500);
+            }
+        }
+
+        function aggregateItems(orders) {
+            const container = document.getElementById('kds-container');
+            const totalOrdersSpan = document.getElementById('total-active-orders');
+            const totalSticksSpan = document.getElementById('total-active-sticks');
+
+            totalOrdersSpan.innerText = orders.length;
+
+            if (orders.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i data-lucide="check-circle" style="width: 80px; height: 80px;"></i>
+                        <h2 style="color: white; margin-bottom: 8px;">ออเดอร์เกลี้ยงเตา!</h2>
+                        <p>ขณะนี้ไม่มีรายการอาหารที่ต้องปรุงเพิ่มเติมครับ</p>
+                    </div>`;
+                totalSticksSpan.innerText = 0;
+                lucide.createIcons();
+                return;
+            }
+
+            const masterMap = {};
+            let globalTotalSticks = 0;
+
+            orders.forEach(order => {
+                if (!order.items || !Array.isArray(order.items)) return;
+
+                order.items.forEach(item => {
+                    const itemName = item.name;
+                    const qty = parseInt(item.qty) || 0;
+                    const spice = item.spiciness || 'ไม่ระบุ';
+
+                    if (!masterMap[itemName]) {
+                        masterMap[itemName] = {
+                            name: itemName,
+                            total: 0,
+                            spices: {},
+                            queues: []
+                        };
+                    }
+
+                    masterMap[itemName].total += qty;
+                    globalTotalSticks += qty;
+
+                    if (!masterMap[itemName].spices[spice]) {
+                        masterMap[itemName].spices[spice] = 0;
+                    }
+                    masterMap[itemName].spices[spice] += qty;
+
+                    if (!masterMap[itemName].queues.includes(order.queue)) {
+                        masterMap[itemName].queues.push(order.queue);
+                    }
+                });
+            });
+
+            totalSticksSpan.innerText = globalTotalSticks;
+
+            // Sort by Total Descending
+            const sortedItems = Object.values(masterMap).sort((a, b) => b.total - a.total);
+
+            container.innerHTML = sortedItems.map(item => `
+                <div class="kds-card">
+                    <div class="card-header">
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-total">${item.total}</div>
+                    </div>
+                    
+                    <div class="spiciness-list">
+                        ${Object.entries(item.spices).map(([spice, count]) => `
+                            <div class="spice-row">
+                                <div class="spice-label">
+                                    <i data-lucide="flame" style="width:14px; color:${getSpiceColor(spice)}"></i>
+                                    ${spice}
+                                </div>
+                                <div class="spice-count">${count} ไม้</div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="order-bubbles">
+                        ${item.queues.map(q => `<div class="order-bubble">${q}</div>`).join('')}
+                    </div>
+                </div>
+            `).join('');
+
+            lucide.createIcons();
+        }
+
+        function getSpiceColor(spice) {
+            if (spice.includes('มาก')) return '#ef4444'; // Red
+            if (spice.includes('กลาง')) return '#f59e0b'; // Amber
+            if (spice.includes('น้อย')) return '#10b981'; // Green
+            return '#94a3b8';
+        }
+
+        // Initialize and setup Auto-refresh every 30s
+        fetchKDS();
+        setInterval(fetchKDS, 30000);
+    </script>
+</body>
+
+</html>
