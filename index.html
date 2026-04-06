@@ -3469,10 +3469,28 @@
                             feeEl.innerText = `เกินระยะ (${maxKm} กม.)`;
                             feeEl.style.color = "#FF5252";
                         }
-                        deliveryFee = 0; // No delivery fee to show if outside service area
+                        deliveryFee = 0;
+
+                        // Block Checkout Button in Cart
+                        const checkoutBtn = document.querySelector('#checkout-bar button');
+                        if (checkoutBtn) {
+                            checkoutBtn.innerHTML = `นอกพื้นที่บริการ <i data-lucide="map-pin-off" style="width: 18px;"></i>`;
+                            checkoutBtn.style.background = "rgba(255,255,255,0.05)";
+                            checkoutBtn.style.color = "var(--text-muted)";
+                            checkoutBtn.style.cursor = "not-allowed";
+                        }
                     } else {
                         const { fee, isShared } = calculateDynamicFee(dist, cartTotal);
                         deliveryFee = fee;
+
+                        // Restore Checkout Button
+                        const checkoutBtn = document.querySelector('#checkout-bar button');
+                        if (checkoutBtn) {
+                            checkoutBtn.innerHTML = `ดำเนินการต่อ <i data-lucide="arrow-right" style="width: 20px;"></i>`;
+                            checkoutBtn.style.background = "var(--primary)";
+                            checkoutBtn.style.color = "white";
+                            checkoutBtn.style.cursor = "pointer";
+                        }
 
                         deliveryLine.style.display = 'flex';
                         if (distEl) distEl.innerText = dist.toFixed(1);
@@ -3538,12 +3556,11 @@
                 const maxKm = AppState.settings ? AppState.settings.delivery_max_km : 20;
 
                 if (dist > maxKm) {
-                    // Force Pickup if outside radius
-                    selectDelivery('pickup');
-                    showToast(`📍 ระยะทาง ${dist.toFixed(1)} กม. เกินพื้นที่บริการ! ระบบปรับเป็น "รับเองที่ร้าน" ให้อัตโนมัติครับ`);
-                } else {
-                    selectDelivery('delivery');
+                    showToast(`❌ ท่านอยู่นอกพื้นที่บริการจัดส่ง (${dist.toFixed(1)} กม.) หากต้องการสั่งแบบ 'มารับเองที่ร้าน' กรุณาติดต่อทางร้านโดยตรงครับ`);
+                    return; // BLOCK PROGRESS
                 }
+
+                selectDelivery('delivery');
 
                 // Populate Form Fields
                 if (AppState.user.phone) {
