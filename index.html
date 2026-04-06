@@ -165,12 +165,62 @@
             }
         }
 
+        /* Shop Closed Overlay */
+        #shop-closed-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: rgba(15, 15, 18, 0.96);
+            z-index: 99999;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 32px;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+        }
+
+        .closed-card {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border: 1px solid rgba(255, 107, 0, 0.2);
+            padding: 40px 30px;
+            border-radius: 32px;
+            max-width: 380px;
+            width: 100%;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
         .custom-div-icon {
             background: none;
             border: none;
         }
 
         /* Splash Screen */
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-dark);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.6s ease-out, visibility 0.6s;
+        }
+
+        /* Shop Closed UI Hook */
+        #shop-closed-banner {
+            display: none;
+        }
+
         #splash-screen {
             position: fixed;
             top: 0;
@@ -1559,6 +1609,25 @@
         <div class="glow-blob glow-1"></div>
         <div class="glow-blob glow-2"></div>
 
+        <!-- Shop Closed Banner -->
+        <div id="shop-closed-banner">
+            <div class="closed-card">
+                <div
+                    style="width: 80px; height: 80px; background: rgba(255,107,0,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; color: var(--primary);">
+                    <i data-lucide="clock" style="width: 40px; height: 40px;"></i>
+                </div>
+                <h2 style="font-size: 1.8rem; margin-bottom: 12px; color: white;">ร้านปิดปรับปรุงชั่วคราว</h2>
+                <p style="color: var(--text-muted); font-size: 1rem; line-height: 1.6; margin-bottom: 32px;">
+                    ขออภัยในความไม่สะดวกครับ ขณะนี้ร้านกำลังปิดปรับปรุงระบบชั่วคราว
+                    <br>กรุณากลับมาใช้บริการใหม่อีกครั้งในภายหลังครับ 🙏
+                </p>
+                <button onclick="location.reload()" class="btn-primary"
+                    style="width: 100%; justify-content: center; height: 54px; border-radius: 18px; font-weight: 700; font-size: 1.05rem;">
+                    <i data-lucide="refresh-cw" style="width: 20px;"></i> ตรวจสอบอีกครั้ง
+                </button>
+            </div>
+        </div>
+
         <!-- Splash Screen -->
         <div id="splash-screen">
             <div class="logo-container">
@@ -2502,6 +2571,20 @@
                     AppState.settings = res.settings;
                     AppState.settings.currentPendingTotal = res.currentPendingTotal || 0;
 
+                    // Shop Status Handling
+                    const shopStatus = res.settings.shop_status || 'open';
+                    const banner = document.getElementById('shop-closed-banner');
+                    if (banner) {
+                        if (shopStatus === 'closed') {
+                            banner.style.display = 'flex';
+                            if (AppState.currentPage === 'checkout') {
+                                switchPage('home'); // Kick out of checkout if closed
+                            }
+                        } else {
+                            banner.style.display = 'none';
+                        }
+                    }
+
                     const lat = AppState.checkout.lat || (AppState.user && AppState.user.lat);
                     const lng = AppState.checkout.lng || (AppState.user && AppState.user.lng);
 
@@ -3178,6 +3261,12 @@
         }
 
         function addToCart(id, event) {
+            // Real-time Shop Status Check
+            if (AppState.settings && AppState.settings.shop_status === 'closed') {
+                showToast("ขออภัยครับ ขณะนี้ร้านปิดปรับปรุงชั่วคราว 🙏");
+                return;
+            }
+
             const item = AppState.menu.find(i => i.id === id);
 
             if (!item) return;
@@ -5101,6 +5190,9 @@
             setTimeout(() => icon.classList.remove('bell-shake'), 1000);
             if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
         }
+
+        // Start Periodic Settings/Shop Status Fetch
+        setInterval(fetchSettings, 15000); // Check every 15s
 
         // Start Polling
         setInterval(fetchNotifications, 20000); // Check every 20 seconds
