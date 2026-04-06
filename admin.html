@@ -599,6 +599,29 @@
             border-style: dashed;
         }
 
+        /* ปุ่มจัดการในรายการ */
+        .btn-action {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--surface-border);
+            border-radius: 8px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-action:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px var(--primary-glow);
+            transform: translateY(-2px);
+        }
+
         /* --- Custom Slip Preview Modal --- */
         .slip-overlay {
             position: fixed;
@@ -1415,9 +1438,17 @@
                 <i data-lucide="package" style="width: 20px;"></i>
                 จัดการเมนูอาหาร
             </a>
+            <a class="nav-link" onclick="switchView('promos')" id="nav-promos">
+                <i data-lucide="ticket" style="width: 20px;"></i>
+                จัดการรหัสส่วนลด
+            </a>
             <a class="nav-link" onclick="switchView('reports')" id="nav-reports">
                 <i data-lucide="bar-chart-2" style="width: 20px;"></i>
                 ยอดขาย / รายงาน
+            </a>
+            <a class="nav-link" onclick="window.open('kitchen.html', '_blank')">
+                <i data-lucide="chef-hat" style="width: 20px;"></i>
+                หน้าห้องครัว (KDS Display)
             </a>
             <a class="nav-link" onclick="window.open('delivery.html', '_blank')">
                 <i data-lucide="bike" style="width: 20px;"></i>
@@ -1626,6 +1657,34 @@
             </div>
         </div>
 
+        <!-- ================= VIEW: PROMOS ================= -->
+        <div id="view-promos" class="view-section">
+            <header class="topbar">
+                <div class="topbar-header">
+                    <div>
+                        <h1 style="font-size: 1.45rem;">จัดการรหัสส่วนลด (Promo Codes)</h1>
+                        <p class="text-muted" style="font-size: 0.85rem;">สร้างรหัสคูปองเพื่อมอบส่วนลดพิเศษให้ลูกค้า</p>
+                    </div>
+                    <button class="menu-toggle" onclick="toggleSidebar()">
+                        <i data-lucide="menu" style="width: 28px; height: 28px;"></i>
+                    </button>
+                </div>
+            </header>
+
+            <div class="banner-content-area">
+                <div class="banner-header-actions">
+                    <h3 style="font-weight: 500;">รหัสที่มีอยู่ในระบบ</h3>
+                    <button class="btn-add" onclick="openPromoModal()">
+                        <i data-lucide="plus" style="width: 18px;"></i> เพิ่มรหัสใหม่
+                    </button>
+                </div>
+
+                <div class="banner-list" id="promos-list-container">
+                    <!-- Promo codes will be rendered here -->
+                </div>
+            </div>
+        </div>
+
         <!-- ================= VIEW: REPORTS (NEW) ================= -->
         <div id="view-reports" class="view-section">
             <header class="topbar">
@@ -1772,6 +1831,95 @@
                 <button class="btn-outline" onclick="closeBannerModal()">ยกเลิก</button>
                 <button class="btn-add" onclick="saveBanner()"><i data-lucide="save" style="width: 18px;"></i>
                     บันทึก</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Promo Code Management Modal - PREMIUM VERSION -->
+    <div class="modal-overlay" id="promo-modal">
+        <div class="modal-content glass"
+            style="max-width: 440px; padding: 0; border: 1px solid rgba(255,107,0,0.3); overflow: hidden;">
+            <div class="modal-header"
+                style="background: linear-gradient(135deg, rgba(255,107,0,0.1) 0%, rgba(0,0,0,0.4) 100%); padding: 24px 28px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div
+                        style="background: var(--primary); width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px var(--primary-glow);">
+                        <i data-lucide="ticket" style="width: 20px; color: white;"></i>
+                    </div>
+                    <h2 id="promo-modal-title"
+                        style="margin:0; font-size: 1.25rem; font-weight: 700; letter-spacing: -0.5px;">จัดการรหัสส่วนลด
+                    </h2>
+                </div>
+                <button class="btn-cancel"
+                    style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;"
+                    onclick="closePromoModal()">
+                    <i data-lucide="x" style="width: 18px;"></i>
+                </button>
+            </div>
+
+            <div class="modal-body" style="padding: 28px;">
+                <!-- 1. Promo Code Input -->
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label
+                        style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">
+                        <i data-lucide="hash" style="width: 14px;"></i> รหัสส่วนลด (Promo Code)
+                    </label>
+                    <input type="text" id="promo-code" class="form-control" placeholder="เช่น MALA10"
+                        style="text-transform: uppercase; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px; font-weight: 700; color: var(--primary); font-size: 1.1rem; letter-spacing: 1px;">
+                </div>
+
+                <!-- 2. Type Select -->
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label
+                        style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">
+                        <i data-lucide="layers" style="width: 14px;"></i> ประเภทส่วนลด
+                    </label>
+                    <select id="promo-type" class="form-control"
+                        style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px; height: auto;">
+                        <option value="percent">ลดเป็นเปอร์เซ็นต์ (%)</option>
+                        <option value="fixed">ลดเป็นจำนวนเงิน (฿)</option>
+                    </select>
+                </div>
+
+                <!-- 3. Value & Min Spend Grid -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                    <div class="form-group">
+                        <label
+                            style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">
+                            <i data-lucide="circle-dollar-sign" style="width: 14px;"></i> มูลค่า
+                        </label>
+                        <input type="number" id="promo-value" class="form-control" placeholder="10"
+                            style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px;">
+                    </div>
+                    <div class="form-group">
+                        <label
+                            style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">
+                            <i data-lucide="shopping-cart" style="width: 14px;"></i> ขั้นต่ำ (บาท)
+                        </label>
+                        <input type="number" id="promo-min" class="form-control" placeholder="0"
+                            style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px;">
+                    </div>
+                </div>
+
+                <!-- 4. Message -->
+                <div class="form-group" style="margin-bottom: 28px;">
+                    <label
+                        style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">
+                        <i data-lucide="message-circle" style="width: 14px;"></i> คำอธิบายแคมเปญ
+                    </label>
+                    <input type="text" id="promo-msg" class="form-control" placeholder="เช่น ลด 10% เมื่อสั่งครบ 100.-"
+                        style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px;">
+                </div>
+
+                <!-- Actions -->
+                <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 12px;">
+                    <button class="btn-outline" onclick="closePromoModal()"
+                        style="border-radius: 12px; height: 50px;">ยกเลิก</button>
+                    <button class="btn-add" onclick="savePromoCode()"
+                        style="border-radius: 12px; height: 50px; justify-content: center; font-size: 1rem;">
+                        <i data-lucide="check-circle" style="width: 18px;"></i> บันทึกข้อมูล
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -2459,6 +2607,7 @@
             try {
                 const response = await fetch(API_URL + "?action=updateStatus", {
                     method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
                     body: JSON.stringify({ orderId: orderId, status: 'slip_rejected', reason: selectedReason })
                 });
                 const res = await response.json();
@@ -2491,6 +2640,7 @@
 
                 const response = await fetch(API_URL + "?action=updateStatus", {
                     method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
                     body: JSON.stringify({ orderId: orderId, status: newStatus })
                 });
                 const res = await response.json();
@@ -2794,6 +2944,7 @@
 
                 const response = await fetch(API_URL + "?action=saveMenu", {
                     method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
                     body: JSON.stringify(newMenu)
                 });
                 const res = await response.json();
@@ -2816,6 +2967,7 @@
 
                     const response = await fetch(API_URL + "?action=deleteMenu", {
                         method: 'POST',
+                        headers: { 'Content-Type': 'text/plain' },
                         body: JSON.stringify({ id: id })
                     });
                     const res = await response.json();
@@ -3197,6 +3349,7 @@
 
             if (viewName === 'banners') renderBanners();
             if (viewName === 'reports') generateReports();
+            if (viewName === 'promos') fetchPromoCodes();
         }
 
         let toastTimeout;
@@ -3222,6 +3375,7 @@
                 fetchOrders();
                 fetchBanners();
                 fetchMenus();
+                fetchPromoCodes();
                 setInterval(fetchOrders, 30000);
                 setupScrollObserver();
             } else {
@@ -3246,6 +3400,7 @@
                     fetchOrders();
                     fetchBanners();
                     fetchMenus();
+                    fetchPromoCodes();
 
                     setInterval(fetchOrders, 30000);
                     setupScrollObserver();
@@ -3298,6 +3453,210 @@
             }, observerOptions);
 
             columns.forEach(col => observer.observe(col));
+        }
+
+        // ================= PROMO CODES LOGIC =================
+        let allPromoCodes = [];
+
+        async function fetchPromoCodes() {
+            try {
+                const response = await fetch(`${API_URL}?action=getPromoCodes`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({})
+                });
+                const res = await response.json();
+                // Safety Check: มั่นใจว่าเป็น Array
+                allPromoCodes = Array.isArray(res) ? res : (res && res.data ? res.data : []);
+                renderPromoCodes();
+            } catch (err) {
+                console.error("Fetch Promos Error:", err);
+                allPromoCodes = [];
+                renderPromoCodes();
+            }
+        }
+
+        function renderPromoCodes() {
+            const container = document.getElementById('promos-list-container');
+            if (!container) return;
+
+            if (!Array.isArray(allPromoCodes) || allPromoCodes.length === 0) {
+                container.innerHTML = `
+                <div style="text-align:center; padding:40px; background:rgba(255,107,0,0.05); border-radius:12px; border:1px dashed var(--primary); margin-top:20px;">
+                    <i data-lucide="ticket" style="width:40px; height:40px; color:var(--primary); opacity:0.5; margin-bottom:12px;"></i>
+                    <p style="color:var(--text-muted);">ยังไม่มีรหัสส่วนลดในระบบ หรือกำลังโหลดข้อมูล...</p>
+                </div>`;
+                lucide.createIcons();
+                return;
+            }
+
+            container.innerHTML = allPromoCodes.map(promo => {
+                const isActive = promo.active === true || promo.active === 'TRUE';
+                return `
+                <div class="banner-card glass" style="display:flex; justify-content:space-between; align-items:center; padding:16px; margin-bottom:12px; border: 1px solid ${isActive ? 'rgba(76,175,80,0.2)' : 'var(--surface-border)'};">
+                    <div style="display:flex; align-items:center; gap:16px;">
+                        <div style="background:${isActive ? 'var(--primary)' : '#444'}; color:white; width:48px; height:48px; border-radius:10px; display:flex; align-items:center; justify-content:center; box-shadow:${isActive ? '0 4px 12px var(--primary-glow)' : 'none'};">
+                            <i data-lucide="ticket"></i>
+                        </div>
+                        <div>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <h3 style="font-size:1.1rem; color:${isActive ? 'var(--primary)' : 'var(--text-muted)'}; font-weight:700; margin:0;">${promo.code}</h3>
+                                <span class="status-pill" style="background:${isActive ? 'rgba(76,175,80,0.1)' : 'rgba(255,255,255,0.05)'}; color:${isActive ? '#4CAF50' : 'var(--text-muted)'}; padding: 2px 8px; font-size: 0.7rem; border-radius: 20px; font-weight: 600;">
+                                    ${isActive ? 'ACTIVE' : 'INACTIVE'}
+                                </span>
+                            </div>
+                            <p style="font-size:0.85rem; color:var(--text-muted); margin:4px 0 0 0;">${promo.message}</p>
+                            <div style="font-size:0.75rem; color:rgba(255,255,255,0.3); margin-top:4px;">
+                                ขั้นต่ำ ฿${promo.minSpend} | ส่วนลด: ${promo.value}${promo.type === 'percent' ? '%' : ' บาท'}
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:8px;">
+                        <button class="btn-action" onclick="togglePromoStatus('${promo.code}', ${isActive})" title="เปิด/ปิดการใช้งาน">
+                            <i data-lucide="${isActive ? 'eye-off' : 'eye'}" style="width:18px;"></i>
+                        </button>
+                        <button class="btn-action" onclick="openPromoModal('${promo.code}')" title="แก้ไข">
+                            <i data-lucide="edit-3" style="width:18px;"></i>
+                        </button>
+                        <button class="btn-action" style="color:#F44336; border-color:rgba(244,67,54,0.2);" onclick="deletePromoCode('${promo.code}')" title="ลบ">
+                            <i data-lucide="trash-2" style="width:18px;"></i>
+                        </button>
+                    </div>
+                </div>
+                `;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        function openPromoModal(codeString = "") {
+            const modal = document.getElementById('promo-modal');
+            const title = document.getElementById('promo-modal-title');
+
+            // Default Values for New
+            document.getElementById('promo-code').value = "";
+            document.getElementById('promo-type').value = "percent";
+            document.getElementById('promo-value').value = "";
+            document.getElementById('promo-min').value = "0";
+            document.getElementById('promo-msg').value = "";
+            document.getElementById('promo-code').disabled = false;
+
+            if (codeString) {
+                const promo = allPromoCodes.find(p => p.code === codeString);
+                if (promo) {
+                    title.innerText = "แก้ไขรหัสส่วนลด";
+                    document.getElementById('promo-code').value = promo.code;
+                    document.getElementById('promo-code').disabled = true; // Code stays primary key
+                    document.getElementById('promo-type').value = promo.type;
+                    document.getElementById('promo-value').value = promo.value;
+                    document.getElementById('promo-min').value = promo.minSpend;
+                    document.getElementById('promo-msg').value = promo.message;
+                    modal.dataset.active = promo.active;
+                }
+            } else {
+                title.innerText = "เพิ่มรหัสส่วนลดใหม่";
+                modal.dataset.active = "TRUE";
+            }
+
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('active'), 10);
+            lucide.createIcons();
+        }
+
+        function closePromoModal() {
+            const modal = document.getElementById('promo-modal');
+            modal.classList.remove('active');
+            setTimeout(() => modal.style.display = 'none', 300);
+        }
+
+        async function savePromoCode() {
+            const code = document.getElementById('promo-code').value.trim().toUpperCase();
+            const type = document.getElementById('promo-type').value;
+            const value = parseFloat(document.getElementById('promo-value').value);
+            const min = parseFloat(document.getElementById('promo-min').value) || 0;
+            const msg = document.getElementById('promo-msg').value.trim();
+            const isActive = document.getElementById('promo-modal').dataset.active === "TRUE" || document.getElementById('promo-modal').dataset.active === true;
+
+            if (!code || isNaN(value)) {
+                alert("กรุณากรอกข้อมูลให้ครบถ้วน");
+                return;
+            }
+
+            try {
+                showToast("กำลังบันทึกรหัส...");
+                const response = await fetch(`${API_URL}?action=savePromoCode`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({
+                        code: code,
+                        type: type,
+                        value: value,
+                        minSpend: min,
+                        message: msg,
+                        active: isActive
+                    })
+                });
+                const res = await response.json();
+                if (res.success) {
+                    showToast("บันทึกรหัสส่วนลดสำเร็จ!");
+                    closePromoModal();
+                    fetchPromoCodes();
+                } else {
+                    alert("Error: " + res.message);
+                }
+            } catch (err) {
+                console.error("Save Promo Error:", err);
+                showToast("❌ เชื่อมต่อล้มเหลว กรุณาตรวจสอบอินเทอร์เน็ต");
+            }
+        }
+
+        async function togglePromoStatus(code, currentActive) {
+            const newActive = !currentActive; // Boolean toggle
+            const promo = allPromoCodes.find(p => p.code === code);
+            if (!promo) return;
+
+            const promoData = { ...promo, active: newActive };
+
+            try {
+                showToast("กำลังอัปเดตสถานะ...");
+                const response = await fetch(`${API_URL}?action=savePromoCode`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify(promoData)
+                });
+                const res = await response.json();
+                if (res.success) {
+                    showToast(`เปลี่ยนสถานะรหัส ${code} สำเร็จ!`);
+                    fetchPromoCodes();
+                } else {
+                    showToast("❌ อัปเดตไม่สำเร็จ");
+                }
+            } catch (err) {
+                console.error("Toggle Promo Error:", err);
+                showToast("❌ ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้");
+            }
+        }
+
+        async function deletePromoCode(code) {
+            if (!confirm(`ยืนยันการลบรหัส "${code}" ใช่หรือไม่?`)) return;
+
+            try {
+                showToast("กำลังลบรหัส...");
+                const response = await fetch(`${API_URL}?action=deletePromoCode`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({ code: code })
+                });
+                const res = await response.json();
+                if (res.success) {
+                    showToast("ลบรหัสส่วนลดเรียบร้อย");
+                    fetchPromoCodes();
+                } else {
+                    showToast("❌ ลบไม่สำเร็จ");
+                }
+            } catch (err) {
+                console.error("Delete Promo Error:", err);
+                showToast("❌ การเชื่อมต่อผิดพลาด");
+            }
         }
 
     </script>
