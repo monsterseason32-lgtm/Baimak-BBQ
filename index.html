@@ -3460,18 +3460,30 @@
 
                 if (lat && lng) {
                     const dist = calculateDistance(AppState.shopLocation.lat, AppState.shopLocation.lng, lat, lng);
-                    const { fee, isShared } = calculateDynamicFee(dist, cartTotal);
-                    deliveryFee = fee;
+                    const maxKm = AppState.settings ? AppState.settings.delivery_max_km : 20;
 
-                    deliveryLine.style.display = 'flex';
-                    if (distEl) distEl.innerText = dist.toFixed(1);
-                    if (feeEl) {
-                        if (fee === 0) {
-                            feeEl.innerText = isShared ? "ส่งฟรี (แชร์ทริป)" : "ฟรี";
-                            feeEl.style.color = "#22c55e";
-                        } else {
-                            feeEl.innerText = `฿${fee}`;
-                            feeEl.style.color = "var(--primary)";
+                    if (dist > maxKm) {
+                        deliveryLine.style.display = 'flex';
+                        if (distEl) distEl.innerText = dist.toFixed(1);
+                        if (feeEl) {
+                            feeEl.innerText = `เกินระยะ (${maxKm} กม.)`;
+                            feeEl.style.color = "#FF5252";
+                        }
+                        deliveryFee = 0; // No delivery fee to show if outside service area
+                    } else {
+                        const { fee, isShared } = calculateDynamicFee(dist, cartTotal);
+                        deliveryFee = fee;
+
+                        deliveryLine.style.display = 'flex';
+                        if (distEl) distEl.innerText = dist.toFixed(1);
+                        if (feeEl) {
+                            if (fee === 0) {
+                                feeEl.innerText = isShared ? "ส่งฟรี (แชร์ทริป)" : "ฟรี";
+                                feeEl.style.color = "#22c55e";
+                            } else {
+                                feeEl.innerText = `฿${fee}`;
+                                feeEl.style.color = "var(--primary)";
+                            }
                         }
                     }
                 } else {
@@ -3521,8 +3533,17 @@
                 AppState.checkout.lat = AppState.user.lat;
                 AppState.checkout.lng = AppState.user.lng;
 
-                // Auto-select delivery if location is already picked
-                selectDelivery('delivery');
+                // Check distance before auto-selecting delivery
+                const dist = calculateDistance(AppState.shopLocation.lat, AppState.shopLocation.lng, AppState.user.lat, AppState.user.lng);
+                const maxKm = AppState.settings ? AppState.settings.delivery_max_km : 20;
+
+                if (dist > maxKm) {
+                    // Force Pickup if outside radius
+                    selectDelivery('pickup');
+                    showToast(`📍 ระยะทาง ${dist.toFixed(1)} กม. เกินพื้นที่บริการ! ระบบปรับเป็น "รับเองที่ร้าน" ให้อัตโนมัติครับ`);
+                } else {
+                    selectDelivery('delivery');
+                }
 
                 // Populate Form Fields
                 if (AppState.user.phone) {
@@ -3535,6 +3556,9 @@
                     const addrInput = document.getElementById('checkout-address');
                     if (addrInput) addrInput.value = AppState.user.address;
                 }
+            } else {
+                // Default to pickup if no location
+                selectDelivery('pickup');
             }
 
             // Reset slip state
