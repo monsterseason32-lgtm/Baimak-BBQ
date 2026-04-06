@@ -1652,14 +1652,31 @@
                 <!-- Render via JS -->
             </div>
 
-            <div class="glass checkout-bar" id="checkout-bar" style="display: none;">
-                <div>
-                    <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 2px;">ราคารวมทั้งหมด</p>
-                    <h2 class="text-primary" style="font-size: 1.5rem;">฿<span id="cart-total">0</span></h2>
+            <!-- Checkout Bar (Cart Page) -->
+            <div class="glass checkout-bar" id="checkout-bar"
+                style="display: none; flex-direction: column; align-items: stretch; gap: 8px;">
+                <!-- Line for Delivery Fee (Cart) -->
+                <div id="cart-delivery-line"
+                    style="display: none; align-items: center; justify-content: space-between; padding: 0 4px; border-bottom: 1px dashed rgba(255,255,255,0.05); padding-bottom: 8px; margin-bottom: 4px;">
+                    <span class="text-muted" style="font-size: 0.8rem;">
+                        <i data-lucide="bike" style="width: 14px; vertical-align: middle;"></i> ค่าจัดส่ง (<span
+                            id="cart-dist">0</span> กม.)
+                    </span>
+                    <span id="cart-delivery-fee"
+                        style="font-size: 0.9rem; color: var(--primary); font-weight: 600;">฿0</span>
                 </div>
-                <button class="btn-primary" onclick="goToCheckout()">
-                    ดำเนินการต่อ <i data-lucide="arrow-right" style="width: 18px;"></i>
-                </button>
+
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <p class="text-muted" style="font-size: 0.75rem; margin-bottom: 0;">ยอดชำระสุทธิ</p>
+                        <h2 class="text-primary" style="font-size: 1.6rem; font-weight: 700; line-height: 1.2;">฿<span
+                                id="cart-total">0</span></h2>
+                    </div>
+                    <button class="btn-primary" onclick="goToCheckout()"
+                        style="padding: 14px 28px; border-radius: 20px; font-weight: 700; font-size: 1.05rem;">
+                        ดำเนินการต่อ <i data-lucide="arrow-right" style="width: 20px;"></i>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -2271,7 +2288,13 @@
             userLocation: null,
             shopLocation: { lat: 14.503158, lng: 98.834390 },
             bookmarks: JSON.parse(localStorage.getItem('baimak_bookmarks') || '[]'),
-            salesStats: { bestSeller: null, recommended: null, newItems: [] }
+            salesStats: { bestSeller: null, recommended: null, newItems: [] },
+            settings: {
+                delivery_fee_per_km: 5,
+                delivery_free_min_spend: 200,
+                delivery_free_km: 1,
+                delivery_max_km: 20
+            }
         };
 
         // ================= PERSISTENCE LOGIC =================
@@ -2293,6 +2316,32 @@
                 } catch (e) {
                     console.error("Load cart failed", e);
                 }
+            }
+        }
+
+        function saveUserLocation() {
+            const lat = AppState.checkout.lat || (AppState.user && AppState.user.lat);
+            const lng = AppState.checkout.lng || (AppState.user && AppState.user.lng);
+            if (lat && lng) {
+                localStorage.setItem('baimak_last_location', JSON.stringify({ lat, lng }));
+            }
+        }
+
+        function loadUserLocation() {
+            const saved = localStorage.getItem('baimak_last_location');
+            if (saved) {
+                try {
+                    const loc = JSON.parse(saved);
+                    if (!AppState.user) AppState.user = {};
+                    AppState.user.lat = loc.lat;
+                    AppState.user.lng = loc.lng;
+                    AppState.checkout.lat = loc.lat;
+                    AppState.checkout.lng = loc.lng;
+
+                    // อัปเดต UI ทันที
+                    const dist = calculateDistance(loc.lat, loc.lng, AppState.shopLocation.lat, AppState.shopLocation.lng);
+                    updateDeliveryBanner(dist);
+                } catch (e) { }
             }
         }
 
@@ -2441,6 +2490,39 @@
             } catch (error) { return { bestSeller: null, recommended: null, newItems: [] }; }
         }
 
+        async function fetchSettings() {
+            try {
+                const response = await fetch(`${API_URL}?action=getSettings`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({})
+                });
+                const res = await response.json();
+                if (res.success && res.settings) {
+                    AppState.settings = res.settings;
+                    AppState.settings.currentPendingTotal = res.currentPendingTotal || 0;
+
+                    const lat = AppState.checkout.lat || (AppState.user && AppState.user.lat);
+                    const lng = AppState.checkout.lng || (AppState.user && AppState.user.lng);
+
+                    // อัปเดตแบนเนอร์หากมีการแสดงผลอยู่
+                    if (lat && lng) {
+                        const dist = calculateDistance(lat, lng, AppState.shopLocation.lat, AppState.shopLocation.lng);
+                        updateDeliveryBanner(dist);
+                    }
+
+                    // อัปเดตหน้าตะกร้าหรือหน้าชำระเงินหากกำลังเปิดอยู่เพื่อสะท้อนยอดแชร์ค่าส่งล่าสุด
+                    if (document.getElementById('page-cart').classList.contains('active')) renderCartPage();
+                    if (AppState.currentPage === 'checkout') recalculateDeliveryFee();
+                }
+            } catch (error) {
+                console.warn("Fetch Settings Error, using defaults");
+            }
+        }
+
+        // Polling: อัปเดตข้อมูลการแชร์ค่าส่งทุกๆ 60 วินาที
+        setInterval(fetchSettings, 60000);
+
         function ensureDeliveryBanner() {
             if (!document.getElementById('delivery-info-banner')) {
                 const header = document.querySelector('.header-profile');
@@ -2469,7 +2551,7 @@
                         <i data-lucide="map-pin" id="delivery-status-icon" style="width: 20px; height: 20px;"></i>
                     </div>
                     <div style="flex: 1; min-width: 0;">
-                        <div id="delivery-dist-text" style="font-size: 0.95rem; font-weight: 700; color: var(--text-main); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">กำลังระบุพิกัด...</div>
+                        <div id="delivery-dist-text" style="font-size: 0.95rem; font-weight: 700; color: var(--text-main); margin-bottom: 2px;">กำลังระบุพิกัด...</div>
                         <div id="delivery-time-text" style="font-size: 0.78rem; color: var(--text-muted); display: flex; align-items: center; gap: 4px;">เพื่อประเมินระยะเวลาจัดส่ง</div>
                     </div>
                     <div style="color: var(--text-muted);">
@@ -2518,6 +2600,35 @@
             return R * c;
         }
 
+        /**
+         * คำนวณค่าส่งแบบแชร์ต้นทุน (Shared Fuel Cost)
+         */
+        function calculateDynamicFee(distKm, cartTotal) {
+            const s = AppState.settings || { delivery_free_km: 1, delivery_fee_per_km: 5, delivery_free_min_spend: 200, trip_threshold_multiplier: 20 };
+            const pendingTotal = AppState.settings.currentPendingTotal || 0;
+            const multiplier = s.trip_threshold_multiplier || 20;
+
+            let baseFee = 0;
+            if (distKm > s.delivery_free_km) {
+                baseFee = Math.ceil(distKm - s.delivery_free_km) * s.delivery_fee_per_km;
+            }
+
+            const requirement = distKm * multiplier;
+            const combinedTotal = cartTotal + pendingTotal;
+
+            // เงื่อนไขส่งฟรี: สั่งครบเป้าหมายรวม หรือ สั่งครบเกณฑ์ส่งฟรีปกติของร้าน
+            if (combinedTotal >= requirement || cartTotal >= s.delivery_free_min_spend) {
+                return { fee: 0, discount: baseFee, isShared: pendingTotal > 0 && cartTotal < s.delivery_free_min_spend };
+            }
+
+            // ส่วนลดแชร์ค่าส่งตามสัดส่วนออเดอร์ในคิว
+            let discount = (pendingTotal / requirement) * baseFee;
+            discount = Math.min(baseFee, Math.floor(discount));
+            const finalFee = Math.max(0, baseFee - discount);
+
+            return { fee: finalFee, discount: discount, isShared: discount > 0 };
+        }
+
         function updateDeliveryBanner(distKm) {
             const banner = document.getElementById('delivery-info-banner');
             const distText = document.getElementById('delivery-dist-text');
@@ -2530,7 +2641,9 @@
             banner.style.display = 'flex';
             banner.style.animation = 'slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards';
 
-            if (distKm > 20) {
+            const s = AppState.settings || { delivery_max_km: 20, delivery_free_km: 1, delivery_fee_per_km: 5 };
+
+            if (distKm > s.delivery_max_km) {
                 distText.innerHTML = `ระยะห่าง: <span style="color: #FF5252;">${distKm.toFixed(1)} กม.</span>`;
                 timeText.innerHTML = `<span style="color: rgba(255,82,82,0.8); display: flex; align-items: center; gap: 4px;">
                     <i data-lucide="alert-circle" style="width: 14px;"></i> เกินระยะบริการจัดส่ง
@@ -2542,17 +2655,45 @@
                 iconBg.style.boxShadow = '0 0 15px rgba(255, 82, 82, 0.3)';
                 iconWrap.setAttribute('data-lucide', 'map-pin-off');
             } else {
-                const durationMin = Math.round(15 + (distKm * 5));
-                distText.innerHTML = `ระยะทางจัดส่ง: <span class="text-primary">${distKm.toFixed(1)} กม.</span>`;
-                timeText.innerHTML = `<span style="display: flex; align-items: center; gap: 4px;">
-                    <i data-lucide="bike" style="width: 14px; color: var(--primary);"></i> รับอาหารในประมาณ ${durationMin}-${durationMin + 10} นาที
-                </span>`;
+                const speed = parseFloat(s.delivery_speed_kmh) || 80;
+                const prepTime = parseFloat(s.order_prep_time_mins) || 15;
+                const travelTime = (distKm / speed) * 60;
+                const durationMin = Math.round(prepTime + travelTime);
 
-                banner.style.background = 'rgba(255, 107, 0, 0.06)';
-                banner.style.borderColor = 'rgba(255, 107, 0, 0.2)';
-                iconBg.style.background = 'var(--primary)';
-                iconBg.style.boxShadow = '0 0 15px var(--primary-glow)';
-                iconWrap.setAttribute('data-lucide', 'map-pin');
+                const cartTotal = AppState.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+                const { fee, discount, isShared } = calculateDynamicFee(distKm, cartTotal);
+
+                let feeText = '';
+                if (fee === 0) {
+                    feeText = `<span style="color: #22c55e; font-weight: 700;">(ส่งฟรี! ${isShared ? 'แชร์ทริป' : ''})</span>`;
+                } else {
+                    feeText = `<span style="color: var(--primary); font-weight: 700;">(ค่าส่ง ฿${fee})</span>`;
+                    if (isShared) {
+                        feeText += ` <span style="font-size: 0.7rem; color: #22c55e;">[แชร์แล้ว -฿${discount}]</span>`;
+                    }
+                }
+
+                distText.innerHTML = `ระยะทางจัดส่ง: <span class="text-primary">${distKm.toFixed(1)} กม.</span> ${feeText}`;
+
+                if (isShared && fee > 0) {
+                    const s = AppState.settings;
+                    const target = distKm * (s.trip_threshold_multiplier || 20);
+                    const missing = Math.ceil(target - (cartTotal + (s.currentPendingTotal || 0)));
+                    timeText.innerHTML = `<span style="display: flex; align-items: center; gap: 4px; color: #22c55e;">
+                        <i data-lucide="info" style="width: 14px;"></i> แชร์ค่าส่งสำเร็จ! อีก ฿${missing} จะส่งฟรี
+                    </span>`;
+                } else {
+                    timeText.innerHTML = `<span style="display: flex; align-items: center; gap: 4px;">
+                        <i data-lucide="bike" style="width: 14px; color: var(--primary);"></i> รับอาหารในประมาณ ${durationMin}-${durationMin + 10} นาที
+                    </span>`;
+                }
+
+                banner.style.background = isShared ? 'rgba(34, 197, 94, 0.05)' : 'rgba(255, 107, 0, 0.06)';
+                banner.style.borderColor = isShared ? 'rgba(34, 197, 94, 0.2)' : 'rgba(255, 107, 0, 0.2)';
+                iconBg.style.background = isShared ? '#22c55e' : 'var(--primary)';
+                iconBg.style.boxShadow = isShared ? '0 0 15px rgba(34, 197, 94, 0.3)' : '0 0 15px var(--primary-glow)';
+                iconWrap.setAttribute('data-lucide', isShared ? 'share-2' : 'map-pin');
             }
 
             // Re-render only necessary icon
@@ -2593,13 +2734,17 @@
             AppState.currentPage = 'menu';
             lucide.createIcons();
 
+            // Fetch Settings
+            await fetchSettings();
+
             // Add delivery banner area if it doesn't exist
             ensureDeliveryBanner();
 
             await initializeLiff();
 
-            // Restore cart from previous session
+            // Restore cart and location from previous session
             loadCartFromLocal();
+            loadUserLocation();
 
             const [menuData, promosData, salesStats] = await Promise.all([fetchMenuData(), fetchPromotionsData(), fetchSalesStats()]);
             AppState.menu = menuData;
@@ -3174,6 +3319,7 @@
             saveCartToLocal();
 
             if (document.getElementById('page-cart').classList.contains('active')) renderCartPage();
+            if (AppState.currentPage === 'checkout') recalculateDeliveryFee();
         }
 
         function renderCartPage() {
@@ -3191,9 +3337,9 @@
             emptyState.style.display = 'none';
             checkoutBar.style.display = 'flex';
 
-            let total = 0;
+            let cartTotal = 0;
             container.innerHTML = AppState.cart.map((item, index) => {
-                total += item.price * item.qty;
+                cartTotal += item.price * item.qty;
                 return `
                 <div class="glass cart-item" style="animation-delay: ${index * 0.05}s;">
                     <img src="${item.img}" class="cart-item-img">
@@ -3213,7 +3359,44 @@
                 </div>`;
             }).join('');
 
-            document.getElementById('cart-total').innerText = total;
+            // คำนวณค่าส่งเบื้องต้นในหน้าตะกร้า
+            const deliveryLine = document.getElementById('cart-delivery-line');
+            const distEl = document.getElementById('cart-dist');
+            const feeEl = document.getElementById('cart-delivery-fee');
+            let deliveryFee = 0;
+
+            if (deliveryLine) {
+                const lat = AppState.checkout.lat || (AppState.user && AppState.user.lat);
+                const lng = AppState.checkout.lng || (AppState.user && AppState.user.lng);
+
+                if (lat && lng) {
+                    const dist = calculateDistance(AppState.shopLocation.lat, AppState.shopLocation.lng, lat, lng);
+                    const { fee, isShared } = calculateDynamicFee(dist, cartTotal);
+                    deliveryFee = fee;
+
+                    deliveryLine.style.display = 'flex';
+                    if (distEl) distEl.innerText = dist.toFixed(1);
+                    if (feeEl) {
+                        if (fee === 0) {
+                            feeEl.innerText = isShared ? "ส่งฟรี (แชร์ทริป)" : "ฟรี";
+                            feeEl.style.color = "#22c55e";
+                        } else {
+                            feeEl.innerText = `฿${fee}`;
+                            feeEl.style.color = "var(--primary)";
+                        }
+                    }
+                } else {
+                    // หากยังไม่ปักหมุด
+                    deliveryLine.style.display = 'flex';
+                    if (distEl) distEl.innerText = "??";
+                    if (feeEl) {
+                        feeEl.innerText = "ยังไม่ระบุตำแหน่ง";
+                        feeEl.style.color = "var(--text-muted)";
+                    }
+                }
+            }
+
+            document.getElementById('cart-total').innerText = cartTotal + deliveryFee;
             lucide.createIcons();
         }
 
@@ -3243,6 +3426,28 @@
         // ================= NEW: CHECKOUT LOGIC =================
         function goToCheckout() {
             if (AppState.cart.length === 0) return;
+
+            // Sync Location and Contact Info if Picked on Main Map
+            if (AppState.user && AppState.user.lat && AppState.user.lng) {
+                AppState.checkout.lat = AppState.user.lat;
+                AppState.checkout.lng = AppState.user.lng;
+
+                // Auto-select delivery if location is already picked
+                selectDelivery('delivery');
+
+                // Populate Form Fields
+                if (AppState.user.phone) {
+                    AppState.checkout.phone = AppState.user.phone;
+                    const phoneInput = document.getElementById('checkout-phone');
+                    if (phoneInput) phoneInput.value = AppState.user.phone;
+                }
+                if (AppState.user.address) {
+                    AppState.checkout.address = AppState.user.address;
+                    const addrInput = document.getElementById('checkout-address');
+                    if (addrInput) addrInput.value = AppState.user.address;
+                }
+            }
+
             // Reset slip state
             AppState.checkout.slipBase64 = null;
             AppState.checkout.slipFileName = null;
@@ -3505,6 +3710,7 @@
                 feeLine.style.display = 'flex';
                 // Initialize map after animation
                 setTimeout(initMap, 400);
+                recalculateDeliveryFee();
             } else {
                 addrForm.classList.remove('show');
                 feeLine.style.display = 'none';
@@ -3515,22 +3721,32 @@
 
         function recalculateDeliveryFee() {
             if (AppState.checkout.delivery !== 'delivery') return;
-            if (!AppState.checkout.lat || !AppState.checkout.lng) return;
+
+            // Use AppState.user coordinates as fallback for sync
+            const lat = AppState.checkout.lat || (AppState.user && AppState.user.lat);
+            const lng = AppState.checkout.lng || (AppState.user && AppState.user.lng);
+
+            if (!lat || !lng) return;
 
             const dist = calculateDistance(
                 AppState.shopLocation.lat, AppState.shopLocation.lng,
-                AppState.checkout.lat, AppState.checkout.lng
+                lat, lng
             );
+
+            // Sync back to AppState.user for global consistency
+            if (!AppState.user) AppState.user = {};
+            AppState.user.lat = lat;
+            AppState.user.lng = lng;
+
+            // บันทึกตำแหน่งล่าสุดลงเครื่อง (Persistence)
+            saveUserLocation();
 
             // SYNC WITH DELIVERY BANNER
             ensureDeliveryBanner(); // Make sure it exists
             updateDeliveryBanner(dist);
 
-            // Rule: 0-1km FREE, then 5 THB per additional km
-            let fee = 0;
-            if (dist > 1) {
-                fee = Math.ceil(dist - 1) * 5;
-            }
+            const cartTotal = AppState.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            const { fee, discount, isShared } = calculateDynamicFee(dist, cartTotal);
 
             AppState.checkout.deliveryFee = fee;
 
@@ -3539,8 +3755,13 @@
 
             const feeEl = document.getElementById('checkout-delivery-fee');
             if (feeEl) {
-                feeEl.innerText = fee === 0 ? "ฟรี" : `฿${fee}`;
-                feeEl.style.color = fee === 0 ? "var(--success)" : "var(--primary)";
+                if (fee === 0) {
+                    feeEl.innerText = isShared ? "ส่งฟรี (แชร์ทริป)" : "ฟรี";
+                    feeEl.style.color = "var(--success)";
+                } else {
+                    feeEl.innerText = `฿${fee}`;
+                    feeEl.style.color = "var(--primary)";
+                }
             }
 
             updateCheckoutTotal();
@@ -3812,8 +4033,9 @@
                         AppState.checkout.lat, AppState.checkout.lng
                     );
 
-                    if (dist > 20) {
-                        showToast(`ระยะทาง ${dist.toFixed(1)} กม. เกินพื้นที่บริการจัดส่ง (20 กม.) ❌`);
+                    const maxKm = AppState.settings ? AppState.settings.delivery_max_km : 20;
+                    if (dist > maxKm) {
+                        showToast(`ระยะทาง ${dist.toFixed(1)} กม. เกินพื้นที่บริการจัดส่ง (${maxKm} กม.) ❌`);
                         return;
                     }
                 } else {
@@ -4193,12 +4415,13 @@
                         if (userMarker) {
                             const dist = calculateDistance(userMarker.getLatLng().lat, userMarker.getLatLng().lng, res.lat, res.lng);
 
-                            // ETA Definition: Average speed ~24km/h = 2.5 min per km + 2 min buffer
+                            // ETA Definition: Use configured delivery speed
                             let etaText = "";
                             if (dist < 0.1) {
                                 etaText = "ถึงแล้ว 🔥";
                             } else {
-                                const etaMins = Math.ceil(dist * 2.5 + 2);
+                                const speed = (AppState.settings && AppState.settings.delivery_speed_kmh) ? parseFloat(AppState.settings.delivery_speed_kmh) : 80;
+                                const etaMins = Math.ceil((dist / speed) * 60 + 2); // 2 min buffer
                                 etaText = `ประมาณ ${etaMins} นาที`;
                             }
 
