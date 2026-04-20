@@ -162,6 +162,33 @@
             background-color: var(--bg-panel);
         }
 
+        .shop-sync-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--surface-border);
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            line-height: 1;
+        }
+
+        .shop-sync-pill::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+        }
+
+        .shop-sync-pill.syncing::before {
+            background: #f59e0b;
+            box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.15);
+        }
+
         .stats-container {
             display: flex;
             gap: 20px;
@@ -1506,6 +1533,7 @@
                     </button>
                     <!-- Shop Status Toggle -->
                     <div class="stat-badge" style="gap: 10px; padding: 6px 12px;">
+                        <span id="shop-sync-pill" class="shop-sync-pill">ซิงค์สถานะร้านแล้ว</span>
                         <span id="shop-status-text" style="font-size: 0.85rem; font-weight: 500;">ร้านเปิดอยู่</span>
                         <label class="switch" title="เปิด/ปิดร้านชั่วคราว" style="transform: scale(0.85);">
                             <input type="checkbox" id="shop-status-toggle" checked
@@ -2244,7 +2272,7 @@
 
         async function fetchOrders() {
             try {
-                const response = await fetch(API_URL + "?action=getOrders", {
+                const response = await fetch(API_URL + "?action=getOrders&t=" + Date.now(), {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain' },
                     body: JSON.stringify({})
@@ -2347,17 +2375,38 @@
             }
         }
 
+        function updateShopSyncPill(mode = 'synced', shopStatus = 'open') {
+            const pill = document.getElementById('shop-sync-pill');
+            if (!pill) return;
+
+            pill.classList.toggle('syncing', mode === 'syncing');
+            if (mode === 'syncing') {
+                pill.textContent = 'กำลังซิงค์สถานะร้าน...';
+                return;
+            }
+
+            if (mode === 'error') {
+                pill.textContent = 'ซิงค์สถานะร้านไม่สำเร็จ';
+                return;
+            }
+
+            pill.textContent = `ซิงค์แล้ว: ${shopStatus === 'closed' ? 'ปิดร้าน' : 'เปิดร้าน'}`;
+        }
+
         async function fetchSettings() {
+            updateShopSyncPill('syncing');
             try {
-                const response = await fetch(API_URL + "?action=getSettings", {
+                const response = await fetch(API_URL + "?action=getSettings&t=" + Date.now(), {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain' },
                     body: JSON.stringify({})
                 });
                 const res = await response.json();
                 if (res.success && res.settings) {
-                    // Update Shop Status UI
-                    const shopStatus = res.settings.shop_status || 'open';
+                    appSettings = res.settings;
+
+                    // Shop Status Handling (Trim and Lowercase for safety)
+                    const shopStatus = (res.settings.shop_status || 'open').toString().toLowerCase().trim();
                     const toggle = document.getElementById('shop-status-toggle');
                     const text = document.getElementById('shop-status-text');
 
@@ -2365,6 +2414,23 @@
                         toggle.checked = shopStatus === 'open';
                         text.innerText = shopStatus === 'open' ? 'ร้านเปิดอยู่' : 'ปิดร้านชั่วคราว';
                         text.style.color = shopStatus === 'open' ? 'var(--success)' : '#F44336';
+                    }
+
+                    updateShopSyncPill('synced', shopStatus);
+
+                    // Temporary corner debug
+                    if (res.debug) {
+                        const debugDiv = document.getElementById('debug-status');
+                        const debugContent = `Status: ${shopStatus} | SS: ${res.debug.ssId} | Rows: ${res.debug.sheetRows}`;
+                        if (debugDiv) {
+                            debugDiv.innerText = debugContent;
+                        } else {
+                            const div = document.createElement('div');
+                            div.id = 'debug-status';
+                            div.style.cssText = 'position:fixed; bottom:5px; left:5px; font-size:10px; color:rgba(255,255,255,0.3); z-index:99999; pointer-events:none;';
+                            div.innerText = debugContent;
+                            document.body.appendChild(div);
+                        }
                     }
 
                     // Update Settings View if active
@@ -2380,13 +2446,16 @@
                 }
             } catch (error) {
                 console.error("Fetch Settings Error:", error);
+                updateShopSyncPill('error');
             }
         }
 
         async function toggleShopStatus(isOpen) {
             const status = isOpen ? 'open' : 'closed';
             const text = document.getElementById('shop-status-text');
-            text.innerText = isOpen ? 'กำลังบันทึก...' : 'กำลังบันทึก...';
+            const toggle = document.getElementById('shop-status-toggle');
+            text.innerText = 'กำลังบันทึก...';
+            if (toggle) toggle.disabled = true;
 
             try {
                 const response = await fetch(API_URL + "?action=saveSettings", {
@@ -2398,17 +2467,22 @@
                 });
                 const res = await response.json();
                 if (res.success) {
+                    appSettings.shop_status = status;
                     text.innerText = isOpen ? 'ร้านเปิดอยู่' : 'ปิดร้านชั่วคราว';
                     text.style.color = isOpen ? 'var(--success)' : '#F44336';
                     showToast(isOpen ? "เปิดร้านเรียบร้อยแล้ว ✅" : "ปิดร้านชั่วคราวเรียบร้อยแล้ว ❌");
+                    await fetchSettings();
                 } else {
                     throw new Error(res.message);
                 }
             } catch (error) {
                 showToast("เกิดข้อผิดพลาด: " + error.message);
                 // Revert toggle
-                document.getElementById('shop-status-toggle').checked = !isOpen;
+                if (toggle) toggle.checked = !isOpen;
                 text.innerText = !isOpen ? 'ร้านเปิดอยู่' : 'ปิดร้านชั่วคราว';
+                text.style.color = !isOpen ? 'var(--success)' : '#F44336';
+            } finally {
+                if (toggle) toggle.disabled = false;
             }
         }
 
@@ -3841,28 +3915,6 @@
         // ================= SETTINGS LOGIC =================
         let appSettings = {};
 
-        async function fetchSettings() {
-            try {
-                const response = await fetch(`${API_URL}?action=getSettings`, {
-                    method: 'POST',
-                    body: JSON.stringify({})
-                });
-                const res = await response.json();
-                if (res.success) {
-                    appSettings = res.settings;
-                    document.getElementById('setting-delivery-fee').value = appSettings.delivery_fee_per_km || 5;
-                    document.getElementById('setting-delivery-free-km').value = appSettings.delivery_free_km || 1;
-                    document.getElementById('setting-delivery-free-min').value = appSettings.delivery_free_min_spend || 200;
-                    document.getElementById('setting-delivery-max-km').value = appSettings.delivery_max_km || 20;
-                    document.getElementById('setting-trip-threshold').value = appSettings.trip_threshold_multiplier || 20;
-                    document.getElementById('setting-delivery-speed').value = appSettings.delivery_speed_kmh || 80;
-                    document.getElementById('setting-prep-time').value = appSettings.order_prep_time_mins || 15;
-                }
-            } catch (err) {
-                console.error("Fetch Settings Error:", err);
-            }
-        }
-
         async function saveSettings() {
             const fee = parseFloat(document.getElementById('setting-delivery-fee').value);
             const freeKm = parseFloat(document.getElementById('setting-delivery-free-km').value);
@@ -3893,6 +3945,7 @@
                 });
                 const res = await response.json();
                 if (res.success) {
+                    await fetchSettings();
                     showToast("บันทึกการตั้งค่าเรียบร้อยแล้ว ✅");
                 } else {
                     showToast("❌ บันทึกไม่สำเร็จ: " + res.message);
