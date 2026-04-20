@@ -216,6 +216,194 @@
             transition: opacity 0.6s ease-out, visibility 0.6s;
         }
 
+        .floating-admin-btn {
+            position: fixed;
+            right: 20px;
+            bottom: 85px;
+            z-index: 100000;
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            background: var(--primary);
+            box-shadow: 0 4px 15px var(--primary-glow);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            animation: slideUpFade 0.5s ease-out;
+            cursor: pointer;
+        }
+
+        .shop-sync-indicator {
+            position: fixed;
+            left: 12px;
+            bottom: 12px;
+            z-index: 9998;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            max-width: calc(100vw - 24px);
+            padding: 7px 10px;
+            border-radius: 999px;
+            background: rgba(15, 15, 18, 0.68);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 11px;
+            line-height: 1;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+            pointer-events: none;
+            opacity: 0.9;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .shop-sync-indicator::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #22c55e;
+            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.18);
+        }
+
+        .shop-sync-indicator.syncing::before {
+            background: #f59e0b;
+            box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.18);
+        }
+
+        .delivery-banner {
+            margin: 12px 16px;
+            padding: 12px 14px;
+            border-radius: 18px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background:
+                radial-gradient(circle at top right, rgba(255, 107, 0, 0.18), transparent 35%),
+                linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03));
+            box-shadow: 0 14px 34px rgba(0, 0, 0, 0.18);
+        }
+
+        .delivery-banner::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), transparent 55%);
+            pointer-events: none;
+        }
+
+        .delivery-banner-main {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .delivery-banner-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .delivery-banner-fee {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 8px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff4e8;
+            font-size: 0.72rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .delivery-banner-title {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.2;
+        }
+
+        .delivery-banner-meta {
+            display: flex;
+            gap: 6px;
+        }
+
+        .delivery-banner-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 8px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.06);
+            color: rgba(255, 255, 255, 0.84);
+            font-size: 0.72rem;
+            font-weight: 600;
+        }
+
+        .delivery-banner-subtext {
+            font-size: 0.72rem;
+            color: rgba(255, 255, 255, 0.62);
+            line-height: 1.3;
+        }
+
+        .delivery-banner-arrow {
+            position: relative;
+            z-index: 1;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.72);
+            background: rgba(255, 255, 255, 0.06);
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 640px) {
+            .delivery-banner {
+                margin: 10px 12px;
+                padding: 11px 12px;
+                border-radius: 16px;
+            }
+
+            .delivery-banner-header {
+                align-items: center;
+            }
+
+            .delivery-banner-title {
+                font-size: 0.86rem;
+            }
+
+            .delivery-banner-subtext {
+                display: none;
+            }
+
+            .delivery-banner-arrow {
+                width: 24px;
+                height: 24px;
+            }
+
+            .delivery-banner-chip {
+                font-size: 0.68rem;
+                padding: 4px 7px;
+            }
+        }
+
         /* Shop Closed UI Hook */
         #shop-closed-banner {
             display: none;
@@ -923,6 +1111,7 @@
             position: relative;
             transition: all 0.3s;
             animation: slideUpFade 0.4s ease forwards;
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
         }
 
         .notif-item.unread {
@@ -947,10 +1136,55 @@
             margin-top: 6px;
         }
 
+        .notif-title-row {
+            font-weight: 700;
+            font-size: 0.95rem;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #fff;
+        }
+
+        .notif-message {
+            font-size: 0.84rem;
+            color: rgba(255, 255, 255, 0.82);
+            line-height: 1.5;
+        }
+
         .notif-empty {
             text-align: center;
             padding: 60px 20px;
             color: var(--text-muted);
+        }
+
+        .notif-empty-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 16px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(255, 107, 0, 0.12), rgba(255, 255, 255, 0.03));
+            border: 1px solid rgba(255, 107, 0, 0.12);
+            color: var(--primary);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16);
+        }
+
+        .notif-empty-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 6px;
+        }
+
+        .notif-empty-desc {
+            font-size: 0.82rem;
+            line-height: 1.5;
+            color: var(--text-muted);
+            max-width: 220px;
+            margin: 0 auto;
         }
 
         /* Cart Page */
@@ -1605,6 +1839,7 @@
 <body>
 
     <div id="app-container">
+        <div id="shop-sync-indicator" class="shop-sync-indicator">กำลังซิงค์สถานะร้าน...</div>
         <!-- Cinematic Glows -->
         <div class="glow-blob glow-1"></div>
         <div class="glow-blob glow-2"></div>
@@ -2517,15 +2752,106 @@
 
         function showAdminButton() {
             if (!AppState.isAdmin) return;
-            // Create Floating Admin Button
-            const btn = document.createElement('div');
-            btn.innerHTML = `
-                <div onclick="window.location.href='admin.html'" style="position: fixed; bottom: 85px; right: 20px; z-index: 999; background: var(--primary); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 4px 15px var(--primary-glow); border: 2px solid rgba(255,255,255,0.2); animation: slideUpFade 0.5s ease-out;">
-                    <i data-lucide="shield-check" style="width: 24px; height: 24px;"></i>
-                </div>
-            `;
+            if (document.getElementById('floating-admin-btn')) return;
+
+            const btn = document.createElement('button');
+            btn.id = 'floating-admin-btn';
+            btn.className = 'floating-admin-btn';
+            btn.type = 'button';
+            btn.setAttribute('aria-label', 'เปิดหน้าแอดมิน');
+            btn.onclick = () => {
+                window.location.href = 'admin.html';
+            };
+            btn.innerHTML = `<i data-lucide="shield-check" style="width: 24px; height: 24px;"></i>`;
             document.body.appendChild(btn);
             lucide.createIcons();
+        }
+
+        function normalizeShopStatus(status) {
+            return (status || 'open').toString().toLowerCase().trim() === 'closed' ? 'closed' : 'open';
+        }
+
+        function updateShopSyncIndicator(status, mode = 'synced') {
+            const indicator = document.getElementById('shop-sync-indicator');
+            if (!indicator) return;
+
+            indicator.classList.toggle('syncing', mode === 'syncing');
+            indicator.textContent = mode === 'syncing'
+                ? 'กำลังซิงค์สถานะร้าน...'
+                : `หน้าลูกค้า: ${status === 'closed' ? 'ปิดร้าน' : 'เปิดร้าน'}`;
+        }
+
+        const CACHE_KEYS = {
+            menu: 'baimak_menu_cache_v1',
+            promotions: 'baimak_promotions_cache_v1'
+        };
+
+        function readCache(key) {
+            try {
+                const raw = localStorage.getItem(key);
+                if (!raw) return null;
+                const parsed = JSON.parse(raw);
+                return Array.isArray(parsed.data) ? parsed.data : null;
+            } catch (error) {
+                return null;
+            }
+        }
+
+        function writeCache(key, data) {
+            try {
+                localStorage.setItem(key, JSON.stringify({
+                    updatedAt: Date.now(),
+                    data: Array.isArray(data) ? data : []
+                }));
+            } catch (error) { }
+        }
+
+        function applyCachedCatalogData() {
+            const cachedMenu = readCache(CACHE_KEYS.menu);
+            const cachedPromotions = readCache(CACHE_KEYS.promotions);
+            let hasCachedData = false;
+
+            if (Array.isArray(cachedMenu) && cachedMenu.length > 0) {
+                AppState.menu = cachedMenu;
+                hasCachedData = true;
+            }
+
+            if (Array.isArray(cachedPromotions)) {
+                AppState.promotions = cachedPromotions;
+                hasCachedData = true;
+            }
+
+            if (hasCachedData) {
+                renderCategories();
+                renderMenu();
+                renderHeroBanner();
+            }
+        }
+
+        async function refreshCatalogData() {
+            const [menuData, promosData, salesStats] = await Promise.all([
+                fetchMenuData(),
+                fetchPromotionsData(),
+                fetchSalesStats()
+            ]);
+
+            if (Array.isArray(menuData) && menuData.length > 0) {
+                AppState.menu = menuData;
+                writeCache(CACHE_KEYS.menu, menuData);
+            }
+
+            if (Array.isArray(promosData) && promosData.length > 0) {
+                AppState.promotions = promosData;
+                writeCache(CACHE_KEYS.promotions, promosData);
+            } else if (!Array.isArray(AppState.promotions)) {
+                AppState.promotions = [];
+            }
+
+            AppState.salesStats = salesStats;
+
+            renderCategories();
+            renderMenu(document.querySelector('.search-input')?.value?.toLowerCase() || '');
+            renderHeroBanner();
         }
 
         async function fetchMenuData() {
@@ -2591,8 +2917,9 @@
         }
 
         async function fetchSettings() {
+            updateShopSyncIndicator(normalizeShopStatus(AppState.settings && AppState.settings.shop_status), 'syncing');
             try {
-                const response = await fetch(`${API_URL}?action=getSettings`, {
+                const response = await fetch(`${API_URL}?action=getSettings&t=${Date.now()}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain' },
                     body: JSON.stringify({})
@@ -2601,18 +2928,37 @@
                 if (res.success && res.settings) {
                     AppState.settings = res.settings;
                     AppState.settings.currentPendingTotal = res.currentPendingTotal || 0;
+                    AppState.settings.shop_status = normalizeShopStatus(res.settings.shop_status);
 
-                    // Shop Status Handling
-                    const shopStatus = res.settings.shop_status || 'open';
+                    // Shop Status Handling (Trim and Lowercase for safety)
+                    const shopStatus = AppState.settings.shop_status;
                     const banner = document.getElementById('shop-closed-banner');
                     if (banner) {
                         if (shopStatus === 'closed') {
                             banner.style.display = 'flex';
+                            console.log("DEBUG: Shop is CLOSED according to server", res.debug);
                             if (AppState.currentPage === 'checkout') {
                                 switchPage('home'); // Kick out of checkout if closed
                             }
                         } else {
                             banner.style.display = 'none';
+                            console.log("DEBUG: Shop is OPEN according to server", res.debug);
+                        }
+                    }
+
+                    updateShopSyncIndicator(shopStatus, 'synced');
+
+                    // Temporary corner debug (Optional, but very helpful)
+                    if (res.debug) {
+                        const debugDiv = document.getElementById('debug-status');
+                        if (debugDiv) {
+                            debugDiv.innerText = `Status: ${shopStatus} | SS: ${res.debug.ssId} | Rows: ${res.debug.sheetRows}`;
+                        } else {
+                            const div = document.createElement('div');
+                            div.id = 'debug-status';
+                            div.style.cssText = 'position:fixed; bottom:5px; left:5px; font-size:10px; color:rgba(255,255,255,0.3); z-index:99999; pointer-events:none;';
+                            div.innerText = `Status: ${shopStatus} | SS: ${res.debug.ssId} | Rows: ${res.debug.sheetRows}`;
+                            document.body.appendChild(div);
                         }
                     }
 
@@ -2631,44 +2977,41 @@
                 }
             } catch (error) {
                 console.warn("Fetch Settings Error, using defaults");
+                updateShopSyncIndicator(normalizeShopStatus(AppState.settings && AppState.settings.shop_status), 'synced');
             }
         }
 
-        // Polling: อัปเดตข้อมูลการแชร์ค่าส่งทุกๆ 60 วินาที
-        setInterval(fetchSettings, 60000);
+
 
         function ensureDeliveryBanner() {
             if (!document.getElementById('delivery-info-banner')) {
                 const header = document.querySelector('.header-profile');
                 const banner = document.createElement('div');
                 banner.id = 'delivery-info-banner';
-                banner.className = 'glass';
+                banner.className = 'glass delivery-banner';
                 banner.onclick = openLocationPicker; // Restored: Open Picker like before
-                banner.style.cssText = `
-                    margin: 12px 16px;
-                    padding: 14px;
-                    border-radius: 20px;
-                    display: none;
-                    align-items: center;
-                    gap: 14px;
-                    border: 1px solid rgba(255,107,0,0.15);
-                    background: rgba(255,107,0,0.05); /* Default tint */
-                    backdrop-filter: blur(20px);
-                    box-shadow: 0 4px 24px rgba(0,0,0,0.2);
-                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                    overflow: hidden;
-                    position: relative;
-                    cursor: pointer;
-                `;
                 banner.innerHTML = `
-                    <div id="delivery-icon-bg" style="background: var(--primary); width: 42px; height: 42px; border-radius: 14px; display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; transition: all 0.5s;">
-                        <i data-lucide="map-pin" id="delivery-status-icon" style="width: 20px; height: 20px;"></i>
+                    <div id="delivery-icon-bg" style="background: var(--primary); width: 40px; height: 40px; border-radius: 14px; display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; transition: all 0.5s; position: relative; z-index: 1; box-shadow: 0 8px 18px rgba(255,107,0,0.24);">
+                        <i data-lucide="map-pin" id="delivery-status-icon" style="width: 18px; height: 18px;"></i>
                     </div>
-                    <div style="flex: 1; min-width: 0;">
-                        <div id="delivery-dist-text" style="font-size: 0.95rem; font-weight: 700; color: var(--text-main); margin-bottom: 2px;">กำลังระบุพิกัด...</div>
-                        <div id="delivery-time-text" style="font-size: 0.78rem; color: var(--text-muted); display: flex; align-items: center; gap: 4px;">เพื่อประเมินระยะเวลาจัดส่ง</div>
+                    <div class="delivery-banner-main">
+                        <div class="delivery-banner-header">
+                            <div id="delivery-dist-text" class="delivery-banner-title">กำลังระบุพิกัด...</div>
+                            <span id="delivery-fee-badge" class="delivery-banner-fee">กำลังคำนวณ...</span>
+                        </div>
+                        <div class="delivery-banner-meta">
+                            <span id="delivery-time-chip" class="delivery-banner-chip">
+                                <i data-lucide="bike" style="width: 14px; height: 14px;"></i>
+                                <span>ประเมินเวลาจัดส่ง</span>
+                            </span>
+                            <span id="delivery-distance-chip" class="delivery-banner-chip">
+                                <i data-lucide="route" style="width: 14px; height: 14px;"></i>
+                                <span>รอข้อมูลระยะทาง</span>
+                            </span>
+                        </div>
+                        <div id="delivery-time-text" class="delivery-banner-subtext">แตะเพื่อเปลี่ยนตำแหน่งจัดส่ง</div>
                     </div>
-                    <div style="color: var(--text-muted);">
+                    <div class="delivery-banner-arrow">
                         <i data-lucide="chevron-right" style="width: 18px;"></i>
                     </div>
                 `;
@@ -2749,6 +3092,9 @@
             const timeText = document.getElementById('delivery-time-text');
             const iconBg = document.getElementById('delivery-icon-bg');
             const iconWrap = document.getElementById('delivery-status-icon');
+            const feeBadge = document.getElementById('delivery-fee-badge');
+            const timeChip = document.getElementById('delivery-time-chip');
+            const distanceChip = document.getElementById('delivery-distance-chip');
 
             if (!banner) return;
 
@@ -2758,15 +3104,16 @@
             const s = AppState.settings || { delivery_max_km: 20, delivery_free_km: 1, delivery_fee_per_km: 5 };
 
             if (distKm > s.delivery_max_km) {
-                distText.innerHTML = `ระยะห่าง: <span style="color: #FF5252;">${distKm.toFixed(1)} กม.</span>`;
-                timeText.innerHTML = `<span style="color: rgba(255,82,82,0.8); display: flex; align-items: center; gap: 4px;">
-                    <i data-lucide="alert-circle" style="width: 14px;"></i> เกินระยะบริการจัดส่ง
-                </span>`;
+                distText.innerHTML = `ระยะทาง <span style="color: #FF8A80;">${distKm.toFixed(1)} กม.</span>`;
+                if (feeBadge) feeBadge.innerHTML = `<i data-lucide="alert-circle" style="width: 14px; height: 14px;"></i> นอกเขตบริการ`;
+                if (distanceChip) distanceChip.innerHTML = `<i data-lucide="route" style="width: 14px; height: 14px;"></i><span>ระยะทาง ${distKm.toFixed(1)} กม.</span>`;
+                if (timeChip) timeChip.innerHTML = `<i data-lucide="shield-alert" style="width: 14px; height: 14px;"></i><span>แนะนำมารับที่ร้าน</span>`;
+                timeText.textContent = 'แตะเพื่อเปลี่ยนจุดจัดส่ง';
 
-                banner.style.background = 'rgba(255, 82, 82, 0.08)';
+                banner.style.background = 'radial-gradient(circle at top right, rgba(255, 82, 82, 0.18), transparent 35%), linear-gradient(135deg, rgba(255, 82, 82, 0.08), rgba(255, 255, 255, 0.03))';
                 banner.style.borderColor = 'rgba(255, 82, 82, 0.25)';
                 iconBg.style.background = '#FF5252';
-                iconBg.style.boxShadow = '0 0 15px rgba(255, 82, 82, 0.3)';
+                iconBg.style.boxShadow = '0 10px 24px rgba(255, 82, 82, 0.3)';
                 iconWrap.setAttribute('data-lucide', 'map-pin-off');
             } else {
                 const speed = parseFloat(s.delivery_speed_kmh) || 80;
@@ -2780,33 +3127,33 @@
 
                 let feeText = '';
                 if (fee === 0) {
-                    feeText = `<span style="color: #22c55e; font-weight: 700;">(ส่งฟรี! ${isShared ? 'แชร์ทริป' : ''})</span>`;
+                    feeText = `<i data-lucide="sparkles" style="width: 14px; height: 14px;"></i> ส่งฟรี${isShared ? ' จากการแชร์ทริป' : ''}`;
                 } else {
-                    feeText = `<span style="color: var(--primary); font-weight: 700;">(ค่าส่ง ฿${fee})</span>`;
-                    if (isShared) {
-                        feeText += ` <span style="font-size: 0.7rem; color: #22c55e;">[แชร์แล้ว -฿${discount}]</span>`;
-                    }
+                    feeText = `<i data-lucide="wallet" style="width: 14px; height: 14px;"></i> ค่าส่ง ฿${fee}`;
                 }
 
-                distText.innerHTML = `ระยะทางจัดส่ง: <span class="text-primary">${distKm.toFixed(1)} กม.</span> ${feeText}`;
+                distText.innerHTML = `ระยะทาง <span class="text-primary">${distKm.toFixed(1)} กม.</span>`;
+                if (feeBadge) feeBadge.innerHTML = feeText;
+                if (distanceChip) distanceChip.innerHTML = `<i data-lucide="route" style="width: 14px; height: 14px;"></i><span>ระยะทาง ${distKm.toFixed(1)} กม.</span>`;
+                if (timeChip) timeChip.innerHTML = `<i data-lucide="bike" style="width: 14px; height: 14px;"></i><span>${durationMin}-${durationMin + 10} นาที</span>`;
 
                 if (isShared && fee > 0) {
                     const s = AppState.settings;
                     const target = distKm * (s.trip_threshold_multiplier || 20);
                     const missing = Math.ceil(target - (cartTotal + (s.currentPendingTotal || 0)));
-                    timeText.innerHTML = `<span style="display: flex; align-items: center; gap: 4px; color: #22c55e;">
-                        <i data-lucide="info" style="width: 14px;"></i> แชร์ค่าส่งสำเร็จ! อีก ฿${missing} จะส่งฟรี
-                    </span>`;
+                    timeText.textContent = `แชร์ค่าส่งแล้ว ลดไป ฿${discount} อีก ฿${missing} ส่งฟรี`;
                 } else {
-                    timeText.innerHTML = `<span style="display: flex; align-items: center; gap: 4px;">
-                        <i data-lucide="bike" style="width: 14px; color: var(--primary);"></i> รับอาหารในประมาณ ${durationMin}-${durationMin + 10} นาที
-                    </span>`;
+                    timeText.textContent = fee === 0
+                        ? 'เข้าเกณฑ์ส่งฟรีแล้ว'
+                        : 'แตะเพื่อเปลี่ยนตำแหน่งจัดส่ง';
                 }
 
-                banner.style.background = isShared ? 'rgba(34, 197, 94, 0.05)' : 'rgba(255, 107, 0, 0.06)';
+                banner.style.background = isShared
+                    ? 'radial-gradient(circle at top right, rgba(34, 197, 94, 0.18), transparent 35%), linear-gradient(135deg, rgba(34, 197, 94, 0.08), rgba(255, 255, 255, 0.03))'
+                    : 'radial-gradient(circle at top right, rgba(255, 107, 0, 0.18), transparent 35%), linear-gradient(135deg, rgba(255, 107, 0, 0.08), rgba(255, 255, 255, 0.03))';
                 banner.style.borderColor = isShared ? 'rgba(34, 197, 94, 0.2)' : 'rgba(255, 107, 0, 0.2)';
                 iconBg.style.background = isShared ? '#22c55e' : 'var(--primary)';
-                iconBg.style.boxShadow = isShared ? '0 0 15px rgba(34, 197, 94, 0.3)' : '0 0 15px var(--primary-glow)';
+                iconBg.style.boxShadow = isShared ? '0 10px 24px rgba(34, 197, 94, 0.3)' : '0 10px 24px var(--primary-glow)';
                 iconWrap.setAttribute('data-lucide', isShared ? 'share-2' : 'map-pin');
             }
 
@@ -2854,16 +3201,16 @@
             // Add delivery banner area if it doesn't exist
             ensureDeliveryBanner();
 
+            // Render cached catalog immediately if available
+            applyCachedCatalogData();
+
             await initializeLiff();
 
             // Restore cart and location from previous session
             loadCartFromLocal();
             loadUserLocation();
 
-            const [menuData, promosData, salesStats] = await Promise.all([fetchMenuData(), fetchPromotionsData(), fetchSalesStats()]);
-            AppState.menu = menuData;
-            AppState.promotions = promosData;
-            AppState.salesStats = salesStats;
+            await refreshCatalogData();
 
             // Fetch Profile and Auto-fill
             const profile = await fetchUserProfile();
@@ -2897,10 +3244,6 @@
 
             // Detect user location immediately for delivery analysis
             detectUserLocation();
-
-            renderCategories();
-            renderMenu();
-            renderHeroBanner();
 
             const searchInput = document.querySelector('.search-input');
             if (searchInput) {
@@ -3229,8 +3572,8 @@
                 }
 
                 const isSoldOut = (item.stock !== undefined && item.stock <= 0);
-                const stockColor = (item.stock < 5) ? '#ff4d4d' : 'var(--text-muted)';
-                const stockText = (item.stock !== undefined) ? `เหลือเพียง ${item.stock}` : '';
+                const stockColor = (item.stock <= 3) ? '#ff4d4d' : 'var(--text-muted)';
+                const stockText = (item.stock !== undefined && item.stock > 0 && item.stock <= 3) ? `เหลือเพียง ${item.stock}` : '';
 
                 return `
                 <div class="menu-card ${isSoldOut ? 'sold-out' : ''}" style="animation-delay: ${index * 0.05}s;">
@@ -3290,7 +3633,7 @@
 
         function addToCart(id, event) {
             // Real-time Shop Status Check
-            if (AppState.settings && AppState.settings.shop_status === 'closed') {
+            if (normalizeShopStatus(AppState.settings && AppState.settings.shop_status) === 'closed') {
                 showToast("ขออภัยครับ ขณะนี้ร้านปิดปรับปรุงชั่วคราว 🙏");
                 return;
             }
@@ -5219,21 +5562,24 @@
             const container = document.getElementById('notif-list');
             if (AppState.notifications.length === 0) {
                 container.innerHTML = `
-                < div class="notif-empty" >
-                        <i data-lucide="bell-off" style="width: 48px; height: 48px; opacity: 0.3; margin-bottom: 12px;"></i>
-                        <p>ยังไม่มีการแจ้งเตือนในขณะนี้</p>
-                    </div > `;
+                    <div class="notif-empty">
+                        <div class="notif-empty-icon">
+                            <i data-lucide="bell-off" style="width: 30px; height: 30px;"></i>
+                        </div>
+                        <div class="notif-empty-title">ยังไม่มีการแจ้งเตือน</div>
+                        <p class="notif-empty-desc">เมื่อมีอัปเดตเกี่ยวกับออเดอร์หรือระบบ รายการจะแสดงที่นี่ทันที</p>
+                    </div>`;
                 lucide.createIcons();
                 return;
             }
 
             container.innerHTML = AppState.notifications.map(n => `
                 <div class="notif-item ${n.isRead ? '' : 'unread'}" onclick="markAsRead('${n.id}')">
-                    <div style="font-weight: 600; font-size: 0.95rem; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                    <div class="notif-title-row">
                         <i data-lucide="${n.type === 'system' ? 'cpu' : 'message-square'}" style="width: 14px; color: var(--primary);"></i>
                         ${n.title}
                     </div>
-                    <div style="font-size: 0.85rem; color: #eee; line-height: 1.4;">${n.message}</div>
+                    <div class="notif-message">${n.message}</div>
                     <div class="notif-time">${new Date(n.timestamp).toLocaleString('th-TH', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' })}</div>
                 </div>
                 `).join('');
@@ -5261,7 +5607,7 @@
         }
 
         // Start Periodic Settings/Shop Status Fetch
-        setInterval(fetchSettings, 15000); // Check every 15s
+        setInterval(fetchSettings, 5000); // Check every 5s for faster shop-status sync
 
         // Start Polling
         setInterval(fetchNotifications, 20000); // Check every 20 seconds
@@ -5271,6 +5617,12 @@
             // Start notification check after a small delay
             setTimeout(fetchNotifications, 3000);
         };
+
+        window.addEventListener('focus', fetchSettings);
+        window.addEventListener('pageshow', fetchSettings);
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') fetchSettings();
+        });
 
     </script>
 
